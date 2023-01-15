@@ -10,7 +10,10 @@ load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
 GUILD = os.getenv("DISCORD_GUILD")
 
-client = discord.Client()
+intents = discord.Intents.default()
+intents.messages = True
+intents.message_content = True
+client = discord.Client(intents=intents)
 
 f = open(association_file_name, "a+")
 f.close()
@@ -65,6 +68,8 @@ async def on_ready():
     print("Initializing HeckBot..")
     for guild in client.guilds:
         print(f"{client.user} has connected to the following guild: {guild.name}(id: {guild.id})")
+        channel = guild.get_channel(744611387371683962)
+        await channel.send('hello, i am online')
 
 @client.event
 async def on_message(message):
