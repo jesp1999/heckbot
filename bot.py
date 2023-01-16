@@ -18,6 +18,7 @@ intents.messages = True
 intents.message_content = True
 intents.typing = True
 intents.presences = True
+intents.members = True
 bot = commands.Bot(command_prefix='!', intents=intents)
 
 
@@ -75,5 +76,15 @@ async def on_message(message: discord.Message):
             for emoji in emojis:
                 asyncio.get_event_loop().create_task(message.add_reaction(emoji))
 
+#welcome message
+@bot.listen()
+async def on_member_join(member):
+    #essentially whitelisted servers with a designated channel; we can either give the bot permission to make a channel so we could allow that on any server, or add whitelisted servers as wanted
+    for guild in bot.guilds:
+        if guild.id == 334491082241081347:
+            #placeholder channel; we need a welcome channel in HeckBoiCrue
+            channel = guild.get_channel(744611387371683962)
+            #the actual message; edit as wanted. if we allow bot to be in more servers we will have to make a command to change the message we want to send per server
+            await channel.send(f"Welcome to HeckBoiCrue <@!{member.id}>!")
 
 bot.run(TOKEN)
