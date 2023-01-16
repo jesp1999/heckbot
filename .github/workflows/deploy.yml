@@ -1,0 +1,18 @@
+name: Deploy to main running instance
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+    - name: executing remote ssh commands using password
+      uses: appleboy/ssh-action@v0.1.7
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USER }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        port: ${{ secrets.PORT }}
+        script: sudo shutdown -r
