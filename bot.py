@@ -1,6 +1,8 @@
 import asyncio
 import os
 import discord
+from discord.ext import commands
+from discord.ext.commands import Context
 
 from dotenv import load_dotenv
 from src.handler.association_handler import AssociationHandler
@@ -16,54 +18,57 @@ intents.messages = True
 intents.message_content = True
 intents.typing = True
 intents.presences = True
-client: discord.Client = discord.Client(intents=intents)
+intents.members = True
+bot = commands.Bot(command_prefix='!', intents=intents)
 
 
-@client.event
+@bot.listen('on_ready')
 async def on_ready():
     print('Initializing HeckBot..')
-    for guild in client.guilds:
-        print(f'{client.user} has connected to the following guild: {guild.name}(id: {guild.id})')
+    for guild in bot.guilds:
+        print(f'{bot.user} has connected to the following guild: {guild.name}(id: {guild.id})')
         if guild.id == 334491082241081347:
             channel = guild.get_channel(744611387371683962)
             await channel.send('hello, i am online')
 
 
-@client.event
+@bot.command()
+async def associate(ctx: Context, *args):
+    if len(args) != 2:
+        await ctx.send('Incorrect syntax, try \"`!associate <word> <emoji>`\"')
+    else:
+        word = args[0].lower()
+        emoji = args[1]
+        association_handler.add_association(str(ctx.guild.id), word, emoji)
+        await ctx.send(f'Successfully associated the keyword \"{word}\" with the reaction \"{emoji}\"!')
+
+
+@bot.command()
+async def dissociate(ctx: Context, *args):
+    if len(args) == 1:
+        word = args[0].lower()
+        association_handler.remove_association(str(ctx.guild.id), word)
+        await ctx.send(f'Successfully dissociated the keyword \"{word}\" from all reactions!')
+    elif len(args) == 2:
+        word = args[0].lower()
+        emoji = args[1]
+        association_handler.remove_association(str(ctx.guild.id), word, emoji)
+        await ctx.send(f'Successfully dissociated the keyword \"{word}\" with the reaction \"{emoji}\"!')
+    else:
+        await ctx.send('Incorrect syntax, try \"`!dissociate <word>`\"')
+
+
+@bot.command()
+async def disassociate(ctx: Context, *args):
+    await ctx.send('The command is \"`!dissociate`\", y\'know 😉')
+
+
+@bot.listen('on_message')
 async def on_message(message: discord.Message):
     text = message.content.lower()
     server = message.guild
-    if message.author.bot:
+    if message.author.bot or (await bot.get_context(message)).valid:
         return
-
-    if text[:10] == '!associate':
-        args = text.split(" ")
-        if len(args) != 3:
-            await message.channel.send('Incorrect syntax, try \"`!associate <word> <emoji>`\"')
-        else:
-            word = args[1].lower()
-            emoji = args[2]
-            association_handler.add_association(str(server.id), word, emoji)
-            await message.channel.send(f'Successfully associated the keyword \"{word}\" '
-                                       f'with the reaction \"{emoji}\"!')
-
-    if text[:11] == '!dissociate':
-        args = text.split(" ")
-        if len(args) == 2:
-            word = args[1].lower()
-            association_handler.remove_association(str(server.id), word)
-            await message.channel.send(f'Successfully dissociated the keyword \"{word}\" from all reactions!')
-        elif len(args) == 3:
-            word = args[1].lower()
-            emoji = args[2]
-            association_handler.remove_association(str(server.id), word, emoji)
-            await message.channel.send(f'Successfully dissociated the keyword \"{word}\" '
-                                       f'with the reaction \"{emoji}\"!')
-        else:
-            await message.channel.send('Incorrect syntax, try \"`!dissociate <word>`\"')
-
-    if text[:13] == "!disassociate":
-        await message.channel.send('The command is \"`!dissociate`\", y\'know 😉')
 
     associations = association_handler.get_all_associations(str(server.id))
     for word, emojis in associations.items():
@@ -71,5 +76,15 @@ async def on_message(message: discord.Message):
             for emoji in emojis:
                 asyncio.get_event_loop().create_task(message.add_reaction(emoji))
 
+#welcome message
+@bot.listen()
+async def on_member_join(member):
+    #essentially whitelisted servers with a designated channel; we can either give the bot permission to make a channel so we could allow that on any server, or add whitelisted servers as wanted
+    for guild in bot.guilds:
+        if guild.id == 334491082241081347:
+            #placeholder channel; we need a welcome channel in HeckBoiCrue
+            channel = guild.get_channel(744611387371683962)
+            #the actual message; edit as wanted. if we allow bot to be in more servers we will have to make a command to change the message we want to send per server
+            await channel.send(f"Welcome to HeckBoiCrue <@!{member.id}>!")
 
-client.run(TOKEN)
+bot.run(TOKEN)
