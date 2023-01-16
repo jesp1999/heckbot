@@ -7,15 +7,15 @@ from src.handler.association_handler import AssociationHandler
 
 load_dotenv()
 
-association_handler = AssociationHandler()
-TOKEN = os.getenv('DISCORD_TOKEN')
+association_handler: AssociationHandler = AssociationHandler()
+TOKEN: str = os.getenv('DISCORD_TOKEN')
 
 intents = discord.Intents.default()
 intents.messages = True
 intents.message_content = True
 intents.typing = True
 intents.presences = True
-client = discord.Client(intents=intents)
+client: discord.Client = discord.Client(intents=intents)
 
 
 @client.event
@@ -41,7 +41,8 @@ async def on_message(message):
             word = args[1].lower()
             emoji = args[2]
             association_handler.add_association(str(server.id), word, emoji)
-            await message.channel.send(f'Successfully associated the keyword \"{word}\" with the reaction \"{emoji}\"!')
+            await message.channel.send(f'Successfully associated the keyword \"{word}\" '
+                                       f'with the reaction \"{emoji}\"!')
 
     if text[:11] == '!dissociate':
         args = text.split(" ")
@@ -53,7 +54,8 @@ async def on_message(message):
             word = args[1].lower()
             emoji = args[2]
             association_handler.remove_association(str(server.id), word, emoji)
-            await message.channel.send(f'Successfully dissociated the keyword \"{word}\" with the reaction \"{emoji}\"!')
+            await message.channel.send(f'Successfully dissociated the keyword \"{word}\" '
+                                       f'with the reaction \"{emoji}\"!')
         else:
             await message.channel.send('Incorrect syntax, try \"`!dissociate <word>`\"')
 

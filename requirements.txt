@@ -1,3 +1,4 @@
-discord
-python_dotenv
 boto3
+discord
+pynacl
+python_dotenv
