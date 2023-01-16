@@ -1,2 +1,3 @@
 discord
 python_dotenv
+boto3
