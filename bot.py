@@ -1,3 +1,4 @@
+import asyncio
 import os
 import discord
 
@@ -29,9 +30,11 @@ async def on_ready():
 
 
 @client.event
-async def on_message(message):
+async def on_message(message: discord.Message):
     text = message.content.lower()
     server = message.guild
+    if message.author.bot:
+        return
 
     if text[:10] == '!associate':
         args = text.split(" ")
@@ -66,7 +69,7 @@ async def on_message(message):
     for word, emojis in associations.items():
         if word in text:
             for emoji in emojis:
-                await message.add_reaction(emoji)
+                asyncio.get_event_loop().create_task(message.add_reaction(emoji))
 
 
 client.run(TOKEN)

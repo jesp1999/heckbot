@@ -87,7 +87,7 @@ class DynamoTableAdaptor:
         :param list_item: Value to be appended to the `list_key_name` column of the matching entry
         """
         existing_entry = self.read(pk_value, sk_value)
-        if existing_entry is None:
+        if not existing_entry:
             item = self._create_item(pk_value, sk_value, {list_key_name: [list_item]})
             self._get_table().put_item(Item=item)
         else:
