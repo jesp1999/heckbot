@@ -6,7 +6,7 @@ from discord.ext import commands
 
 from dotenv import load_dotenv
 
-from src.cogs import reactmatch, poll
+from src.cogs import reactmatch, poll, gif
 
 load_dotenv(join(dirname(__file__), '.env'))
 
@@ -27,6 +27,7 @@ async def on_ready():
     # load cogs
     await reactmatch.setup(bot)
     await poll.setup(bot)
+    await gif.setup(bot)
 
     # alert channels of bot online status
     for guild in bot.guilds:

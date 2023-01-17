@@ -6,8 +6,8 @@ class Poll(commands.Cog):
     _yes_no_reactions = ['👍', '👎']
     _multi_choice_reactions = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟']
 
-    def __init__(self, bot):
-        self.bot: Bot = bot
+    def __init__(self, bot: Bot):
+        self._bot: Bot = bot
 
     @commands.command()
     async def poll(self, ctx: Context, *args):
@@ -38,5 +38,5 @@ class Poll(commands.Cog):
             await ctx.send('Incorrect syntax, try \"`!poll "<question>" "[choice1]" "[choice2]" ...`\"')
 
 
-async def setup(bot):
+async def setup(bot: Bot):
     await bot.add_cog(Poll(bot))

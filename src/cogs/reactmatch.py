@@ -10,8 +10,8 @@ from src.handler.association_handler import AssociationHandler
 class ReactMatch(commands.Cog):
     _association_handler: AssociationHandler = AssociationHandler()
 
-    def __init__(self, bot):
-        self.bot: Bot = bot
+    def __init__(self, bot: Bot):
+        self._bot: Bot = bot
 
     @commands.command()
     async def associate(self, ctx: Context, *args):
@@ -43,7 +43,7 @@ class ReactMatch(commands.Cog):
 
     @commands.Cog.listener('on_message')
     async def on_message(self, message: discord.Message):
-        if message.author.bot or (await self.bot.get_context(message)).valid:
+        if message.author.bot or (await self._bot.get_context(message)).valid:
             return
 
         text = message.content.lower()
@@ -56,5 +56,5 @@ class ReactMatch(commands.Cog):
                     asyncio.get_event_loop().create_task(message.add_reaction(emoji))
 
 
-async def setup(bot):
+async def setup(bot: Bot):
     await bot.add_cog(ReactMatch(bot))
