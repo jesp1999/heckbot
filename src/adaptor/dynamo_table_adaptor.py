@@ -3,9 +3,11 @@ from typing import Any
 
 import boto3.session as session
 from boto3.dynamodb.conditions import Key
+from boto3.resources.base import ServiceResource
+from mypy_boto3_dynamodb.service_resource import Table, DynamoDBServiceResource
 
-_DYNAMO_TABLES: dict[str, object] = {}
-_DYNAMO_RESOURCES: dict[str, object] = {}
+_DYNAMO_TABLES: dict[str, Table] = {}
+_DYNAMO_RESOURCES: dict[str, ServiceResource] = {}
 
 
 class DynamoTableAdaptor:
@@ -14,11 +16,11 @@ class DynamoTableAdaptor:
     _aws_region: str = os.environ.get('AWS_DEFAULT_REGION')
 
     def __init__(self, table_name: str, pk_name: str, sk_name: str) -> None:
-        self._table_name = table_name
-        self._pk_name = pk_name
-        self._sk_name = sk_name
+        self._table_name: str = table_name
+        self._pk_name: str = pk_name
+        self._sk_name: str = sk_name
 
-    def _get_table(self) -> object:
+    def _get_table(self) -> Table:
         """
         Returns a DynamoDB Table Resource with the name `self._table_name` and caches the resource and table in a global
         cache for re-use throughout the application.
@@ -27,14 +29,14 @@ class DynamoTableAdaptor:
         if self._table_name in _DYNAMO_TABLES.keys():
             return _DYNAMO_TABLES[self._table_name]
 
-        dynamodb_resource = session.Session(
+        dynamodb_resource: DynamoDBServiceResource = session.Session(
             aws_access_key_id=self._aws_access_key_id,
             aws_secret_access_key=self._aws_secret_access_key,
             region_name=self._aws_region
         ).resource(service_name='dynamodb')
         _DYNAMO_RESOURCES[self._table_name] = dynamodb_resource
 
-        table = dynamodb_resource.Table(self._table_name)
+        table: Table = dynamodb_resource.Table(self._table_name)
 
         _DYNAMO_TABLES[self._table_name] = table
         return table
@@ -73,7 +75,12 @@ class DynamoTableAdaptor:
                 KeyConditionExpression=expr
             )
 
-        return response.get('Items')
+        items = response.get('Items')
+        if items is None or len(items) < 1:
+            return None
+        if len(items) == 1:
+            return items[0]
+        return items
 
     def add_list_item(self, pk_value: Any, sk_value: Any, list_key_name: str = None, list_item: Any = None) -> None:
         """
