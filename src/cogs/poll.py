@@ -11,25 +11,26 @@ class Poll(commands.Cog):
 
     @commands.command()
     async def poll(self, ctx: Context, *args):
-        poll_args = ''.join(args).split('"')
-        poll_args = [poll_arg for poll_arg in poll_args if poll_arg not in ['', ' ']]
-        if len(poll_args) == 1:
+        if len(args) == 1:
             # Yes/no poll
-            question = poll_args[0]
+            question = args[0]
             if question[:2] != '**' or question[-2:] != '**':
                 question = '**' + question + '**'
 
             message = await ctx.send(question)
             for reaction in self._yes_no_reactions:
                 await message.add_reaction(reaction)
-        elif len(poll_args) > 1:
+        elif len(args) > 1:
             # Multi-choice poll
-            question = poll_args[0]
-            choices = poll_args[1:]
+            question = args[0]
+            choices = args[1:]
             if question[:2] != '**' or question[-2:] != '**':
                 question = '**' + question + '**'
-            num_choices = len(poll_args) - 1
-            message = await ctx.send(question + '\n' + '\n'.join(choices))
+            num_choices = len(args) - 1
+            message_text = question
+            for i in range(num_choices):
+                message_text += f'\n{self._multi_choice_reactions[i]}: {choices[i]}'
+            message = await ctx.send(message_text)
             # TODO handle more poll options than emojis in list
             for reaction in self._multi_choice_reactions[:num_choices]:
                 await message.add_reaction(reaction)
