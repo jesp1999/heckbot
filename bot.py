@@ -41,7 +41,7 @@ async def on_ready():
     )
 
 
-# welcome message
+# welcome message in channel
 @bot.listen()
 async def on_member_join(member):
     # essentially whitelisted servers with a designated channel; we can either give the bot permission to make a channel
@@ -54,5 +54,9 @@ async def on_member_join(member):
             # to change the message we want to send per server
             await channel.send(f"Welcome to HeckBoiCrue <@!{member.id}>!")
 
+#welcome message dm
+@bot.listen()
+async def on_member_join(member):
+        await member.send(f"Welcome to HeckBoiCrue!")
 
 bot.run(TOKEN)
