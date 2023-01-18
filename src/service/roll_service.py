@@ -2,6 +2,8 @@ import random
 from collections import namedtuple
 from math import ceil, floor
 
+from table2ascii import table2ascii, PresetStyle
+
 RESULT_DICE_LENGTH = 9
 RESULT_ROLLS_LENGTH = 30
 RESULT_SUM_LENGTH = RESULT_DICE_LENGTH - 1
@@ -34,44 +36,13 @@ class RollService:
         return parsed_roll_requests
 
     @staticmethod
-    def pad_with_spaces_to_length(text: str, length: int):
-        num_spaces = length - len(text)
-        return (' ' * floor(num_spaces / 2)) + text + (' ' * ceil(num_spaces / 2))
-
-    @staticmethod
-    def format_roll_line(p1, p2, p3):
-        return 'X {} X {} X {} X'.format(
-            RollService.pad_with_spaces_to_length(p1, RESULT_DICE_LENGTH),
-            RollService.pad_with_spaces_to_length(p2, RESULT_ROLLS_LENGTH),
-            RollService.pad_with_spaces_to_length(p3, RESULT_SUM_LENGTH)
-        )
-
-    @staticmethod
     def format_roll_results(roll_results: list[RollResult]) -> str:
-        roll_result_boundary = 'X' * RESULT_TOTAL_LENGTH
-        formatted_roll_results: list[str] = [
-            '```',
-            roll_result_boundary,
-            RollService.format_roll_line('dice', 'rolls', 'sum'),
-            roll_result_boundary
-        ]
-        for i, rr in enumerate(roll_results):
-            roll_lines = []
-            roll_line = str(rr.rolls[0])
-            for r in rr.rolls[1:]:
-                if len(roll_line) + 1 + len(str(r)) > RESULT_ROLLS_LENGTH:
-                    roll_lines.append(roll_line)
-                    roll_line = str(r)
-                else:
-                    roll_line += ' ' + str(r)
-            roll_lines.append(roll_line)
-            sum_part = str(sum(rr.rolls))
-            formatted_roll_results.append(RollService.format_roll_line(rr.dice, roll_lines[0], sum_part))
-            for j in range(1, len(roll_lines)):
-                formatted_roll_results.append(RollService.format_roll_line('', roll_lines[j], ''))
-            if i != len(roll_results) - 1:
-                formatted_roll_results.append(RollService.format_roll_line('', '', ''))
-
-        formatted_roll_results.append(roll_result_boundary)
-        formatted_roll_results.append('```')
-        return '\n'.join(formatted_roll_results)
+        results = '```' + table2ascii(
+            header=['dice', 'rolls', 'sum'],
+            body=[
+                [rr.dice, ' '.join([str(r) for r in rr.rolls]), sum(rr.rolls)]
+                for rr in roll_results
+            ],
+            style=PresetStyle.double_thin_box
+        ) + '```'
+        return results
