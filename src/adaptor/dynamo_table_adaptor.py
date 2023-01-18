@@ -11,11 +11,20 @@ _DYNAMO_RESOURCES: dict[str, ServiceResource] = {}
 
 
 class DynamoTableAdaptor:
+    """
+    Adaptor service for transferring data between the application and a composite-key DynamoDB table.
+    """
     _aws_access_key_id: str = os.getenv('AWS_ACCESS_KEY_ID')
     _aws_secret_access_key: str = os.getenv('AWS_SECRET_ACCESS_KEY')
     _aws_region: str = os.environ.get('AWS_DEFAULT_REGION')
 
     def __init__(self, table_name: str, pk_name: str, sk_name: str) -> None:
+        """
+        Constructor method
+        :param table_name: Logical name of the table in DynamoDB
+        :param pk_name: Name of the partition_key in the DynamoDB table
+        :param sk_name: Name of the sort key in the DynamoDB table
+        """
         self._table_name: str = table_name
         self._pk_name: str = pk_name
         self._sk_name: str = sk_name
@@ -72,8 +81,8 @@ class DynamoTableAdaptor:
             expr &= Key(self._sk_name).eq(sk_value)
 
         response = self._get_table().query(
-                KeyConditionExpression=expr
-            )
+            KeyConditionExpression=expr
+        )
 
         items = response.get('Items')
         if items is None or len(items) < 1:
@@ -99,7 +108,8 @@ class DynamoTableAdaptor:
             self._get_table().put_item(Item=item)
         else:
             # TODO make this an update
-            existing_entry = existing_entry[0]
+            if type(existing_entry) is list:
+                existing_entry = existing_entry[0]
             item = self._create_item(pk_value, sk_value)
             self._get_table().delete_item(Key=item)
 
@@ -125,7 +135,8 @@ class DynamoTableAdaptor:
         if existing_entry is None:
             # TODO notify / error handle
             return
-        existing_entry = existing_entry[0]
+        if type(existing_entry) is list:
+            existing_entry = existing_entry[0]
 
         if list_item is None:
             self._get_table().delete_item(Key=item)
