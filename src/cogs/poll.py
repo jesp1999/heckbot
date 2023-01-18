@@ -1,8 +1,13 @@
+import random
+
 from discord.ext import commands
 from discord.ext.commands import Bot, Context
 
+from src.service.roll_service import RollService, RollRequest
+
 
 class Poll(commands.Cog):
+    _roll_service: RollService = RollService()
     _yes_no_reactions = ['👍', '👎']
     _multi_choice_reactions = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟']
 
@@ -36,6 +41,20 @@ class Poll(commands.Cog):
                 await message.add_reaction(reaction)
         else:
             await ctx.send('Incorrect syntax, try \"`!poll "<question>" "[choice1]" "[choice2]" ...`\"')
+
+    @commands.command()
+    async def d(self, ctx: Context, num_sides: int = 6):
+        roll_results = self._roll_service.roll_many([RollRequest(num=1, sides=num_sides)])
+        await ctx.send(self._roll_service.format_roll_results(roll_results))
+
+    @commands.command()
+    async def roll(self, ctx: Context, *args):
+        if any([type(arg) is not str for arg in args]):
+            return  # TODO give advice on how to reformat
+        args: list[str]
+        roll_requests = self._roll_service.parse_roll_requests(args)
+        roll_results = self._roll_service.roll_many(roll_requests)
+        await ctx.send(self._roll_service.format_roll_results(roll_results))
 
 
 async def setup(bot: Bot):
