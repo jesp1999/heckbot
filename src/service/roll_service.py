@@ -5,7 +5,7 @@ from math import ceil, floor
 RESULT_DICE_LENGTH = 9
 RESULT_ROLLS_LENGTH = 30
 RESULT_SUM_LENGTH = RESULT_DICE_LENGTH - 1
-RESULT_TOTAL_LENGTH = RESULT_DICE_LENGTH + RESULT_ROLLS_LENGTH + RESULT_SUM_LENGTH + 4
+RESULT_TOTAL_LENGTH = RESULT_DICE_LENGTH + RESULT_ROLLS_LENGTH + RESULT_SUM_LENGTH + 10
 
 RollRequest = namedtuple('RollRequest', ['num', 'sides'])
 RollResult = namedtuple('RollResult', ['dice', 'rolls'])
@@ -40,7 +40,7 @@ class RollService:
 
     @staticmethod
     def format_roll_line(p1, p2, p3):
-        return 'X{}X{}X{}X'.format(
+        return 'X {} X {} X {} X'.format(
             RollService.pad_with_spaces_to_length(p1, RESULT_DICE_LENGTH),
             RollService.pad_with_spaces_to_length(p2, RESULT_ROLLS_LENGTH),
             RollService.pad_with_spaces_to_length(p3, RESULT_SUM_LENGTH)
@@ -59,7 +59,7 @@ class RollService:
             roll_lines = []
             roll_line = str(rr.rolls[0])
             for r in rr.rolls[1:]:
-                if len(roll_line) + 3 + len(str(r)) > RESULT_ROLLS_LENGTH:
+                if len(roll_line) + 1 + len(str(r)) > RESULT_ROLLS_LENGTH:
                     roll_lines.append(roll_line)
                     roll_line = str(r)
                 else:
