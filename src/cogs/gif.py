@@ -6,18 +6,34 @@ from discord.ext.commands import Bot, Context
 
 
 class Gif(commands.Cog):
+    """
+    Cog for enabling gif-related features in the bot.
+    """
     _client_key = 'HeckBot'
 
-    def __init__(self, bot: Bot):
+    def __init__(self, bot: Bot) -> None:
+        """
+        Constructor method
+        :param bot: Instance of the running Bot
+        """
         self._tenor_api_key = os.getenv('TENOR_API_KEY')
         self._bot: Bot = bot
 
     @commands.command()
-    async def gif(self, ctx: Context, *args):
-        search_term = ''.join(args)
+    async def gif(self, ctx: Context, *search_term_parts) -> None:
+        """
+        Gif lookup command. Takes in a set of search parameters and queries the Tenor API for the top result for a given
+        search, which is returned as an image URL sent via a Discord message in the same channel as the command.
+        :param ctx: Command context
+        :param search_term_parts: Parts of the search term as a collection of strings
+        """
+        search_term = ''.join(search_term_parts)
         async with aiohttp.ClientSession() as session:
-            gif_request_url = f'https://tenor.googleapis.com/v2/search?q={search_term}&key={self._tenor_api_key}' +\
-                              f'&client_key={self._client_key}&limit=1'
+            gif_request_url = 'https://tenor.googleapis.com/v2/search?q={}&key={}&client_key={}&limit=1'.format(
+                search_term,
+                self._tenor_api_key,
+                self._client_key
+            )
             async with session.get(gif_request_url) as response:
                 if response.status == 200:
                     response_json = await response.json()
@@ -26,4 +42,8 @@ class Gif(commands.Cog):
 
 
 async def setup(bot: Bot):
+    """
+    Setup function for registering the gif cog.
+    :param bot: Instance of the running Bot
+    """
     await bot.add_cog(Gif(bot))

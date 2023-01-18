@@ -1,7 +1,8 @@
-boto3~=1.26.50
-boto3-stubs[essential]
+aiohttp~=3.8.3
+boto3==1.26.51
+boto3-stubs[essential]==1.26.51
 discord~=2.1.0
 pynacl
 pytest
 python-dotenv~=0.21.0
-aiohttp~=3.8.3
+table2ascii~=1.1.0

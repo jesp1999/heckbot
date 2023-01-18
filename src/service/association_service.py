@@ -1,7 +1,10 @@
 from src.adaptor.dynamo_table_adaptor import DynamoTableAdaptor
 
 
-class AssociationHandler:
+class AssociationService:
+    """
+    Service class which encapsulates all logic behind association commands from the react-match cog.
+    """
     _association_table: DynamoTableAdaptor = DynamoTableAdaptor(
         table_name='HeckBotAssociations',
         pk_name='Server',
@@ -38,28 +41,28 @@ class AssociationHandler:
             sk_value=pattern
         )[0].get('Reactions')
 
-    def add_association(self, server: str, pattern: str, emoji: str) -> None:
+    def add_association(self, server: str, pattern: str, reaction: str) -> None:
         """
         Adds a text-pattern-to-emoji association for a given server.
         :param server: Identifier for the server
         :param pattern: Text pattern
-        :param emoji: Emoji to be reacted
+        :param reaction: Emoji to be reacted
         """
         self._association_table.add_list_item(
             pk_value=server,
             sk_value=pattern,
             list_key_name='Reactions',
-            list_item=emoji
+            list_item=reaction
         )
 
-    def remove_association(self, server: str, pattern: str, emoji: str = None) -> None:
+    def remove_association(self, server: str, pattern: str, reaction: str = None) -> None:
         """
         Removes all emoji associations to a given text-pattern for a given server.
         :param server: Identifier for the server
         :param pattern: Text pattern
-        :param emoji: Emoji to be reacted
+        :param reaction: Emoji to be reacted
         """
-        if emoji is None:
+        if reaction is None:
             self._association_table.delete(
                 pk_value=server,
                 sk_value=pattern
@@ -69,5 +72,5 @@ class AssociationHandler:
                 pk_value=server,
                 sk_value=pattern,
                 list_key_name='Reactions',
-                list_item=emoji
+                list_item=reaction
             )
