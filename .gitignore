@@ -2,3 +2,5 @@
 .idea
 venv
 *.run.xml
+*__pycache__
+*.pyc
