@@ -4,3 +4,4 @@ venv
 *.run.xml
 *__pycache__
 *.pyc
+heckboxsfx.txt

@@ -5,7 +5,7 @@ import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 
-from src.cogs import reactmatch, poll, gif
+from src.cogs import reactmatch, poll, gif, sfx
 from src.types.constants import WELCOME_CHANNEL_ID, PRIMARY_GUILD_ID, WELCOME_MESSAGE, ADMIN_CONSOLE_CHANNEL_ID, \
     BOT_ONLINE_MESSAGE, BOT_CUSTOM_STATUS, BOT_COMMAND_PREFIX
 
@@ -33,6 +33,7 @@ async def on_ready() -> None:
     await reactmatch.setup(bot)
     await poll.setup(bot)
     await gif.setup(bot)
+    await sfx.setup(bot)
 
     # alert channels of bot online status
     for guild in bot.guilds:
