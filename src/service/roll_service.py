@@ -4,7 +4,7 @@ from collections import namedtuple
 from table2ascii import table2ascii, PresetStyle, TableStyle
 
 RESULT_DICE_LENGTH = 9
-RESULT_ROLLS_LENGTH = 30
+RESULT_ROLLS_LENGTH = 21
 RESULT_SUM_LENGTH = RESULT_DICE_LENGTH - 1
 RESULT_TOTAL_LENGTH = RESULT_DICE_LENGTH + RESULT_ROLLS_LENGTH + RESULT_SUM_LENGTH + 10
 
@@ -49,7 +49,7 @@ class RollService:
         return parsed_roll_requests
 
     @staticmethod
-    def get_rolls_pretty(rolls: list[int], line_length: int = RESULT_ROLLS_LENGTH) -> str:
+    def get_rolls_pretty(rolls: list[int], line_length: int = RESULT_ROLLS_LENGTH) -> list[str]:
         """
         Format the rolls of a roll command to span multiple lines as to not exceed the specified line_length.
         :param rolls: Rolls of a roll command, as ints
@@ -59,13 +59,13 @@ class RollService:
         rolls_pretty = []
         roll_pretty = ''
         for roll in rolls:
-            if len(roll_pretty) + 1 + len(str(roll)) > line_length:
+            if len(roll_pretty) + 3 + len(str(roll)) > line_length:
                 rolls_pretty.append(roll_pretty)
                 roll_pretty = str(roll)
             else:
                 roll_pretty += ' ' + str(roll)
         rolls_pretty.append(roll_pretty)
-        return '\n'.join(rolls_pretty)
+        return rolls_pretty
 
     @staticmethod
     def format_roll_results(
@@ -78,13 +78,28 @@ class RollService:
         :param table_style: Table style in table2ascii format
         :return: results of a roll command as an ascii table
         """
+        table_body = []
+        max_dice_strlen = 4
+        max_rolls_strlen = 5
+        max_sum_strlen = 3
+        for i, rr in enumerate(roll_results):
+            rr_pretty = RollService.get_rolls_pretty(rr.rolls)
+            if len(rr_pretty) > 1:
+                max_rolls_strlen = RESULT_ROLLS_LENGTH
+            rr_sum = str(sum(rr.rolls))
+            table_body.append([rr.dice, rr_pretty[0], rr_sum])
+            for pretty_line in rr_pretty[1:]:
+                table_body.append(['', pretty_line, ''])
+            if len(rr.dice) > max_dice_strlen:
+                max_dice_strlen = len(rr.dice)
+            if len(rr_pretty) > max_rolls_strlen:
+                max_rolls_strlen = len(rr_pretty)
+            if len(rr_sum) > max_sum_strlen:
+                max_sum_strlen = len(rr_sum)
         results = '```' + table2ascii(
             header=['dice', 'rolls', 'sum'],
-            body=[
-                [rr.dice, RollService.get_rolls_pretty(rr.rolls), sum(rr.rolls)]
-                for rr in roll_results
-            ],
-            column_widths=[RESULT_DICE_LENGTH, RESULT_ROLLS_LENGTH + 3, RESULT_SUM_LENGTH],
+            body=table_body,
+            column_widths=[max_dice_strlen + 3, max_rolls_strlen + 3, max_sum_strlen + 3],
             style=table_style
         ) + '```'
         return results
