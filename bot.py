@@ -21,6 +21,7 @@ intents.presences = True
 intents.members = True
 bot = commands.Bot(command_prefix=BOT_COMMAND_PREFIX, intents=intents)
 
+# this is bruh
 
 @bot.listen('on_ready')
 async def on_ready() -> None:
