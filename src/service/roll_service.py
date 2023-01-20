@@ -3,13 +3,13 @@ from collections import namedtuple
 
 from table2ascii import table2ascii, PresetStyle, TableStyle
 
-RESULT_DICE_LENGTH = 9
-RESULT_ROLLS_LENGTH = 21
-RESULT_SUM_LENGTH = RESULT_DICE_LENGTH - 1
-RESULT_TOTAL_LENGTH = RESULT_DICE_LENGTH + RESULT_ROLLS_LENGTH + RESULT_SUM_LENGTH + 10
+Bounds: namedtuple = namedtuple('Bounds', ['min', 'max'])
+RESULT_DICE_LENGTH_BOUNDS: Bounds = Bounds(6, 9)
+RESULT_ROLLS_LENGTH_BOUNDS: Bounds = Bounds(7, 21)
+RESULT_SUM_LENGTH_BOUNDS: Bounds = Bounds(5, 8)
 
-RollRequest = namedtuple('RollRequest', ['num', 'sides'])
-RollResult = namedtuple('RollResult', ['dice', 'rolls'])
+RollRequest: namedtuple = namedtuple('RollRequest', ['num', 'sides'])
+RollResult: namedtuple = namedtuple('RollResult', ['dice', 'rolls'])
 
 
 class RollService:
@@ -49,7 +49,7 @@ class RollService:
         return parsed_roll_requests
 
     @staticmethod
-    def get_rolls_pretty(rolls: list[int], line_length: int = RESULT_ROLLS_LENGTH) -> list[str]:
+    def get_rolls_pretty(rolls: list[int], line_length: int = RESULT_ROLLS_LENGTH_BOUNDS.max) -> str:
         """
         Format the rolls of a roll command to span multiple lines as to not exceed the specified line_length.
         :param rolls: Rolls of a roll command, as ints
@@ -57,15 +57,16 @@ class RollService:
         :return: Formatted rolls
         """
         rolls_pretty = []
-        roll_pretty = ''
-        for roll in rolls:
+        roll_pretty = str(rolls[0])
+        for roll in rolls[1:]:
+            # +3 accounts for padding and the space between the rolls
             if len(roll_pretty) + 3 + len(str(roll)) > line_length:
                 rolls_pretty.append(roll_pretty)
                 roll_pretty = str(roll)
             else:
                 roll_pretty += ' ' + str(roll)
         rolls_pretty.append(roll_pretty)
-        return rolls_pretty
+        return '\n'.join(rolls_pretty)
 
     @staticmethod
     def format_roll_results(
@@ -79,27 +80,36 @@ class RollService:
         :return: results of a roll command as an ascii table
         """
         table_body = []
-        max_dice_strlen = 4
-        max_rolls_strlen = 5
-        max_sum_strlen = 3
+        max_dice_strlen = RESULT_DICE_LENGTH_BOUNDS.min
+        max_rolls_strlen = RESULT_ROLLS_LENGTH_BOUNDS.min
+        max_sum_strlen = RESULT_SUM_LENGTH_BOUNDS.min
         for i, rr in enumerate(roll_results):
             rr_pretty = RollService.get_rolls_pretty(rr.rolls)
-            if len(rr_pretty) > 1:
-                max_rolls_strlen = RESULT_ROLLS_LENGTH
+            # If more than one line, rolls column takes max length
+            if '\n' in rr_pretty:
+                max_rolls_strlen = RESULT_ROLLS_LENGTH_BOUNDS.max
+            else:
+                # Add 2 for 1 space padding on both sides
+                max_rolls_strlen = max(max_rolls_strlen, len(rr_pretty) + 2)
             rr_sum = str(sum(rr.rolls))
-            table_body.append([rr.dice, rr_pretty[0], rr_sum])
-            for pretty_line in rr_pretty[1:]:
-                table_body.append(['', pretty_line, ''])
-            if len(rr.dice) > max_dice_strlen:
-                max_dice_strlen = len(rr.dice)
-            if len(rr_pretty) > max_rolls_strlen:
-                max_rolls_strlen = len(rr_pretty)
-            if len(rr_sum) > max_sum_strlen:
-                max_sum_strlen = len(rr_sum)
+            table_body.append([rr.dice, rr_pretty, rr_sum])
+            # Add 2 for 1 space padding on both sides
+            max_dice_strlen = max(max_dice_strlen, len(rr.dice) + 2)
+            max_sum_strlen = max(max_sum_strlen, len(rr_sum) + 2)
+
+        # TODO input validation on roll requests which don't fit on mobile, maybe this could be a config option?
+        if max_dice_strlen > RESULT_DICE_LENGTH_BOUNDS.max:
+            print('Warning: dice string exceeds the set limit for optimal mobile display')
+        if max_rolls_strlen > RESULT_ROLLS_LENGTH_BOUNDS.max:
+            print('Warning: rolls string exceeds the set limit for optimal mobile display')
+        if max_sum_strlen > RESULT_SUM_LENGTH_BOUNDS.max:
+            print('Warning: sum string exceeds the set limit for optimal mobile display')
+
+        # TODO find a way to have equal character spacing without this being in a codeblock
         results = '```' + table2ascii(
             header=['dice', 'rolls', 'sum'],
             body=table_body,
-            column_widths=[max_dice_strlen + 3, max_rolls_strlen + 3, max_sum_strlen + 3],
+            column_widths=[max_dice_strlen, max_rolls_strlen, max_sum_strlen],
             style=table_style
         ) + '```'
         return results
