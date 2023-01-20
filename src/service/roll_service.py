@@ -3,13 +3,13 @@ from collections import namedtuple
 
 from table2ascii import table2ascii, PresetStyle, TableStyle
 
-RESULT_DICE_LENGTH = 9
-RESULT_ROLLS_LENGTH = 30
-RESULT_SUM_LENGTH = RESULT_DICE_LENGTH - 1
-RESULT_TOTAL_LENGTH = RESULT_DICE_LENGTH + RESULT_ROLLS_LENGTH + RESULT_SUM_LENGTH + 10
+Bounds: namedtuple = namedtuple('Bounds', ['min', 'max'])
+RESULT_DICE_LENGTH_BOUNDS: Bounds = Bounds(6, 9)
+RESULT_ROLLS_LENGTH_BOUNDS: Bounds = Bounds(7, 21)
+RESULT_SUM_LENGTH_BOUNDS: Bounds = Bounds(5, 8)
 
-RollRequest = namedtuple('RollRequest', ['num', 'sides'])
-RollResult = namedtuple('RollResult', ['dice', 'rolls'])
+RollRequest: namedtuple = namedtuple('RollRequest', ['num', 'sides'])
+RollResult: namedtuple = namedtuple('RollResult', ['dice', 'rolls'])
 
 
 class RollService:
@@ -49,7 +49,7 @@ class RollService:
         return parsed_roll_requests
 
     @staticmethod
-    def get_rolls_pretty(rolls: list[int], line_length: int = RESULT_ROLLS_LENGTH) -> str:
+    def get_rolls_pretty(rolls: list[int], line_length: int = RESULT_ROLLS_LENGTH_BOUNDS.max) -> str:
         """
         Format the rolls of a roll command to span multiple lines as to not exceed the specified line_length.
         :param rolls: Rolls of a roll command, as ints
@@ -57,9 +57,10 @@ class RollService:
         :return: Formatted rolls
         """
         rolls_pretty = []
-        roll_pretty = ''
-        for roll in rolls:
-            if len(roll_pretty) + 1 + len(str(roll)) > line_length:
+        roll_pretty = str(rolls[0])
+        for roll in rolls[1:]:
+            # +3 accounts for padding and the space between the rolls
+            if len(roll_pretty) + 3 + len(str(roll)) > line_length:
                 rolls_pretty.append(roll_pretty)
                 roll_pretty = str(roll)
             else:
@@ -78,13 +79,37 @@ class RollService:
         :param table_style: Table style in table2ascii format
         :return: results of a roll command as an ascii table
         """
+        table_body = []
+        max_dice_strlen = RESULT_DICE_LENGTH_BOUNDS.min
+        max_rolls_strlen = RESULT_ROLLS_LENGTH_BOUNDS.min
+        max_sum_strlen = RESULT_SUM_LENGTH_BOUNDS.min
+        for i, rr in enumerate(roll_results):
+            rr_pretty = RollService.get_rolls_pretty(rr.rolls)
+            # If more than one line, rolls column takes max length
+            if '\n' in rr_pretty:
+                max_rolls_strlen = RESULT_ROLLS_LENGTH_BOUNDS.max
+            else:
+                # Add 2 for 1 space padding on both sides
+                max_rolls_strlen = max(max_rolls_strlen, len(rr_pretty) + 2)
+            rr_sum = str(sum(rr.rolls))
+            table_body.append([rr.dice, rr_pretty, rr_sum])
+            # Add 2 for 1 space padding on both sides
+            max_dice_strlen = max(max_dice_strlen, len(rr.dice) + 2)
+            max_sum_strlen = max(max_sum_strlen, len(rr_sum) + 2)
+
+        # TODO input validation on roll requests which don't fit on mobile, maybe this could be a config option?
+        if max_dice_strlen > RESULT_DICE_LENGTH_BOUNDS.max:
+            print('Warning: dice string exceeds the set limit for optimal mobile display')
+        if max_rolls_strlen > RESULT_ROLLS_LENGTH_BOUNDS.max:
+            print('Warning: rolls string exceeds the set limit for optimal mobile display')
+        if max_sum_strlen > RESULT_SUM_LENGTH_BOUNDS.max:
+            print('Warning: sum string exceeds the set limit for optimal mobile display')
+
+        # TODO find a way to have equal character spacing without this being in a codeblock
         results = '```' + table2ascii(
             header=['dice', 'rolls', 'sum'],
-            body=[
-                [rr.dice, RollService.get_rolls_pretty(rr.rolls), sum(rr.rolls)]
-                for rr in roll_results
-            ],
-            column_widths=[RESULT_DICE_LENGTH, RESULT_ROLLS_LENGTH + 3, RESULT_SUM_LENGTH],
+            body=table_body,
+            column_widths=[max_dice_strlen, max_rolls_strlen, max_sum_strlen],
             style=table_style
         ) + '```'
         return results
