@@ -14,14 +14,19 @@ RollResult: namedtuple = namedtuple('RollResult', ['dice', 'rolls'])
 
 class RollService:
     """
-    Service class which encapsulates all logic behind dice rolling commands from the poll cog.
+    Service class which encapsulates all logic behind dice rolling
+    commands from the poll cog.
     """
 
     @staticmethod
-    def roll_many(roll_requests: list[RollRequest]) -> list[RollResult]:
+    def roll_many(
+            roll_requests: list[RollRequest]
+    ) -> list[RollResult]:
         """
-        Simulates the rolling of a set of dice according to an input list of RollRequests.
-        :param roll_requests: RollRequests which specify the rolling parameters
+        Simulates the rolling of a set of dice according to an input
+        list of RollRequests.
+        :param roll_requests: RollRequests which specify the rolling
+        parameters
         :return: results of the dice rolls as RollResult objects
         """
         roll_results = []
@@ -29,13 +34,21 @@ class RollService:
             rolls = []
             for roll in range(roll_request.num):
                 rolls.append(random.randint(1, roll_request.sides))
-            roll_results.append(RollResult(dice=f'{roll_request.num}D{roll_request.sides}', rolls=rolls))
+            roll_results.append(
+                RollResult(
+                    dice=f'{roll_request.num}D{roll_request.sides}',
+                    rolls=rolls
+                )
+            )
         return roll_results
 
     @staticmethod
-    def parse_roll_requests(roll_requests: list[str]) -> list[RollRequest]:
+    def parse_roll_requests(
+            roll_requests: list[str]
+    ) -> list[RollRequest]:
         """
-        Parses raw roll requests from command args into the RoleRequest data type.
+        Parses raw roll requests from command args into the RoleRequest
+        data type.
         :param roll_requests: Raw roll requests from command args
         :return: Roll requests as RoleRequest data types
         """
@@ -45,13 +58,21 @@ class RollService:
             if len(roll_request_parts) == 2:
                 num = int(roll_request_parts[0])
                 sides = int(roll_request_parts[1])
-                parsed_roll_requests.append(RollRequest(num=num, sides=sides))
+                parsed_roll_requests.append(
+                    RollRequest(
+                        num=num, sides=sides
+                    )
+                )
         return parsed_roll_requests
 
     @staticmethod
-    def get_rolls_pretty(rolls: list[int], line_length: int = RESULT_ROLLS_LENGTH_BOUNDS.max) -> str:
+    def get_rolls_pretty(
+            rolls: list[int],
+            line_length: int = RESULT_ROLLS_LENGTH_BOUNDS.max
+    ) -> str:
         """
-        Format the rolls of a roll command to span multiple lines as to not exceed the specified line_length.
+        Format the rolls of a roll command to span multiple lines as to
+        not exceed the specified line_length.
         :param rolls: Rolls of a roll command, as ints
         :param line_length: Maximum length of a line
         :return: Formatted rolls
@@ -74,7 +95,8 @@ class RollService:
             table_style: TableStyle = PresetStyle.double_thin_box
     ) -> str:
         """
-        Format results of a roll command into an ascii table with line-wrapping.
+        Format results of a roll command into an ascii table with
+        line-wrapping.
         :param roll_results:
         :param table_style: Table style in table2ascii format
         :return: results of a roll command as an ascii table
@@ -97,19 +119,28 @@ class RollService:
             max_dice_strlen = max(max_dice_strlen, len(rr.dice) + 2)
             max_sum_strlen = max(max_sum_strlen, len(rr_sum) + 2)
 
-        # TODO input validation on roll requests which don't fit on mobile, maybe this could be a config option?
+        # TODO input validation on roll requests which don't fit on
+        #  mobile, maybe this could be a config option?
         if max_dice_strlen > RESULT_DICE_LENGTH_BOUNDS.max:
-            print('Warning: dice string exceeds the set limit for optimal mobile display')
+            print('Warning: dice string exceeds the set '
+                  'limit for optimal mobile display')
         if max_rolls_strlen > RESULT_ROLLS_LENGTH_BOUNDS.max:
-            print('Warning: rolls string exceeds the set limit for optimal mobile display')
+            print('Warning: rolls string exceeds the set '
+                  'limit for optimal mobile display')
         if max_sum_strlen > RESULT_SUM_LENGTH_BOUNDS.max:
-            print('Warning: sum string exceeds the set limit for optimal mobile display')
+            print('Warning: sum string exceeds the set '
+                  'limit for optimal mobile display')
 
-        # TODO find a way to have equal character spacing without this being in a codeblock
+        # TODO find a way to have equal character spacing without this
+        #  being in a codeblock
         results = '```' + table2ascii(
             header=['dice', 'rolls', 'sum'],
             body=table_body,
-            column_widths=[max_dice_strlen, max_rolls_strlen, max_sum_strlen],
+            column_widths=[
+                max_dice_strlen,
+                max_rolls_strlen,
+                max_sum_strlen
+            ],
             style=table_style
         ) + '```'
         return results
