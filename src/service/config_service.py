@@ -1,11 +1,16 @@
 import json
 from pathlib import Path
 
-#import command for cogs:
-#from src.service.config_service import Config
-
 #path for config.json
 config_file = Path(__file__).parents[2] / "resources" / "config" / "config.json"
+#config file check
+f = open(config_file, 'r')
+try:
+    json.load(f)
+except:
+    f.close()
+    with open(config_file, 'w') as f:
+        f.write('{}')
 
 class Config:
     def save(guild_id:str, setting:str, value:(str | int | float | bool)) -> None:
@@ -28,6 +33,9 @@ class Config:
         :param guild_id: Identifier for the server
         :param setting: Setting name
         """
-        with open(config_file, 'r') as f:
-            config_data = json.load(f)
-            return config_data[guild_id][setting]
+        try:
+            with open(config_file, 'r') as f:
+                config_data = json.load(f)
+                return config_data[guild_id][setting]
+        except:
+            return None
