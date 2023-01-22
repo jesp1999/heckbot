@@ -1,4 +1,5 @@
 import asyncio
+from typing import Optional
 
 import discord
 from discord.ext import commands
@@ -11,7 +12,7 @@ class ReactMatch(commands.Cog):
     """
     Cog for enabling reaction-matching-related features in the bot.
     """
-    _association_handler: AssociationService = AssociationService()
+    _association_service: AssociationService = AssociationService()
 
     def __init__(self, bot: Bot) -> None:
         """
@@ -36,7 +37,7 @@ class ReactMatch(commands.Cog):
         :param pattern: Pattern string to match with the reaction
         :param reaction: Reaction to respond with
         """
-        self._association_handler.add_association(
+        self._association_service.add_association(
             str(ctx.guild.id),
             pattern,
             reaction
@@ -64,14 +65,14 @@ class ReactMatch(commands.Cog):
         :param reaction: Reaction to (no longer) respond with
         """
         if reaction == '':
-            self._association_handler.remove_association(
+            self._association_service.remove_association(
                 str(ctx.guild.id),
                 pattern
             )
             await ctx.send(f'Successfully dissociated the keyword '
                            f'\"{pattern}\" from all reactions!')
         else:
-            self._association_handler.remove_association(
+            self._association_service.remove_association(
                 str(ctx.guild.id),
                 pattern,
                 reaction
@@ -91,6 +92,25 @@ class ReactMatch(commands.Cog):
         """
         await ctx.send('The command is \"`!dissociate`\", y\'know 😉')
 
+    @commands.command()
+    async def listassociations(
+            self,
+            ctx: Context,
+            pattern: Optional[str] = None
+    ) -> None:
+        associations = None
+        if pattern:
+            associations = \
+                self._association_service.get_associations_for_pattern(
+                    guild=str(ctx.guild.id),
+                    pattern=pattern
+                )
+        else:
+            associations = self._association_service.get_all_associations(
+                guild=str(ctx.guild.id)
+            )
+        await ctx.send(str(associations))
+
     @commands.Cog.listener('on_message')
     async def on_message(self, message: discord.Message) -> None:
         """
@@ -106,10 +126,10 @@ class ReactMatch(commands.Cog):
             return
 
         text = message.content.lower()
-        server = message.guild
+        guild = message.guild
 
-        associations = self._association_handler.get_all_associations(
-            str(server.id)
+        associations = self._association_service.get_all_associations(
+            str(guild.id)
         )
         for word, emojis in associations.items():
             if word in text:

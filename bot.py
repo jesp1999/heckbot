@@ -61,8 +61,8 @@ async def on_member_join(
 ) -> None:
     """
     Event listener triggered when the bot detects a new member joining
-    the server. Sends a message in whitelisted servers with a designated
-    welcome channel to welcome the user to the server.
+    the guild. Sends a message in whitelisted guilds with a designated
+    welcome channel to welcome the user to the guild.
     :param member: Discord member who joined
     """
     for guild in bot.guilds:

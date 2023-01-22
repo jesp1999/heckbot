@@ -15,8 +15,8 @@ except:
 class Config:
     def save(guild_id:str, setting:str, value:(str | int | float | bool)) -> None:
         """
-        Saves a value to a setting bound to a server.
-        :param guild_id: Identifier for the server
+        Saves a value to a setting bound to a guild.
+        :param guild_id: Identifier for the guild
         :param setting: Setting name
         :param value: Value to set setting to
         """
@@ -29,8 +29,8 @@ class Config:
 
     def load(guild_id:str, setting:str) -> (str | int | float | bool):
         """
-        Loads a value from a setting bound to a server.
-        :param guild_id: Identifier for the server
+        Loads a value from a setting bound to a guild.
+        :param guild_id: Identifier for the guild
         :param setting: Setting name
         """
         try:
