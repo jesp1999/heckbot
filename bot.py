@@ -75,7 +75,6 @@ def main() -> NoReturn:
                 await channel.send(WELCOME_MESSAGE.format(member.id))
 
     bot.run(token)
-    print(124512521512)
 
 
 if __name__ == '__main__':
