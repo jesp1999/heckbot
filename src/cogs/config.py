@@ -1,6 +1,3 @@
-import os
-
-import aiohttp
 from discord.ext import commands
 from discord.ext.commands import Bot, Context
 
@@ -20,7 +17,8 @@ class Config(commands.Cog):
         """
         self._bot: Bot = bot
 
-    @commands.command()
+    @commands.command(aliases=['config', 'conf', 'heckbotconf',
+                               'heckbotconfig'])
     async def hbconf(
             self,
             ctx: Context,
