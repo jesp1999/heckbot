@@ -56,9 +56,8 @@ class Poll(commands.Cog):
                 question = '**' + question + '**'
             num_choices = len(args) - 1
             message_text = question
-            for i in range(num_choices):
-                message_text += (f'\n{self.MULTI_CHOICE_REACTIONS[i]}: ' 
-                                 f'{choices[i]}')
+            for reaction, choice in zip(self.MULTI_CHOICE_REACTIONS, choices):
+                message_text += f'\n{reaction}: {choice}'
             message = await ctx.send(message_text)
             # TODO handle more poll options than emojis in list
             for reaction in self.MULTI_CHOICE_REACTIONS[:num_choices]:
