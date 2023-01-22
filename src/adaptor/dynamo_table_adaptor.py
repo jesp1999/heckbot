@@ -1,13 +1,15 @@
 import os
 from typing import TypeVar
+from weakref import WeakValueDictionary
 
 import boto3.session as session
 from boto3.dynamodb.conditions import Key
 from boto3.resources.base import ServiceResource
 from mypy_boto3_dynamodb.service_resource import Table, DynamoDBServiceResource
 
-_DYNAMO_TABLES: dict[str, Table] = {}
-_DYNAMO_RESOURCES: dict[str, ServiceResource] = {}
+_DYNAMO_TABLES: WeakValueDictionary[str, Table] = WeakValueDictionary()
+_DYNAMO_RESOURCES: WeakValueDictionary[str, ServiceResource] = \
+    WeakValueDictionary()
 
 
 class DynamoTableAdaptor:
@@ -89,7 +91,7 @@ class DynamoTableAdaptor:
             self,
             pk_value: DynamoItem,
             sk_value: DynamoItem = None
-    ) -> dict[str, DynamoItem] | list[dict[str, DynamoItem]] | None:
+    ) -> list[dict[str, DynamoItem]] | None:
         """
         Reads all entries in the respective DynamoDB table which match
         supplied parameters.
@@ -110,8 +112,6 @@ class DynamoTableAdaptor:
         items = response.get('Items')
         if items is None or len(items) < 1:
             return None
-        if len(items) == 1:
-            return items[0]
         return items
 
     def add_list_item(
