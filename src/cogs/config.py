@@ -21,7 +21,7 @@ class Config(commands.Cog):
         self._bot: Bot = bot
 
     @commands.command()
-    async def gif(
+    async def hbconf(
             self,
             ctx: Context,
             config_option: str,

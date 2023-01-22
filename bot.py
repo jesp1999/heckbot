@@ -1,6 +1,7 @@
 import os
 import sys
 from os.path import join, dirname
+from typing import NoReturn
 
 import discord
 from discord.ext import commands
@@ -13,7 +14,7 @@ from src.types.constants import (WELCOME_CHANNEL_ID, PRIMARY_GUILD_ID,
                                  BOT_COMMAND_PREFIX)
 
 
-def main():
+def main() -> NoReturn:
     load_dotenv(join(dirname(__file__), '.env'))
 
     token: str = os.getenv('DISCORD_TOKEN')
@@ -74,6 +75,7 @@ def main():
                 await channel.send(WELCOME_MESSAGE.format(member.id))
 
     bot.run(token)
+    print(124512521512)
 
 
 if __name__ == '__main__':
