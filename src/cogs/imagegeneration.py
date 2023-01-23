@@ -16,17 +16,22 @@ class ImageGen(commands.Cog):
         self._bot: Bot = bot
 
     @commands.command()
-    async def imagine(self, ctx: Context) -> None:
+    async def imagine(self, ctx: Context,*prompt_terms) -> None:
 
         # Takes a prompt and turns it into an image url
-        
-        artificial_image = openai.Image.create(
-        prompt=Context.fetch_message,
-        model='text-davinci-003',
-        api_key=os.getenv('OPEN_API_KEY')
-    )
+        openai.api_key=os.getenv('OPEN_API_KEY')
 
-        image_url=artificial_image.data.url
+        prompt= ' '.join(prompt_terms)
+
+        model='image-dALL-E-002'
+
+        artificial_image = openai.Image.create(
+            prompt=prompt,
+            n=1,
+            size="1024x1024"
+        )
+
+        image_url=artificial_image.data[0].url
 
         print(image_url)
 
