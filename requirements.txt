@@ -1,6 +1,6 @@
 aiohttp~=3.8.3
 boto3==1.26.54
-boto3-stubs[essential]==1.26.51
+boto3-stubs[essential]==1.26.55
 discord~=2.1.0
 pynacl
 pytest
