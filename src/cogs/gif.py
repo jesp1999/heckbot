@@ -37,7 +37,7 @@ class Gif(commands.Cog):
         :param search_term_parts: Parts of the search term as a
         collection of strings
         """
-        search_term = ''.join(search_term_parts)
+        search_term = ' '.join(search_term_parts)
         async with aiohttp.ClientSession() as session:
             gif_request_url = (
                 'https://tenor.googleapis.com/v2/'

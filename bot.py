@@ -5,7 +5,7 @@ import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 
-from src.cogs import react, poll, gif
+from src.cogs import react, poll, gif, message
 from src.types.constants import (WELCOME_CHANNEL_ID, PRIMARY_GUILD_ID,
                                  WELCOME_MESSAGE, ADMIN_CONSOLE_CHANNEL_ID,
                                  BOT_ONLINE_MESSAGE, BOT_CUSTOM_STATUS,
@@ -26,8 +26,6 @@ bot = commands.Bot(
     intents=intents
 )
 
-# this is bruh
-
 @bot.listen('on_ready')
 async def on_ready(
 
@@ -40,6 +38,7 @@ async def on_ready(
     print('Initializing HeckBot..')
     # load cogs
     await gif.setup(bot)
+    await message.setup(bot)
     await poll.setup(bot)
     await react.setup(bot)
 
