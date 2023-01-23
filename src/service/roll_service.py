@@ -3,6 +3,8 @@ from collections import namedtuple
 
 from table2ascii import table2ascii, PresetStyle, TableStyle
 
+from src.utils.chatutils import codeblock
+
 Bounds: namedtuple = namedtuple('Bounds', ['min', 'max'])
 RESULT_DICE_LENGTH_BOUNDS: Bounds = Bounds(6, 9)
 RESULT_ROLLS_LENGTH_BOUNDS: Bounds = Bounds(7, 21)
@@ -133,14 +135,16 @@ class RollService:
 
         # TODO find a way to have equal character spacing without this
         #  being in a codeblock
-        results = '```' + table2ascii(
-            header=['dice', 'rolls', 'sum'],
-            body=table_body,
-            column_widths=[
-                max_dice_strlen,
-                max_rolls_strlen,
-                max_sum_strlen
-            ],
-            style=table_style
-        ) + '```'
+        results = codeblock(
+            table2ascii(
+                header=['dice', 'rolls', 'sum'],
+                body=table_body,
+                column_widths=[
+                    max_dice_strlen,
+                    max_rolls_strlen,
+                    max_sum_strlen
+                ],
+                style=table_style
+            )
+        )
         return results

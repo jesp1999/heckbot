@@ -5,7 +5,7 @@ import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 
-from src.cogs import reactmatch, poll, gif
+from src.cogs import react, poll, gif
 from src.types.constants import (WELCOME_CHANNEL_ID, PRIMARY_GUILD_ID,
                                  WELCOME_MESSAGE, ADMIN_CONSOLE_CHANNEL_ID,
                                  BOT_ONLINE_MESSAGE, BOT_CUSTOM_STATUS,
@@ -38,9 +38,9 @@ async def on_ready(
     """
     print('Initializing HeckBot..')
     # load cogs
-    await reactmatch.setup(bot)
-    await poll.setup(bot)
     await gif.setup(bot)
+    await poll.setup(bot)
+    await react.setup(bot)
 
     # alert channels of bot online status
     for guild in bot.guilds:
@@ -61,8 +61,8 @@ async def on_member_join(
 ) -> None:
     """
     Event listener triggered when the bot detects a new member joining
-    the server. Sends a message in whitelisted servers with a designated
-    welcome channel to welcome the user to the server.
+    the guild. Sends a message in whitelisted guilds with a designated
+    welcome channel to welcome the user to the guild.
     :param member: Discord member who joined
     """
     for guild in bot.guilds:
