@@ -2,7 +2,10 @@ aiohttp~=3.8.3
 boto3==1.26.51
 boto3-stubs[essential]==1.26.51
 discord~=2.1.0
+openai
+Pillow
 pynacl
 pytest
 python-dotenv~=0.21.0
 table2ascii
+
