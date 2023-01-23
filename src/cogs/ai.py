@@ -6,7 +6,7 @@ from discord.ui import Button
 
 import openai
 
-class ImageGen(commands.Cog):
+class AI(commands.Cog):
 
     def __init__(self, bot: Bot) -> None:
         """
@@ -18,12 +18,9 @@ class ImageGen(commands.Cog):
     @commands.command()
     async def imagine(self, ctx: Context,*prompt_terms) -> None:
 
-        # Takes a prompt and turns it into an image url
         openai.api_key=os.getenv('OPEN_API_KEY')
 
         prompt= ' '.join(prompt_terms)
-
-        model='image-dALL-E-002'
 
         artificial_image = openai.Image.create(
             prompt=prompt,
@@ -34,14 +31,11 @@ class ImageGen(commands.Cog):
         image_url=artificial_image.data[0].url
 
         print(image_url)
-
         await ctx.send(image_url)
-
-        # Play the sound selected with our input.
 
 async def setup(bot: Bot) -> None:
     """
     Setup function for registering the ImageGen cog.
     :param bot: Instance of the running Bot
     """
-    await bot.add_cog(ImageGen(bot))
+    await bot.add_cog(AI(bot))
