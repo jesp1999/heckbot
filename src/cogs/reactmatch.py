@@ -4,6 +4,7 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import Context, Bot
 
+from src.cogs.config import is_enabled
 from src.service.association_service import AssociationService
 
 
@@ -21,6 +22,7 @@ class ReactMatch(commands.Cog):
         self._bot: Bot = bot
 
     @commands.command()
+    @commands.check(is_enabled)
     async def associate(
             self,
             ctx: Context,
@@ -46,6 +48,7 @@ class ReactMatch(commands.Cog):
                        f'\"{reaction}\"!')
 
     @commands.command()
+    @commands.check(is_enabled)
     async def dissociate(
             self,
             ctx: Context,
@@ -81,6 +84,7 @@ class ReactMatch(commands.Cog):
                            f'\"{reaction}\"!')
 
     @commands.command()
+    @commands.check(is_enabled)
     async def disassociate(
             self,
             ctx: Context

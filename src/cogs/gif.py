@@ -4,6 +4,8 @@ import aiohttp
 from discord.ext import commands
 from discord.ext.commands import Bot, Context
 
+from src.cogs.config import is_enabled
+
 
 class Gif(commands.Cog):
     """
@@ -23,6 +25,7 @@ class Gif(commands.Cog):
         self._bot: Bot = bot
 
     @commands.command()
+    @commands.check(is_enabled)
     async def gif(
             self,
             ctx: Context,

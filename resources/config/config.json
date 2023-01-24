@@ -1,1 +1,80 @@
-{}
+{
+    "1065476609668296714": {
+        "modules": {
+            "Poll": {
+                "commands": {
+                    "d4": {
+                        "enabled": "false"
+                    },
+                    "d8": {
+                        "enabled": "true"
+                    },
+                    "d10": {
+                        "enabled": "true"
+                    },
+                    "roll": {
+                        "enabled": "true"
+                    },
+                    "d12": {
+                        "enabled": "true"
+                    },
+                    "d2": {
+                        "enabled": "true"
+                    },
+                    "d20": {
+                        "enabled": "true"
+                    },
+                    "d6": {
+                        "enabled": "true"
+                    },
+                    "d100": {
+                        "enabled": "true"
+                    },
+                    "d1": {
+                        "enabled": "true"
+                    },
+                    "d": {
+                        "enabled": "true"
+                    },
+                    "poll": {
+                        "enabled": "true"
+                    }
+                }
+            },
+            "ReactMatch": {
+                "commands": {
+                    "associate": {
+                        "enabled": "true"
+                    },
+                    "disassociate": {
+                        "enabled": "true"
+                    },
+                    "dissociate": {
+                        "enabled": "true"
+                    }
+                }
+            },
+            "Config": {
+                "commands": {
+                    "hbconf": {
+                        "enabled": "true"
+                    }
+                }
+            },
+            "Gif": {
+                "commands": {
+                    "gif": {
+                        "enabled": "true"
+                    }
+                }
+            },
+            "null": {
+                "commands": {
+                    "help": {
+                        "enabled": "true"
+                    }
+                }
+            }
+        }
+    }
+}

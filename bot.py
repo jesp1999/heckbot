@@ -49,6 +49,10 @@ def main() -> NoReturn:
 
         # alert channels of bot online status
         for guild in bot.guilds:
+            config.Config.config_adaptor.generate_default_config(
+                bot,
+                str(guild.id)
+            )
             print(f'{bot.user} has connected to the following guild: '
                   f'{guild.name}(id: {guild.id})')
             if guild.id == PRIMARY_GUILD_ID:
