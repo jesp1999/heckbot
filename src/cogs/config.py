@@ -78,15 +78,14 @@ class Config(commands.Cog):
 
 
 def is_enabled(ctx: Context):
-    print(dir(ctx.command))
-    a = Config.config_adaptor.load(
+    return Config.config_adaptor.load(
         str(ctx.guild.id),
         'modules',
+        ctx.command.cog_name,
+        'commands',
         ctx.command.name,
         'enabled'
     ) not in ('false', 'FALSE', 'f', 'F', 'n', 'N', 'no', 'NO', 0, '0')
-    print(a)
-    return a
 
 
 async def setup(

@@ -1,55 +1,61 @@
 {
     "1065476609668296714": {
         "modules": {
-            "Poll": {
+            "React": {
                 "commands": {
-                    "d4": {
-                        "enabled": "false"
-                    },
-                    "d8": {
-                        "enabled": "true"
-                    },
-                    "d10": {
-                        "enabled": "true"
-                    },
-                    "roll": {
-                        "enabled": "true"
-                    },
-                    "d12": {
-                        "enabled": "true"
-                    },
-                    "d2": {
-                        "enabled": "true"
-                    },
-                    "d20": {
-                        "enabled": "true"
-                    },
-                    "d6": {
-                        "enabled": "true"
-                    },
-                    "d100": {
-                        "enabled": "true"
-                    },
-                    "d1": {
-                        "enabled": "true"
-                    },
-                    "d": {
-                        "enabled": "true"
-                    },
-                    "poll": {
-                        "enabled": "true"
-                    }
-                }
-            },
-            "ReactMatch": {
-                "commands": {
-                    "associate": {
+                    "reactlist": {
                         "enabled": "true"
                     },
                     "disassociate": {
                         "enabled": "true"
                     },
-                    "dissociate": {
+                    "reactdelete": {
+                        "enabled": "true"
+                    },
+                    "react": {
+                        "enabled": "true"
+                    },
+                    "reactadd": {
+                        "enabled": "true"
+                    }
+                }
+            },
+            "Poll": {
+                "commands": {
+                    "d4": {
+                        "enabled": "false"
+                    },
+                    "d6": {
+                        "enabled": "true"
+                    },
+                    "d10": {
+                        "enabled": "true"
+                    },
+                    "d1": {
+                        "enabled": "true"
+                    },
+                    "poll": {
+                        "enabled": "true"
+                    },
+                    "roll": {
+                        "enabled": "true"
+                    },
+                    "d20": {
+                        "enabled": "true"
+                    },
+                    "d2": {
+                        "enabled": "true"
+                    },
+                    "d": {
+                        "enabled": "true"
+                    },
+                    "d100": {
+                        "enabled": "true"
+                    },
+                    "d12": {
+                        "enabled": "true"
+                    },
+                    "d8": {
                         "enabled": "true"
                     }
                 }
