@@ -45,7 +45,7 @@ def main() -> NoReturn:
         await config.setup(bot)
         await gif.setup(bot)
         await poll.setup(bot)
-        await reactmatch.setup(bot)
+        await react.setup(bot)
 
         # alert channels of bot online status
         for guild in bot.guilds:
