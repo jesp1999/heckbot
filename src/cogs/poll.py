@@ -4,6 +4,7 @@ from discord.ext.commands import Bot, Context
 from src.cogs import config
 from src.cogs.config import is_enabled
 from src.service.roll_service import RollService, RollRequest
+from src.utils.chatutils import bold
 
 
 class Poll(commands.Cog):
@@ -44,19 +45,14 @@ class Poll(commands.Cog):
         """
         if len(args) == 1:
             # Yes/no poll
-            question: str = args[0]
-            if question[:2] != '**' or question[-2:] != '**':
-                question = '**' + question + '**'
-
+            question: str = bold(args[0])
             message = await ctx.send(question)
             for reaction in self.YES_NO_REACTIONS:
                 await message.add_reaction(reaction)
         elif len(args) > 1:
             # Multi-choice poll
-            question = args[0]
+            question = bold(args[0])
             choices = args[1:]
-            if question[:2] != '**' or question[-2:] != '**':
-                question = '**' + question + '**'
             num_choices = len(args) - 1
             message_text = question
             for reaction, choice in zip(self.MULTI_CHOICE_REACTIONS, choices):
