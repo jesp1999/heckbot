@@ -52,6 +52,7 @@ class React(commands.Cog):
             return await self.rlist(ctx, pattern, reaction)
 
     @commands.command(aliases=['associate', 'assoc', 'radd'])
+    @commands.check(is_enabled)
     async def reactadd(
             self,
             ctx: Context,
@@ -104,6 +105,7 @@ class React(commands.Cog):
         await ctx.send('The command is \"`!dissociate`\", y\'know 😉')
 
     @commands.command(aliases=['listassociations', 'rlist', 'rlst'])
+    @commands.check(is_enabled)
     async def reactlist(
             self,
             ctx: Context,
