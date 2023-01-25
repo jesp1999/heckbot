@@ -6,14 +6,13 @@ from os.path import join, dirname
 from typing import Final
 
 import discord
-from colorama import Fore, Style
 from discord.ext import commands
 from dotenv import load_dotenv
 
-from src.cogs import config
+from src.service.config_service import ConfigService
 from src.types.constants import (PRIMARY_GUILD_ID,
                                  ADMIN_CONSOLE_CHANNEL_ID,
-                                 BOT_ONLINE_MESSAGE, BOT_CUSTOM_STATUS,
+                                 BOT_CUSTOM_STATUS,
                                  BOT_COMMAND_PREFIX)
 
 load_dotenv(join(dirname(__file__), '.env'))
@@ -47,6 +46,7 @@ class HeckBot(commands.Bot):
             reconnect=True,
             case_insensitive=False
         )
+        self.uptime: datetime = datetime.utcnow()
 
     async def setup_hook(
             self
@@ -65,10 +65,11 @@ class HeckBot(commands.Bot):
                 await self.load_extension(f'src.cogs.{cog}')
             except Exception as ex:
                 print(f'Could not load extension {cog}: {ex}')
+                raise ex
 
     async def after_ready(
-                self
-        ):
+            self
+    ):
         """
         Asynchronous post-ready code for the bot
         :return:
@@ -79,29 +80,29 @@ class HeckBot(commands.Bot):
 
         await self.change_presence(
             status=discord.Status.online,
+            # TODO save this constant into a global config elsewhere
             activity=discord.Game(BOT_CUSTOM_STATUS)
         )
 
         # alert channels of bot online status
         for guild in self.guilds:
-            config.Config.config_adaptor.generate_default_config(
-                self,
-                str(guild.id)
-            )
+            ConfigService.generate_default_config(self, str(guild.id))
             print(f'{self.user} has connected to the following guild: '
                   f'{guild.name}(id: {guild.id})')
             if guild.id == PRIMARY_GUILD_ID:
                 channel = guild.get_channel(ADMIN_CONSOLE_CHANNEL_ID)
-                await channel.send(BOT_ONLINE_MESSAGE)
+                await channel.send(
+                    ConfigService.get_config_option(str(guild.id), 'messages',
+                                                     'welcomeMessage')
+                )
 
         print(
             f"----------------HeckBot---------------------"
-            f"\nBot is online and connected to {self.user}"
-            f"\nConnected to {(len(self.guilds))} Guilds."
+            f"\nBot is online as user {self.user}"
+            f"\nConnected to {(len(self.guilds))} guilds."
             f"\nDetected OS: {sys.platform.title()}"
             f"\n--------------------------------------------"
         )
-
 
 
 HeckBot().run(token)

@@ -1,11 +1,8 @@
 import json
 import os
-from pathlib import Path
-from typing import TypeVar, Optional
+from json import JSONDecodeError
 
-from discord.ext.commands import Bot
-
-JsonObject = TypeVar('JsonObject', str, int, float, bool, list, dict, None)
+from src.types.typevars import JsonObject
 
 
 class ConfigJsonAdaptor:
@@ -34,13 +31,12 @@ class ConfigJsonAdaptor:
         """
         Saves a value to a setting bound to a server.
         :param guild_id: Identifier for the server
-        :param setting: Setting name
-        :param value: Value to set setting to
+        :param setting_parts: Setting parts
         """
         with open(self._config_file, 'r') as f:
             try:
                 config_data = json.load(f)
-            except Exception:
+            except JSONDecodeError:
                 config_data = {}
 
         if guild_id not in config_data:
@@ -65,7 +61,7 @@ class ConfigJsonAdaptor:
         """
         Loads a value from a setting bound to a server.
         :param guild_id: Identifier for the server
-        :param setting: Setting name
+        :param setting_parts: Setting parts
         """
         with open(self._config_file, 'r') as f:
             config_data = json.load(f)
@@ -73,19 +69,3 @@ class ConfigJsonAdaptor:
             for setting in setting_parts:
                 config_node = config_node.get(setting, {})
             return config_node or None
-
-    def generate_default_config(
-            self,
-            bot: Bot,
-            guild_id: str
-    ):
-        command_info = {(cmd.name, cmd.cog_name) for cmd in bot.commands}
-        for command_name, module_name in command_info:
-            self.save(
-                guild_id,
-                'modules',
-                module_name,
-                'commands',
-                command_name,
-                'enabled', 'true'
-            )

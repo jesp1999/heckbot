@@ -5,7 +5,7 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import Context, Bot
 
-from src.cogs.config import is_enabled
+from src.service.config_service import ConfigService
 from src.service.react_service import AssociationService
 
 
@@ -26,7 +26,7 @@ class React(commands.Cog):
         self._bot: Bot = bot
 
     @commands.command()
-    @commands.check(is_enabled)
+    @commands.check(ConfigService.is_enabled)
     async def react(
             self,
             ctx: Context,
@@ -52,7 +52,7 @@ class React(commands.Cog):
             return await self.rlist(ctx, pattern, reaction)
 
     @commands.command(aliases=['associate', 'assoc', 'radd'])
-    @commands.check(is_enabled)
+    @commands.check(ConfigService.is_enabled)
     async def reactadd(
             self,
             ctx: Context,
@@ -72,7 +72,7 @@ class React(commands.Cog):
 
     @commands.command(aliases=['dissociate', 'dissoc', 'rdel', 'reactdel',
                                'reactremove', 'reactrem', 'rrem'])
-    @commands.check(is_enabled)
+    @commands.check(ConfigService.is_enabled)
     async def reactdelete(
             self,
             ctx: Context,
@@ -93,7 +93,7 @@ class React(commands.Cog):
         await self.rdel(ctx, pattern, reaction)
 
     @commands.command()
-    @commands.check(is_enabled)
+    @commands.check(ConfigService.is_enabled)
     async def disassociate(
             self,
             ctx: Context
@@ -105,7 +105,7 @@ class React(commands.Cog):
         await ctx.send('The command is \"`!dissociate`\", y\'know 😉')
 
     @commands.command(aliases=['listassociations', 'rlist', 'rlst'])
-    @commands.check(is_enabled)
+    @commands.check(ConfigService.is_enabled)
     async def reactlist(
             self,
             ctx: Context,

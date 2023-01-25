@@ -1,8 +1,7 @@
 from discord.ext import commands
 from discord.ext.commands import Bot, Context
 
-from src.cogs import config
-from src.cogs.config import is_enabled
+from src.service.config_service import ConfigService
 from src.service.roll_service import RollService, RollRequest
 from src.utils.chatutils import bold
 
@@ -28,7 +27,7 @@ class Poll(commands.Cog):
         self._bot: Bot = bot
 
     @commands.command()
-    @commands.check(is_enabled)
+    @commands.check(ConfigService.is_enabled)
     async def poll(
             self,
             ctx: Context,
@@ -66,7 +65,7 @@ class Poll(commands.Cog):
                            ' "[choice1]" "[choice2]" ...`\"')
 
     @commands.command()
-    @commands.check(is_enabled)
+    @commands.check(ConfigService.is_enabled)
     async def d(
             self,
             ctx: Context,
@@ -88,7 +87,7 @@ class Poll(commands.Cog):
         await ctx.send(self._roll_service.format_roll_results(roll_results))
 
     @commands.command()
-    @commands.check(is_enabled)
+    @commands.check(ConfigService.is_enabled)
     async def d1(
             self,
             ctx: Context
@@ -107,7 +106,7 @@ class Poll(commands.Cog):
         await ctx.send(self._roll_service.format_roll_results(roll_results))
 
     @commands.command(aliases=['flip', 'coinflip'])
-    @commands.check(is_enabled)
+    @commands.check(ConfigService.is_enabled)
     async def d2(
             self,
             ctx: Context
@@ -126,7 +125,7 @@ class Poll(commands.Cog):
         await ctx.send(self._roll_service.format_roll_results(roll_results))
 
     @commands.command()
-    @commands.check(is_enabled)
+    @commands.check(ConfigService.is_enabled)
     async def d4(
             self,
             ctx: Context
@@ -145,7 +144,7 @@ class Poll(commands.Cog):
         await ctx.send(self._roll_service.format_roll_results(roll_results))
 
     @commands.command()
-    @commands.check(is_enabled)
+    @commands.check(ConfigService.is_enabled)
     async def d6(
             self,
             ctx: Context
@@ -167,7 +166,7 @@ class Poll(commands.Cog):
         await ctx.send(self._roll_service.format_roll_results(roll_results))
 
     @commands.command()
-    @commands.check(is_enabled)
+    @commands.check(ConfigService.is_enabled)
     async def d8(
             self,
             ctx: Context
@@ -186,7 +185,7 @@ class Poll(commands.Cog):
         await ctx.send(self._roll_service.format_roll_results(roll_results))
 
     @commands.command()
-    @commands.check(is_enabled)
+    @commands.check(ConfigService.is_enabled)
     async def d10(
             self,
             ctx: Context
@@ -205,7 +204,7 @@ class Poll(commands.Cog):
         await ctx.send(self._roll_service.format_roll_results(roll_results))
 
     @commands.command()
-    @commands.check(is_enabled)
+    @commands.check(ConfigService.is_enabled)
     async def d12(
             self,
             ctx: Context
@@ -224,7 +223,7 @@ class Poll(commands.Cog):
         await ctx.send(self._roll_service.format_roll_results(roll_results))
 
     @commands.command()
-    @commands.check(is_enabled)
+    @commands.check(ConfigService.is_enabled)
     async def d20(
             self,
             ctx: Context
@@ -243,7 +242,7 @@ class Poll(commands.Cog):
         await ctx.send(self._roll_service.format_roll_results(roll_results))
 
     @commands.command()
-    @commands.check(is_enabled)
+    @commands.check(ConfigService.is_enabled)
     async def d100(
             self,
             ctx: Context
@@ -262,7 +261,7 @@ class Poll(commands.Cog):
         await ctx.send(self._roll_service.format_roll_results(roll_results))
 
     @commands.command()
-    @commands.check(is_enabled)
+    @commands.check(ConfigService.is_enabled)
     async def roll(
             self,
             ctx: Context,

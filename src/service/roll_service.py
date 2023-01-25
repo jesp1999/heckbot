@@ -5,13 +5,23 @@ from table2ascii import table2ascii, PresetStyle, TableStyle
 
 from src.utils.chatutils import codeblock
 
-Bounds: namedtuple = namedtuple('Bounds', ['min', 'max'])
+Bounds: namedtuple = namedtuple(
+    'Bounds',
+    ['min', 'max']
+)
 RESULT_DICE_LENGTH_BOUNDS: Bounds = Bounds(6, 9)
 RESULT_ROLLS_LENGTH_BOUNDS: Bounds = Bounds(7, 21)
 RESULT_SUM_LENGTH_BOUNDS: Bounds = Bounds(5, 8)
 
-RollRequest: namedtuple = namedtuple('RollRequest', ['num', 'sides'])
-RollResult: namedtuple = namedtuple('RollResult', ['dice', 'rolls'])
+RollRequest: namedtuple = namedtuple(
+    'RollRequest',
+    ['num', 'sides'],
+    defaults=(1, 6)
+)
+RollResult: namedtuple = namedtuple(
+    'RollResult',
+    ['dice', 'rolls']
+)
 
 
 class RollService:

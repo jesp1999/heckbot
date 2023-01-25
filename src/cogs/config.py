@@ -1,8 +1,7 @@
-from functools import wraps
-from typing import Optional, Literal, Any
+from typing import Literal
 
 from discord.ext import commands
-from discord.ext.commands import Bot, Context,Command
+from discord.ext.commands import Bot, Context
 
 from src.adaptor.config_json_adaptor import ConfigJsonAdaptor
 
@@ -27,11 +26,10 @@ class Config(commands.Cog):
         :param bot: Instance of the running Bot
         """
         self._bot: Bot = bot
-        self._current_config: dict = {}
 
     @commands.command(aliases=['config', 'conf', 'heckbotconf',
                                'heckbotconfig'])
-    # @commands.check(is_enabled)
+    # @commands.check(ConfigService.is_enabled)
     async def hbconf(
             self,
             ctx: Context,
@@ -43,16 +41,20 @@ class Config(commands.Cog):
                 str(ctx.guild.id),
                 *config_options
             )
-            self._current_config = self.config_adaptor.load(
-                str(ctx.guild.id)
+            await ctx.send(
+                self.config_adaptor.load(
+                    str(ctx.guild.id)
+                )
             )
         elif command in ['update', 'set']:
             self.config_adaptor.save(
                 str(ctx.guild.id),
                 *config_options
             )
-            self._current_config = self.config_adaptor.load(
-                str(ctx.guild.id)
+            await ctx.send(
+                self.config_adaptor.load(
+                    str(ctx.guild.id)
+                )
             )
         elif command in ['remove', 'unset', 'delete']:
             self.config_adaptor.save(
@@ -60,37 +62,30 @@ class Config(commands.Cog):
                 *config_options,
                 None
             )
-            self._current_config = self.config_adaptor.load(
-                str(ctx.guild.id)
+            await ctx.send(
+                self.config_adaptor.load(
+                    str(ctx.guild.id)
+                )
             )
         elif command in ['get', 'read', 'load']:
-            self._current_config = self.config_adaptor.load(
-                str(ctx.guild.id),
-                *config_options
+            await ctx.send(
+                self.config_adaptor.load(
+                    str(ctx.guild.id),
+                    *config_options
+                )
             )
-            await ctx.send(str(self._current_config))
         elif command == 'list':
-            self._current_config = self.config_adaptor.load(
-                str(ctx.guild.id),
-                *config_options
+            await ctx.send(
+                self.config_adaptor.load(
+                    str(ctx.guild.id),
+                    *config_options
+                )
             )
-            await ctx.send(str(self._current_config))
-
-
-def is_enabled(ctx: Context):
-    return Config.config_adaptor.load(
-        str(ctx.guild.id),
-        'modules',
-        ctx.command.cog_name,
-        'commands',
-        ctx.command.name,
-        'enabled'
-    ) not in ('false', 'FALSE', 'f', 'F', 'n', 'N', 'no', 'NO', 0, '0')
 
 
 async def setup(
         bot: Bot
-):
+) -> None:
     """
     Setup function for registering the gif cog.
     :param bot: Instance of the running Bot

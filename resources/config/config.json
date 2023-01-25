@@ -4,73 +4,73 @@
             "React": {
                 "commands": {
                     "reactlist": {
-                        "enabled": "true"
+                        "enabled": "false"
                     },
                     "disassociate": {
-                        "enabled": "true"
+                        "enabled": "false"
                     },
                     "reactdelete": {
-                        "enabled": "true"
+                        "enabled": "false"
                     },
                     "react": {
-                        "enabled": "true"
+                        "enabled": "false"
                     },
                     "reactadd": {
-                        "enabled": "true"
+                        "enabled": "false"
                     }
                 }
             },
             "Poll": {
                 "commands": {
                     "d4": {
-                        "enabled": "true"
+                        "enabled": "false"
                     },
                     "d6": {
-                        "enabled": "true"
+                        "enabled": "false"
                     },
                     "d10": {
-                        "enabled": "true"
+                        "enabled": "false"
                     },
                     "d1": {
-                        "enabled": "true"
+                        "enabled": "false"
                     },
                     "poll": {
-                        "enabled": "true"
+                        "enabled": "false"
                     },
                     "roll": {
-                        "enabled": "true"
+                        "enabled": "false"
                     },
                     "d20": {
-                        "enabled": "true"
+                        "enabled": "false"
                     },
                     "d2": {
-                        "enabled": "true"
+                        "enabled": "false"
                     },
                     "d": {
-                        "enabled": "true"
+                        "enabled": "false"
                     },
                     "d100": {
-                        "enabled": "true"
+                        "enabled": "false"
                     },
                     "d12": {
-                        "enabled": "true"
+                        "enabled": "false"
                     },
                     "d8": {
-                        "enabled": "true"
+                        "enabled": "false"
                     }
                 }
             },
             "Config": {
                 "commands": {
                     "hbconf": {
-                        "enabled": "true"
+                        "enabled": "false"
                     }
                 }
             },
             "Gif": {
                 "commands": {
                     "gif": {
-                        "enabled": "true"
+                        "enabled": "false"
                     }
                 }
             },
@@ -81,6 +81,18 @@
                     }
                 }
             }
+        },
+        "messages": {
+            "welcomeMessage": "Welcome to HeckBoiCrue <@!{}>!",
+            "botOnlineMessage": "hello, i am online",
+            "guildJoinMessageTitle": "",
+            "guildJoinMessage": ""
+        },
+        "botInfo": {
+            "botCustomStatus": "the part :)"
+        },
+        "colors": {
+            "embedColor": "0x040273"
         }
     }
 }

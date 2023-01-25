@@ -1,0 +1,98 @@
+{
+    "1065476609668296714": {
+        "modules": {
+            "React": {
+                "commands": {
+                    "reactlist": {
+                        "enabled": "false"
+                    },
+                    "disassociate": {
+                        "enabled": "false"
+                    },
+                    "reactdelete": {
+                        "enabled": "false"
+                    },
+                    "react": {
+                        "enabled": "false"
+                    },
+                    "reactadd": {
+                        "enabled": "false"
+                    }
+                }
+            },
+            "Poll": {
+                "commands": {
+                    "d4": {
+                        "enabled": "false"
+                    },
+                    "d6": {
+                        "enabled": "false"
+                    },
+                    "d10": {
+                        "enabled": "false"
+                    },
+                    "d1": {
+                        "enabled": "false"
+                    },
+                    "poll": {
+                        "enabled": "false"
+                    },
+                    "roll": {
+                        "enabled": "false"
+                    },
+                    "d20": {
+                        "enabled": "false"
+                    },
+                    "d2": {
+                        "enabled": "false"
+                    },
+                    "d": {
+                        "enabled": "false"
+                    },
+                    "d100": {
+                        "enabled": "false"
+                    },
+                    "d12": {
+                        "enabled": "false"
+                    },
+                    "d8": {
+                        "enabled": "false"
+                    }
+                }
+            },
+            "Config": {
+                "commands": {
+                    "hbconf": {
+                        "enabled": "false"
+                    }
+                }
+            },
+            "Gif": {
+                "commands": {
+                    "gif": {
+                        "enabled": "false"
+                    }
+                }
+            },
+            "null": {
+                "commands": {
+                    "help": {
+                        "enabled": "true"
+                    }
+                }
+            }
+        },
+        "messages": {
+            "welcomeMessage": "Welcome to HeckBoiCrue <@!{}>!",
+            "botOnlineMessage": "hello, i am online",
+            "guildJoinMessageTitle": "",
+            "guildJoinMessage": ""
+        },
+        "botInfo": {
+            "botCustomStatus": "the part :)"
+        },
+        "colors": {
+            "embedColor": "0x040273"
+        }
+    }
+}
