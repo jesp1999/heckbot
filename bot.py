@@ -1,85 +1,107 @@
+import asyncio
 import os
 import sys
+from datetime import datetime
 from os.path import join, dirname
-from typing import NoReturn
+from typing import Final
 
 import discord
+from colorama import Fore, Style
 from discord.ext import commands
 from dotenv import load_dotenv
 
-from src.cogs import react, poll, gif, config
-from src.types.constants import (WELCOME_CHANNEL_ID, PRIMARY_GUILD_ID,
-                                 WELCOME_MESSAGE, ADMIN_CONSOLE_CHANNEL_ID,
+from src.cogs import config
+from src.types.constants import (PRIMARY_GUILD_ID,
+                                 ADMIN_CONSOLE_CHANNEL_ID,
                                  BOT_ONLINE_MESSAGE, BOT_CUSTOM_STATUS,
                                  BOT_COMMAND_PREFIX)
 
+load_dotenv(join(dirname(__file__), '.env'))
 
-def main() -> NoReturn:
-    load_dotenv(join(dirname(__file__), '.env'))
+token: str = os.getenv('DISCORD_TOKEN')
 
-    token: str = os.getenv('DISCORD_TOKEN')
+cogs: Final[list] = [
+    'config',
+    'events',
+    'gif',
+    'poll',
+    'react'
+]
 
-    intents = discord.Intents.default()
-    intents.messages = True
-    intents.message_content = True
-    intents.typing = True
-    intents.presences = True
-    intents.members = True
-    bot = commands.Bot(
-        command_prefix=BOT_COMMAND_PREFIX,
-        intents=intents
-    )
+intents = discord.Intents.default()
+intents.messages = True
+intents.message_content = True
+intents.typing = True
+intents.presences = True
+intents.members = True
 
-    @bot.listen('on_ready')
-    async def on_ready(
 
+class HeckBot(commands.Bot):
+    after_ready_task: asyncio.Task[None]
+
+    def __init__(self):
+        super().__init__(
+            command_prefix=BOT_COMMAND_PREFIX,
+            intents=intents,
+            owner_id=277859399903608834,
+            reconnect=True,
+            case_insensitive=False
+        )
+
+    async def setup_hook(
+            self
     ) -> None:
         """
-        Event listener triggered when the bot is authenticated and ready
-        to run. Sets up all cogs for the application, notifies the
-        guilds it is present in about its online status, and updates its
-        presence.
+        Asynchronous setup code for the bot before gateway connection
+        :return:
         """
-        print('Initializing HeckBot..')
-        # load cogs
-        await config.setup(bot)
-        await gif.setup(bot)
-        await poll.setup(bot)
-        await react.setup(bot)
+        self.after_ready_task = asyncio.create_task(self.after_ready())
 
-        # alert channels of bot online status
-        for guild in bot.guilds:
-            config.Config.config_adaptor.generate_default_config(
-                bot,
-                str(guild.id)
-            )
-            print(f'{bot.user} has connected to the following guild: '
-                  f'{guild.name}(id: {guild.id})')
-            if guild.id == PRIMARY_GUILD_ID:
-                channel = guild.get_channel(ADMIN_CONSOLE_CHANNEL_ID)
-                await channel.send(BOT_ONLINE_MESSAGE)
-        await bot.change_presence(
+        self.remove_command('help')
+
+        # load cogs
+        for cog in cogs:
+            try:
+                await self.load_extension(f'src.cogs.{cog}')
+            except Exception as ex:
+                print(f'Could not load extension {cog}: {ex}')
+
+    async def after_ready(
+                self
+        ):
+        """
+        Asynchronous post-ready code for the bot
+        :return:
+        """
+        await self.wait_until_ready()
+
+        self.uptime = datetime.utcnow()
+
+        await self.change_presence(
             status=discord.Status.online,
             activity=discord.Game(BOT_CUSTOM_STATUS)
         )
 
-    @bot.listen()
-    async def on_member_join(
-            member: discord.Member
-    ) -> None:
-        """
-        Event listener triggered when the bot detects a new member
-        joining the guild. Sends a message in whitelisted guilds with
-        a designated welcome channel to welcome the user to the guild.
-        :param member: Discord member who joined
-        """
-        for guild in bot.guilds:
+        # alert channels of bot online status
+        for guild in self.guilds:
+            config.Config.config_adaptor.generate_default_config(
+                self,
+                str(guild.id)
+            )
+            print(f'{self.user} has connected to the following guild: '
+                  f'{guild.name}(id: {guild.id})')
             if guild.id == PRIMARY_GUILD_ID:
-                channel = guild.get_channel(WELCOME_CHANNEL_ID)
-                await channel.send(WELCOME_MESSAGE.format(member.id))
+                channel = guild.get_channel(ADMIN_CONSOLE_CHANNEL_ID)
+                await channel.send(BOT_ONLINE_MESSAGE)
 
-    bot.run(token)
+        print(
+            f"----------------HeckBot---------------------"
+            f"\nBot is online and connected to {self.user}"
+            f"\nConnected to {(len(self.guilds))} Guilds."
+            f"\nDetected OS: {sys.platform.title()}"
+            f"\n--------------------------------------------"
+        )
 
 
-if __name__ == '__main__':
-    sys.exit(main())
+
+HeckBot().run(token)

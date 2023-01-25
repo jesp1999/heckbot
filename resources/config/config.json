@@ -23,7 +23,7 @@
             "Poll": {
                 "commands": {
                     "d4": {
-                        "enabled": "false"
+                        "enabled": "true"
                     },
                     "d6": {
                         "enabled": "true"
