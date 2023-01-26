@@ -51,9 +51,9 @@ class React(commands.Cog):
         elif subcommand in ['list', 'lst']:
             return await self.rlist(ctx, pattern, reaction)
 
-    @commands.command(aliases=['associate', 'assoc', 'radd'])
+    @commands.command(aliases=['reactadd', 'associate', 'assoc', 'radd'])
     @commands.check(ConfigService.is_enabled)
-    async def reactadd(
+    async def react_add(
             self,
             ctx: Context,
             pattern: str,
@@ -70,10 +70,11 @@ class React(commands.Cog):
         """
         await self.radd(ctx, pattern, reaction)
 
-    @commands.command(aliases=['dissociate', 'dissoc', 'rdel', 'reactdel',
-                               'reactremove', 'reactrem', 'rrem'])
+    @commands.command(aliases=['reactdelete', 'dissociate', 'dissoc',
+                               'rdel', 'reactdel', 'reactremove',
+                               'reactrem', 'rrem'])
     @commands.check(ConfigService.is_enabled)
-    async def reactdelete(
+    async def react_delete(
             self,
             ctx: Context,
             pattern: str,
@@ -104,9 +105,10 @@ class React(commands.Cog):
         """
         await ctx.send('The command is \"`!dissociate`\", y\'know 😉')
 
-    @commands.command(aliases=['listassociations', 'rlist', 'rlst'])
+    @commands.command(aliases=['reactlist', 'listassociations', 'rlist',
+                               'rlst'])
     @commands.check(ConfigService.is_enabled)
-    async def reactlist(
+    async def react_list(
             self,
             ctx: Context,
             pattern: Optional[str] = None

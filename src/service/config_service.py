@@ -49,7 +49,12 @@ class ConfigService:
             'welcomeMessage': 'Welcome to HeckBoiCrue <@!{}>!',
             'botOnlineMessage': 'hello, i am online',
             'guildJoinMessageTitle': '',
-            'guildJoinMessage': ''
+            'guildJoinMessage': '',
+            'higherPermissionErrorMessage':
+                'Error: The specified user has higher permissions than you.',
+            'equalPermissionErrorMessage':
+                'Error: The specified user has higher permissions than you or '
+                'equal permissions.',
         }
         for message_type, message in message_info.items():
             cls._config_adaptor.save(
