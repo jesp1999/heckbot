@@ -7,70 +7,79 @@
                         "enabled": "false"
                     },
                     "disassociate": {
-                        "enabled": "false"
+                        "enabled": "true"
                     },
                     "reactdelete": {
                         "enabled": "false"
                     },
                     "react": {
-                        "enabled": "false"
+                        "enabled": "true"
                     },
                     "reactadd": {
                         "enabled": "false"
+                    },
+                    "react_add": {
+                        "enabled": "true"
+                    },
+                    "react_list": {
+                        "enabled": "true"
+                    },
+                    "react_delete": {
+                        "enabled": "true"
                     }
                 }
             },
             "Poll": {
                 "commands": {
                     "d4": {
-                        "enabled": "false"
+                        "enabled": "true"
                     },
                     "d6": {
-                        "enabled": "false"
+                        "enabled": "true"
                     },
                     "d10": {
-                        "enabled": "false"
+                        "enabled": "true"
                     },
                     "d1": {
-                        "enabled": "false"
+                        "enabled": "true"
                     },
                     "poll": {
-                        "enabled": "false"
+                        "enabled": "true"
                     },
                     "roll": {
-                        "enabled": "false"
+                        "enabled": "true"
                     },
                     "d20": {
-                        "enabled": "false"
+                        "enabled": "true"
                     },
                     "d2": {
-                        "enabled": "false"
+                        "enabled": "true"
                     },
                     "d": {
-                        "enabled": "false"
+                        "enabled": "true"
                     },
                     "d100": {
-                        "enabled": "false"
+                        "enabled": "true"
                     },
                     "d12": {
-                        "enabled": "false"
+                        "enabled": "true"
                     },
                     "d8": {
-                        "enabled": "false"
+                        "enabled": "true"
                     }
                 }
             },
             "Config": {
                 "commands": {
                     "hbconf": {
-                        "enabled": "false"
+                        "enabled": "true"
                     }
                 }
             },
             "Gif": {
                 "commands": {
                     "gif": {
-                        "enabled": "false"
+                        "enabled": "true"
                     }
                 }
             },
@@ -80,13 +89,49 @@
                         "enabled": "true"
                     }
                 }
+            },
+            "Moderation": {
+                "commands": {
+                    "warn": {
+                        "enabled": "true"
+                    },
+                    "unban": {
+                        "enabled": "true"
+                    },
+                    "kick": {
+                        "enabled": "true"
+                    },
+                    "remove_role": {
+                        "enabled": "true"
+                    },
+                    "purge": {
+                        "enabled": "true"
+                    },
+                    "add_role": {
+                        "enabled": "true"
+                    },
+                    "force_ban": {
+                        "enabled": "true"
+                    },
+                    "ban": {
+                        "enabled": "true"
+                    },
+                    "reset_nick": {
+                        "enabled": "true"
+                    },
+                    "nickname": {
+                        "enabled": "true"
+                    }
+                }
             }
         },
         "messages": {
             "welcomeMessage": "Welcome to HeckBoiCrue <@!{}>!",
             "botOnlineMessage": "hello, i am online",
             "guildJoinMessageTitle": "",
-            "guildJoinMessage": ""
+            "guildJoinMessage": "",
+            "higherPermissionErrorMessage": "Error: The specified user has higher permissions than you.",
+            "equalPermissionErrorMessage": "Error: The specified user has higher permissions than you or equal permissions."
         },
         "botInfo": {
             "botCustomStatus": "the part :)"

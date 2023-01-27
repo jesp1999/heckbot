@@ -23,6 +23,7 @@ cogs: Final[list] = [
     'config',
     'events',
     'gif',
+    'moderation',
     'poll',
     'react'
 ]

@@ -2,7 +2,7 @@ import traceback
 
 import discord
 from discord.ext import commands
-from discord.ext.commands import Context
+from discord.ext.commands import Context, Bot
 
 from src.service.config_service import ConfigService
 
@@ -333,6 +333,9 @@ class Moderation(commands.Cog):
             )
         elif ctx.author.top_role <= member.top_role:
             await ctx.send(
+                'Error: The specified user has higher permissions than you.'
+            )
+            await ctx.send(
                 embed=embed_for_message(
                     ctx,
                     ConfigService.get_config_option(
@@ -410,5 +413,11 @@ class Moderation(commands.Cog):
             await member.send(embed=embed)
 
 
-def setup(bot):
-    bot.add_cog(Moderation(bot))
+async def setup(
+        bot: Bot
+) -> None:
+    """
+    Setup function for registering the poll cog.
+    :param bot: Instance of the running Bot
+    """
+    await bot.add_cog(Moderation(bot))

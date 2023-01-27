@@ -33,7 +33,7 @@ class ConfigService:
         command_info = {(cmd.name, cmd.cog_name) for cmd in bot.commands}
         disabled_by_default = []
         for command_name, module_name in command_info:
-            enabled = command_name in disabled_by_default
+            enabled = command_name not in disabled_by_default
             cls._config_adaptor.save(
                 guild_id,
                 'modules',
