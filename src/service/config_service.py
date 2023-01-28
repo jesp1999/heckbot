@@ -21,7 +21,7 @@ class ConfigService:
             guild_id: str,
             *setting_parts
     ) -> JsonObject:
-        return cls._config_adaptor.load(guild_id, setting_parts)
+        return cls._config_adaptor.load(guild_id, *setting_parts)
 
     @classmethod
     def generate_default_config(
