@@ -4,6 +4,8 @@ import aiohttp
 from discord.ext import commands
 from discord.ext.commands import Bot, Context
 
+from src.service.config_service import ConfigService
+
 
 class Gif(commands.Cog):
     """
@@ -23,6 +25,7 @@ class Gif(commands.Cog):
         self._bot: Bot = bot
 
     @commands.command()
+    @commands.check(ConfigService.is_enabled)
     async def gif(
             self,
             ctx: Context,
@@ -37,8 +40,10 @@ class Gif(commands.Cog):
         :param search_term_parts: Parts of the search term as a
         collection of strings
         """
-        search_term = ''.join(search_term_parts)
+        search_term = ' '.join(search_term_parts)
         async with aiohttp.ClientSession() as session:
+            # TODO refactor this to add some randomness to the returned
+            #  image
             gif_request_url = (
                 'https://tenor.googleapis.com/v2/'
                 'search?q={}&key={}&client_key={}&limit=1').format(
@@ -52,6 +57,7 @@ class Gif(commands.Cog):
                     gif_url = response_json['results'][0]['media_formats'][
                         'mediumgif']['url']
                     await ctx.send(gif_url)
+                response.raise_for_status()
 
 
 async def setup(

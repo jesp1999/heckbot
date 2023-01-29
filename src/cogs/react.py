@@ -5,6 +5,7 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import Context, Bot
 
+from src.service.config_service import ConfigService
 from src.service.react_service import AssociationService
 
 
@@ -25,6 +26,7 @@ class React(commands.Cog):
         self._bot: Bot = bot
 
     @commands.command()
+    @commands.check(ConfigService.is_enabled)
     async def react(
             self,
             ctx: Context,
@@ -49,8 +51,9 @@ class React(commands.Cog):
         elif subcommand in ['list', 'lst']:
             return await self.rlist(ctx, pattern, reaction)
 
-    @commands.command(aliases=['associate', 'assoc', 'radd'])
-    async def reactadd(
+    @commands.command(aliases=['reactadd', 'associate', 'assoc', 'radd'])
+    @commands.check(ConfigService.is_enabled)
+    async def react_add(
             self,
             ctx: Context,
             pattern: str,
@@ -67,9 +70,11 @@ class React(commands.Cog):
         """
         await self.radd(ctx, pattern, reaction)
 
-    @commands.command(aliases=['dissociate', 'dissoc', 'rdel', 'reactdel',
-                               'reactremove', 'reactrem', 'rrem'])
-    async def reactdelete(
+    @commands.command(aliases=['reactdelete', 'dissociate', 'dissoc',
+                               'rdel', 'reactdel', 'reactremove',
+                               'reactrem', 'rrem'])
+    @commands.check(ConfigService.is_enabled)
+    async def react_delete(
             self,
             ctx: Context,
             pattern: str,
@@ -89,6 +94,7 @@ class React(commands.Cog):
         await self.rdel(ctx, pattern, reaction)
 
     @commands.command()
+    @commands.check(ConfigService.is_enabled)
     async def disassociate(
             self,
             ctx: Context
@@ -99,8 +105,10 @@ class React(commands.Cog):
         """
         await ctx.send('The command is \"`!dissociate`\", y\'know 😉')
 
-    @commands.command(aliases=['listassociations', 'rlist', 'rlst'])
-    async def reactlist(
+    @commands.command(aliases=['reactlist', 'listassociations', 'rlist',
+                               'rlst'])
+    @commands.check(ConfigService.is_enabled)
+    async def react_list(
             self,
             ctx: Context,
             pattern: Optional[str] = None

@@ -5,13 +5,23 @@ from table2ascii import table2ascii, PresetStyle, TableStyle
 
 from src.utils.chatutils import codeblock
 
-Bounds: namedtuple = namedtuple('Bounds', ['min', 'max'])
+Bounds: namedtuple = namedtuple(
+    'Bounds',
+    ['min', 'max']
+)
 RESULT_DICE_LENGTH_BOUNDS: Bounds = Bounds(6, 9)
 RESULT_ROLLS_LENGTH_BOUNDS: Bounds = Bounds(7, 21)
 RESULT_SUM_LENGTH_BOUNDS: Bounds = Bounds(5, 8)
 
-RollRequest: namedtuple = namedtuple('RollRequest', ['num', 'sides'])
-RollResult: namedtuple = namedtuple('RollResult', ['dice', 'rolls'])
+RollRequest: namedtuple = namedtuple(
+    'RollRequest',
+    ['num', 'sides'],
+    defaults=(1, 6)
+)
+RollResult: namedtuple = namedtuple(
+    'RollResult',
+    ['dice', 'rolls']
+)
 
 
 class RollService:
@@ -56,15 +66,14 @@ class RollService:
         """
         parsed_roll_requests = []
         for roll_request in roll_requests:
-            roll_request_parts = roll_request.lower().split('d')
-            if len(roll_request_parts) == 2:
-                num = int(roll_request_parts[0])
-                sides = int(roll_request_parts[1])
-                parsed_roll_requests.append(
-                    RollRequest(
-                        num=num, sides=sides
-                    )
+            num_str, _, sides_str = roll_request.lower().partition('d')
+            num = int(num_str) if num_str.isdigit() else 1
+            sides = int(sides_str) if sides_str.isdigit() else 6
+            parsed_roll_requests.append(
+                RollRequest(
+                    num=num, sides=sides
                 )
+            )
         return parsed_roll_requests
 
     @staticmethod
