@@ -6,3 +6,4 @@ pynacl
 pytest
 python-dotenv~=0.21.1
 table2ascii
+colorama
