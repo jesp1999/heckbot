@@ -5,6 +5,7 @@ from discord import Message, Embed
 from discord.ext import commands, tasks
 from discord.ext.commands import Bot, Context
 
+from bot import HeckBot
 from src.service.config_service import ConfigService
 from src.service.roll_service import RollService, RollRequest
 from src.utils.chatutils import bold
@@ -53,6 +54,7 @@ class Poll(commands.Cog):
             message = await ctx.send(question)
             for reaction in self.YES_NO_REACTIONS:
                 await message.add_reaction(reaction)
+            # TODO enqueue poll results at a later time
         elif len(args) > 1:
             # Multi-choice poll
             question = bold(args[0])
@@ -65,6 +67,7 @@ class Poll(commands.Cog):
             # TODO handle more poll options than emojis in list
             for reaction in self.MULTI_CHOICE_REACTIONS[:num_choices]:
                 await message.add_reaction(reaction)
+            # TODO enqueue poll results at a later time
         else:
             await ctx.send('Incorrect syntax, try \"`!poll "<question>"'
                            ' "[choice1]" "[choice2]" ...`\"')

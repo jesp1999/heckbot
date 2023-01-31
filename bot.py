@@ -10,6 +10,7 @@ from discord.ext import commands
 from dotenv import load_dotenv
 
 from src.service.config_service import ConfigService
+from src.service.task_service import TaskService
 from src.types.constants import (PRIMARY_GUILD_ID,
                                  ADMIN_CONSOLE_CHANNEL_ID,
                                  BOT_CUSTOM_STATUS,
@@ -48,6 +49,7 @@ class HeckBot(commands.Bot):
             case_insensitive=False
         )
         self.uptime: datetime = datetime.utcnow()
+        self._task_service = None
 
     async def setup_hook(
             self
@@ -85,6 +87,8 @@ class HeckBot(commands.Bot):
             activity=discord.Game(BOT_CUSTOM_STATUS)
         )
 
+        self._task_service = TaskService(self)
+
         # alert channels of bot online status
         for guild in self.guilds:
             ConfigService.generate_default_config(self, str(guild.id))
@@ -93,8 +97,11 @@ class HeckBot(commands.Bot):
             if guild.id == PRIMARY_GUILD_ID:
                 channel = guild.get_channel(ADMIN_CONSOLE_CHANNEL_ID)
                 await channel.send(
-                    ConfigService.get_config_option(str(guild.id), 'messages',
-                                                     'welcomeMessage')
+                    ConfigService.get_config_option(
+                        str(guild.id),
+                        'messages',
+                        'welcomeMessage'
+                    )
                 )
 
         print(
