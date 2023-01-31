@@ -1,4 +1,8 @@
-from discord.ext import commands
+from typing import List
+
+import discord
+from discord import Message, Embed
+from discord.ext import commands, tasks
 from discord.ext.commands import Bot, Context
 
 from src.service.config_service import ConfigService
@@ -25,6 +29,7 @@ class Poll(commands.Cog):
         :param bot: Instance of the running Bot
         """
         self._bot: Bot = bot
+        self._active_polls: List[Message] = []
 
     @commands.command()
     @commands.check(ConfigService.is_enabled)
@@ -63,6 +68,22 @@ class Poll(commands.Cog):
         else:
             await ctx.send('Incorrect syntax, try \"`!poll "<question>"'
                            ' "[choice1]" "[choice2]" ...`\"')
+
+    async def close_poll(self, poll_message_id: int, poll_channel_id: int):
+        channel = self._bot.get_channel(poll_channel_id)
+        original_message = await channel.fetch_message(poll_message_id)
+        poll_lines = original_message.content.split('\n')
+        poll_title, poll_options = poll_lines[0], poll_lines[1:]
+        poll_reactions = original_message.reactions
+        parts = []
+        for opt, rxn in zip(poll_options, poll_reactions):
+            opt_rxn, opt_txt = opt.split(':')
+            parts.append(f'{opt_txt}: {rxn.count}')
+        embed = Embed(
+            title=f'Results for poll: {poll_title}',
+            description='\n'.join(parts)
+        )
+        await channel.send(embed=embed)
 
     @commands.command()
     @commands.check(ConfigService.is_enabled)
