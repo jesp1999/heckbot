@@ -9,19 +9,21 @@ repos:
     -   id: check-docstring-first
     -   id: check-merge-conflict
     -   id: check-json
-        args: ['config.json', 'default_config.json']
+        args: ['resources/config/config.json', 'resources/config/default_config.json']
     -   id: check-toml
         args: ['pyproject.toml']
     -   id: check-yaml
         args: ['.pre-commit-config.yaml']
     -   id: debug-statements
     -   id: detect-aws-credentials
+        args: [--credentials-file, '.env']
     -   id: detect-private-key
     -   id: double-quote-string-fixer
     -   id: end-of-file-fixer
     -   id: fix-byte-order-marker
     -   id: mixed-line-ending
     -   id: name-tests-test
+        args: [--pytest-test-first]
     -   id: requirements-txt-fixer
     -   id: sort-simple-yaml
     -   id: trailing-whitespace
