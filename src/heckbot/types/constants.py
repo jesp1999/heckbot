@@ -18,7 +18,6 @@ GUILD_JOIN_DESCRIPTION = ''
 
 
 # TODO modify this and use in a logger
-@property
 def CONSOLE_INFO_FMT():
     return (f'{Fore.BLUE}{datetime.now().strftime("%H:%M:%S")}{Fore.RESET} '
             f'{Style.BRIGHT}[{Fore.BLUE}INFO{Fore.RESET}]{Style.RESET_ALL}')

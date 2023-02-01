@@ -1,8 +1,9 @@
 import json
 import os
 from json import JSONDecodeError
+from pathlib import Path
 
-from heckbot.types.typevars import JsonObject
+from heckbot.types.types import JsonObject
 
 
 class ConfigJsonAdaptor:
@@ -19,7 +20,7 @@ class ConfigJsonAdaptor:
     def create_config_if_not_exists(
             self
     ):
-        if not self._config_file.is_file():
+        if not Path(self._config_file).is_file():
             with open(self._config_file, 'w') as f:
                 f.write('{}')
 

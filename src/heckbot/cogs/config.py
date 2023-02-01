@@ -32,7 +32,7 @@ class Config(commands.Cog):
     # @commands.check(ConfigService.is_enabled)
     async def hbconf(
             self,
-            ctx: Context,
+            ctx: Context[Bot],
             command: ConfigCommand,
             *config_options
     ) -> None:

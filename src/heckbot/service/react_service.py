@@ -1,3 +1,5 @@
+from typing import Optional
+
 from heckbot.adaptor.dynamo_table_adaptor import DynamoTableAdaptor
 
 
@@ -77,7 +79,7 @@ class AssociationService:
             self,
             guild: str,
             pattern: str,
-            reaction: str = None
+            reaction: Optional[str] = None
     ) -> None:
         """
         Removes all emoji associations to a given text-pattern for a

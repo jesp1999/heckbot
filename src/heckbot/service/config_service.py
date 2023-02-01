@@ -1,7 +1,7 @@
 from discord.ext.commands import Bot, Context
 
 from heckbot.adaptor.config_json_adaptor import ConfigJsonAdaptor
-from heckbot.types.typevars import JsonObject
+from heckbot.types.types import JsonObject
 
 
 class ConfigService:
@@ -89,7 +89,7 @@ class ConfigService:
             )
 
     @classmethod
-    def is_enabled(cls, ctx: Context):
+    def is_enabled(cls, ctx: Context[Bot]):
         return cls._config_adaptor.load(
             str(ctx.guild.id),
             'modules',

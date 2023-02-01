@@ -28,7 +28,7 @@ class Poll(commands.Cog):
     @commands.command()
     async def poll(
             self,
-            ctx: Context,
+            ctx: Context[Bot],
             *args
     ) -> None:
         """
@@ -65,7 +65,7 @@ class Poll(commands.Cog):
     @commands.command()
     async def d(
             self,
-            ctx: Context,
+            ctx: Context[Bot],
             num_sides: int = 6
     ) -> None:
         """
@@ -86,7 +86,7 @@ class Poll(commands.Cog):
     @commands.command()
     async def d1(
             self,
-            ctx: Context
+            ctx: Context[Bot]
     ) -> None:
         """
         Dice rolling command. The commander specified in the command
@@ -104,7 +104,7 @@ class Poll(commands.Cog):
     @commands.command(aliases=['flip', 'coinflip'])
     async def d2(
             self,
-            ctx: Context
+            ctx: Context[Bot]
     ) -> None:
         """
         Dice rolling command. The commander specified in the command
@@ -122,7 +122,7 @@ class Poll(commands.Cog):
     @commands.command()
     async def d4(
             self,
-            ctx: Context
+            ctx: Context[Bot]
     ) -> None:
         """
         Dice rolling command. The commander specified in the command
@@ -140,7 +140,7 @@ class Poll(commands.Cog):
     @commands.command()
     async def d6(
             self,
-            ctx: Context
+            ctx: Context[Bot]
     ) -> None:
         """
         Dice rolling command. The commander specified in the command
@@ -161,7 +161,7 @@ class Poll(commands.Cog):
     @commands.command()
     async def d8(
             self,
-            ctx: Context
+            ctx: Context[Bot]
     ) -> None:
         """
         Dice rolling command. The commander specified in the command
@@ -179,7 +179,7 @@ class Poll(commands.Cog):
     @commands.command()
     async def d10(
             self,
-            ctx: Context
+            ctx: Context[Bot]
     ) -> None:
         """
         Dice rolling command. The commander specified in the command
@@ -197,7 +197,7 @@ class Poll(commands.Cog):
     @commands.command()
     async def d12(
             self,
-            ctx: Context
+            ctx: Context[Bot]
     ) -> None:
         """
         Dice rolling command. The commander specified in the command
@@ -215,7 +215,7 @@ class Poll(commands.Cog):
     @commands.command()
     async def d20(
             self,
-            ctx: Context
+            ctx: Context[Bot]
     ) -> None:
         """
         Dice rolling command. The commander specified in the command
@@ -233,7 +233,7 @@ class Poll(commands.Cog):
     @commands.command()
     async def d100(
             self,
-            ctx: Context
+            ctx: Context[Bot]
     ) -> None:
         """
         Dice rolling command. The commander specified in the command
@@ -251,7 +251,7 @@ class Poll(commands.Cog):
     @commands.command()
     async def roll(
             self,
-            ctx: Context,
+            ctx: Context[Bot],
             *args
     ) -> None:
         """

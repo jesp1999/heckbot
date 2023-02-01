@@ -28,7 +28,7 @@ class Gif(commands.Cog):
     @commands.check(ConfigService.is_enabled)
     async def gif(
             self,
-            ctx: Context,
+            ctx: Context[Bot],
             *search_term_parts
     ) -> None:
         """
