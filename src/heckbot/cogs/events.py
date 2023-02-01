@@ -1,15 +1,17 @@
+from __future__ import annotations
+
 import discord
 from discord.ext import commands
 from discord.ext.commands import Bot
-
 from heckbot.service.config_service import ConfigService
-from heckbot.types.constants import (PRIMARY_GUILD_ID, WELCOME_CHANNEL_ID)
+from heckbot.types.constants import PRIMARY_GUILD_ID
+from heckbot.types.constants import WELCOME_CHANNEL_ID
 
 
 class Events(commands.Cog):
     def __init__(
             self,
-            bot: Bot
+            bot: Bot,
     ) -> None:
         """
         Constructor method
@@ -20,7 +22,7 @@ class Events(commands.Cog):
     @commands.Cog.listener()
     async def on_member_join(
             self,
-            member: discord.Member
+            member: discord.Member,
     ) -> None:
         """
         Event listener triggered when the bot detects a new member
@@ -30,9 +32,11 @@ class Events(commands.Cog):
         """
         if member.guild.id == PRIMARY_GUILD_ID:
             channel = member.guild.get_channel(WELCOME_CHANNEL_ID)
-            await channel.send(ConfigService.get_config_option(
-                str(member.guild.id), 'messages', 'welcomeMessage'
-            ).format(member.id))
+            await channel.send(
+                ConfigService.get_config_option(
+                    str(member.guild.id), 'messages', 'welcomeMessage',
+                ).format(member.id),
+            )
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
@@ -40,13 +44,13 @@ class Events(commands.Cog):
 
         embed = discord.Embed(
             color=ConfigService.get_config_option(
-                str(guild.id), 'colors', 'embedColor'
+                str(guild.id), 'colors', 'embedColor',
             ),
             title=ConfigService.get_config_option(
-                str(guild.id), 'messages', 'guildJoinMessageTitle'
+                str(guild.id), 'messages', 'guildJoinMessageTitle',
             ),
             description=ConfigService.get_config_option(
-                str(guild.id), 'messages', 'guildJoinMessage'
+                str(guild.id), 'messages', 'guildJoinMessage',
             ),
         )
 
@@ -61,7 +65,7 @@ class Events(commands.Cog):
 
 
 async def setup(
-        bot: Bot
+        bot: Bot,
 ) -> None:
     """
     Setup function for registering the events cog.

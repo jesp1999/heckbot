@@ -1,5 +1,7 @@
-from discord.ext.commands import Bot, Context
+from __future__ import annotations
 
+from discord.ext.commands import Bot
+from discord.ext.commands import Context
 from heckbot.adaptor.config_json_adaptor import ConfigJsonAdaptor
 from heckbot.types.types import JsonObject
 
@@ -27,7 +29,7 @@ class ConfigService:
     def generate_default_config(
             cls,
             bot: Bot,
-            guild_id: str
+            guild_id: str,
     ):
         # Module enablement
         command_info = {(cmd.name, cmd.cog_name) for cmd in bot.commands}
@@ -41,7 +43,7 @@ class ConfigService:
                 'commands',
                 command_name,
                 'enabled',
-                'true' if enabled else 'false'
+                'true' if enabled else 'false',
             )
 
         # Messages
@@ -61,31 +63,31 @@ class ConfigService:
                 guild_id,
                 'messages',
                 message_type,
-                message
+                message,
             )
 
         # Bot information
         bot_info = {
-            'botCustomStatus': 'the part :)'
+            'botCustomStatus': 'the part :)',
         }
         for bot_info_type, bot_info in bot_info.items():
             cls._config_adaptor.save(
                 guild_id,
                 'botInfo',
                 bot_info_type,
-                bot_info
+                bot_info,
             )
 
         # Colors
         color_info = {
-            'embedColor': '0x040273'
+            'embedColor': '0x040273',
         }
         for color_type, color in color_info.items():
             cls._config_adaptor.save(
                 guild_id,
                 'colors',
                 color_type,
-                color
+                color,
             )
 
     @classmethod
@@ -96,5 +98,5 @@ class ConfigService:
             ctx.command.cog_name,
             'commands',
             ctx.command.name,
-            'enabled'
+            'enabled',
         ) == 'true'

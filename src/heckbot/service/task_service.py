@@ -1,8 +1,11 @@
+from __future__ import annotations
+
 import sqlite3
 
 import discord
 from discord.ext import tasks
-from discord.ext.commands import Bot, Cog
+from discord.ext.commands import Bot
+from discord.ext.commands import Cog
 
 from src.cogs.poll import Poll
 
@@ -10,7 +13,7 @@ db_conn = sqlite3.connect('tasks.db')
 cursor = db_conn.cursor()
 cursor.execute(
     'CREATE TABLE IF NOT EXISTS tasks'
-    '(row_id, completed, message_id, channel_id, end_time);'
+    '(row_id, completed, message_id, channel_id, end_time);',
 )
 db_conn.commit()
 
@@ -22,7 +25,7 @@ class TaskService:
     @tasks.loop()
     async def poll_results_task(self):
         cursor.execute(
-            'SELECT * FROM tasks WHERE NOT completed ORDER BY end_time LIMIT 1;'
+            'SELECT * FROM tasks WHERE NOT completed ORDER BY end_time LIMIT 1;',
         )
         next_task = await cursor.fetchone()
 
@@ -38,11 +41,13 @@ class TaskService:
         poll_cog: Poll
         await poll_cog.close_poll(
             next_task['message_id'],
-            next_task['channel_id']
+            next_task['channel_id'],
         )
 
-        cursor.execute('UPDATE tasks SET completed = true WHERE row_id = $1',
-                       next_task['row_id'])
+        cursor.execute(
+            'UPDATE tasks SET completed = true WHERE row_id = $1',
+            next_task['row_id'],
+        )
         db_conn.commit()
 
         self.poll_results_task.before_loop(discord.Client.wait_until_ready)

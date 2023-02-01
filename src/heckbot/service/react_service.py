@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from heckbot.adaptor.dynamo_table_adaptor import DynamoTableAdaptor
@@ -11,12 +13,12 @@ class AssociationService:
     _association_table: DynamoTableAdaptor = DynamoTableAdaptor(
         table_name='HeckBotAssociations',
         pk_name='Server',
-        sk_name='Pattern'
+        sk_name='Pattern',
     )
 
     def get_all_associations(
             self,
-            guild: str
+            guild: str,
     ) -> dict[str, list[str]]:
         """
         Gets all text-pattern-to-emoji mappings for a given guild.
@@ -25,7 +27,7 @@ class AssociationService:
         in order
         """
         results = self._association_table.read(
-            pk_value=guild
+            pk_value=guild,
         )
         if results is None:
             return {}
@@ -39,7 +41,7 @@ class AssociationService:
     def get_associations_for_pattern(
             self,
             guild: str,
-            pattern: str
+            pattern: str,
     ) -> list[str]:
         """
         Gets all emojis associated with a given guild and text-pattern
@@ -50,7 +52,7 @@ class AssociationService:
         """
         associations = self._association_table.read(
             pk_value=guild,
-            sk_value=pattern
+            sk_value=pattern,
         )
         if associations is None:
             return []
@@ -60,7 +62,7 @@ class AssociationService:
             self,
             guild: str,
             pattern: str,
-            reaction: str
+            reaction: str,
     ) -> None:
         """
         Adds a text-pattern-to-emoji association for a given guild.
@@ -72,14 +74,14 @@ class AssociationService:
             pk_value=guild,
             sk_value=pattern,
             list_key_name='Reactions',
-            list_item=reaction
+            list_item=reaction,
         )
 
     def remove_association(
             self,
             guild: str,
             pattern: str,
-            reaction: Optional[str] = None
+            reaction: str | None = None,
     ) -> None:
         """
         Removes all emoji associations to a given text-pattern for a
@@ -91,12 +93,12 @@ class AssociationService:
         if reaction is None:
             self._association_table.delete(
                 pk_value=guild,
-                sk_value=pattern
+                sk_value=pattern,
             )
         else:
             self._association_table.remove_list_item(
                 pk_value=guild,
                 sk_value=pattern,
                 list_key_name='Reactions',
-                list_item=reaction
+                list_item=reaction,
             )
