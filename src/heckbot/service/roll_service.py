@@ -3,7 +3,7 @@ from collections import namedtuple
 
 from table2ascii import table2ascii, PresetStyle, TableStyle
 
-from src.utils.chatutils import codeblock
+from heckbot.utils.chatutils import codeblock
 
 Bounds: namedtuple = namedtuple(
     'Bounds',

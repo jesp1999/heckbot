@@ -2,7 +2,7 @@ import json
 import os
 from json import JSONDecodeError
 
-from src.types.typevars import JsonObject
+from heckbot.types.typevars import JsonObject
 
 
 class ConfigJsonAdaptor:

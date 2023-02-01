@@ -5,7 +5,7 @@ import pytest
 import pytest_asyncio
 
 from bot import HeckBot
-from src.cogs.poll import Poll
+from heckbot.cogs.poll import Poll
 
 
 # noinspection PyProtectedMember

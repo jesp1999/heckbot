@@ -1,7 +1,7 @@
 from discord.ext.commands import Bot, Context
 
-from src.adaptor.config_json_adaptor import ConfigJsonAdaptor
-from src.types.typevars import JsonObject
+from heckbot.adaptor.config_json_adaptor import ConfigJsonAdaptor
+from heckbot.types.typevars import JsonObject
 
 
 class ConfigService:

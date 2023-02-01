@@ -1,9 +1,8 @@
 from discord.ext import commands
 from discord.ext.commands import Bot, Context
 
-from src.service.config_service import ConfigService
-from src.service.roll_service import RollService, RollRequest
-from src.utils.chatutils import bold
+from heckbot.service.roll_service import RollService, RollRequest
+from heckbot.utils.chatutils import bold
 
 
 class Poll(commands.Cog):

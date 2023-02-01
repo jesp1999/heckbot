@@ -4,7 +4,7 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import Context, Bot
 
-from src.service.config_service import ConfigService
+from heckbot.service.config_service import ConfigService
 
 
 def embed_for_message(
@@ -131,8 +131,8 @@ class Moderation(commands.Cog):
                 ),
                 title=f"{member} → You Have Been Banned!"
             )
-            embed2.add_field(name=f"• Moderator", value=f"{sender}")
-            embed2.add_field(name="• Reason", value=f"{reason}")
+            embed2.add_field(name='• Moderator', value=f"{sender}")
+            embed2.add_field(name='• Reason', value=f"{reason}")
             embed2.set_footer(text=f"Banned from: {ctx.guild}")
 
             await member.send(embed=embed2)
@@ -214,8 +214,8 @@ class Moderation(commands.Cog):
                 ),
                 title=f"{member}, you have been kicked."
             )
-            embed.add_field(name=f"Moderator", value=f"{sender}")
-            embed.add_field(name="Reason", value=f"{reason}")
+            embed.add_field(name='Moderator', value=f"{sender}")
+            embed.add_field(name='Reason', value=f"{reason}")
             embed.set_footer(text=f"Kicked from: {ctx.guild}")
             await member.send(embed=embed)
         else:
@@ -407,7 +407,7 @@ class Moderation(commands.Cog):
                 ),
                 title=f"{member}, you have been warned."
             )
-            embed.add_field(name=f'Moderator', value=f'`{sender}`')
+            embed.add_field(name='Moderator', value=f'`{sender}`')
             embed.add_field(name='Reason', value=f'`{reason}`')
             embed.set_footer(text=f'Warning sent from: {ctx.guild}')
             await member.send(embed=embed)

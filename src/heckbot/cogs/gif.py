@@ -4,7 +4,7 @@ import aiohttp
 from discord.ext import commands
 from discord.ext.commands import Bot, Context
 
-from src.service.config_service import ConfigService
+from heckbot.service.config_service import ConfigService
 
 
 class Gif(commands.Cog):

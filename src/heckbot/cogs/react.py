@@ -5,8 +5,8 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import Context, Bot
 
-from src.service.config_service import ConfigService
-from src.service.react_service import AssociationService
+from heckbot.service.config_service import ConfigService
+from heckbot.service.react_service import AssociationService
 
 
 class React(commands.Cog):

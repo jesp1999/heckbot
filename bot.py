@@ -11,11 +11,11 @@ from discord import Intents
 from discord.ext import commands
 from dotenv import load_dotenv
 
-from src.service.config_service import ConfigService
-from src.types.constants import (PRIMARY_GUILD_ID,
-                                 ADMIN_CONSOLE_CHANNEL_ID,
-                                 BOT_CUSTOM_STATUS,
-                                 BOT_COMMAND_PREFIX)
+from heckbot.service.config_service import ConfigService
+from heckbot.types.constants import (PRIMARY_GUILD_ID,
+                                     ADMIN_CONSOLE_CHANNEL_ID,
+                                     BOT_CUSTOM_STATUS,
+                                     BOT_COMMAND_PREFIX)
 
 load_dotenv(join(dirname(__file__), '.env'))
 
@@ -66,7 +66,7 @@ class HeckBot(commands.Bot):
         # load cogs
         for cog in self._cogs:
             try:
-                await self.load_extension(f'src.cogs.{cog}')
+                await self.load_extension(f'src.heckbot.cogs.{cog}')
             except Exception as ex:
                 print(f'Could not load extension {cog}: {ex}')
                 raise ex
