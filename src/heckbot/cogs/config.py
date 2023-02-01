@@ -3,7 +3,7 @@ from typing import Literal
 from discord.ext import commands
 from discord.ext.commands import Bot, Context
 
-from src.adaptor.config_json_adaptor import ConfigJsonAdaptor
+from heckbot.adaptor.config_json_adaptor import ConfigJsonAdaptor
 
 ConfigCommand = Literal[
     'add', 'create', 'update', 'set', 'remove', 'unset',
@@ -32,7 +32,7 @@ class Config(commands.Cog):
     # @commands.check(ConfigService.is_enabled)
     async def hbconf(
             self,
-            ctx: Context,
+            ctx: Context[Bot],
             command: ConfigCommand,
             *config_options
     ) -> None:

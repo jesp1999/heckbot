@@ -2,8 +2,8 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import Bot
 
-from src.service.config_service import ConfigService
-from src.types.constants import (PRIMARY_GUILD_ID, WELCOME_CHANNEL_ID)
+from heckbot.service.config_service import ConfigService
+from heckbot.types.constants import (PRIMARY_GUILD_ID, WELCOME_CHANNEL_ID)
 
 
 class Events(commands.Cog):

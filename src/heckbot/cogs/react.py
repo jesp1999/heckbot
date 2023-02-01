@@ -5,8 +5,10 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import Context, Bot
 
-from src.service.config_service import ConfigService
-from src.service.react_service import AssociationService
+[Bot], Bot
+
+from heckbot.service.config_service import ConfigService
+from heckbot.service.react_service import AssociationService
 
 
 class React(commands.Cog):
@@ -29,7 +31,7 @@ class React(commands.Cog):
     @commands.check(ConfigService.is_enabled)
     async def react(
             self,
-            ctx: Context,
+            ctx: Context[Bot],
             subcommand: str,
             pattern: Optional[str] = None,
             reaction: Optional[str] = None
@@ -45,17 +47,17 @@ class React(commands.Cog):
         :return:
         """
         if subcommand == 'add':
-            return await self.radd(ctx, pattern, reaction)
+            await self.radd(ctx, pattern, reaction)
         elif subcommand in ['remove', 'delete', 'rm', 'del']:
-            return await self.rdel(ctx, pattern, reaction)
+            await self.rdel(ctx, pattern, reaction)
         elif subcommand in ['list', 'lst']:
-            return await self.rlist(ctx, pattern, reaction)
+            await self.rlist(ctx, pattern, reaction)
 
     @commands.command(aliases=['reactadd', 'associate', 'assoc', 'radd'])
     @commands.check(ConfigService.is_enabled)
     async def react_add(
             self,
-            ctx: Context,
+            ctx: Context[Bot],
             pattern: str,
             reaction: str
     ) -> None:
@@ -76,7 +78,7 @@ class React(commands.Cog):
     @commands.check(ConfigService.is_enabled)
     async def react_delete(
             self,
-            ctx: Context,
+            ctx: Context[Bot],
             pattern: str,
             reaction: Optional[str] = None
     ) -> None:
@@ -97,7 +99,7 @@ class React(commands.Cog):
     @commands.check(ConfigService.is_enabled)
     async def disassociate(
             self,
-            ctx: Context
+            ctx: Context[Bot]
     ) -> None:
         """
         Joke command based on a misspelling of the dissociate command.
@@ -110,7 +112,7 @@ class React(commands.Cog):
     @commands.check(ConfigService.is_enabled)
     async def react_list(
             self,
-            ctx: Context,
+            ctx: Context[Bot],
             pattern: Optional[str] = None
     ) -> None:
         await self.rlist(ctx, pattern, ctx.guild.id)

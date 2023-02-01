@@ -1,5 +1,5 @@
 import os
-from typing import TypeVar
+from typing import TypeVar, Optional
 from weakref import WeakValueDictionary
 
 import boto3.session as session
@@ -17,9 +17,9 @@ class DynamoTableAdaptor:
     Adaptor service for transferring data between the application and a
     composite-key DynamoDB table.
     """
-    _aws_access_key_id: str = os.getenv('AWS_ACCESS_KEY_ID')
-    _aws_secret_access_key: str = os.getenv('AWS_SECRET_ACCESS_KEY')
-    _aws_region: str = os.environ.get('AWS_DEFAULT_REGION')
+    _aws_access_key_id: str = os.getenv('AWS_ACCESS_KEY_ID', '')
+    _aws_secret_access_key: str = os.getenv('AWS_SECRET_ACCESS_KEY', '')
+    _aws_region: str = os.environ.get('AWS_DEFAULT_REGION', '')
 
     DynamoItem = TypeVar('DynamoItem')
 
@@ -67,8 +67,8 @@ class DynamoTableAdaptor:
     def _create_item(
             self,
             pk_value: DynamoItem,
-            sk_value=None,
-            extra: dict = None
+            sk_value: Optional[DynamoItem] = None,
+            extra: Optional[dict] = None
     ) -> dict[str, DynamoItem]:
         """
         Creates a DynamoDB-formatted item dict.
@@ -90,7 +90,7 @@ class DynamoTableAdaptor:
     def read(
             self,
             pk_value: DynamoItem,
-            sk_value: DynamoItem = None
+            sk_value: Optional[DynamoItem] = None
     ) -> list[dict[str, DynamoItem]] | None:
         """
         Reads all entries in the respective DynamoDB table which match
@@ -118,8 +118,8 @@ class DynamoTableAdaptor:
             self,
             pk_value: DynamoItem,
             sk_value: DynamoItem,
-            list_key_name: str = None,
-            list_item: DynamoItem = None
+            list_key_name: Optional[str] = None,
+            list_item: Optional[DynamoItem] = None
     ) -> None:
         """
         Attempts to locate an entry matching the supplied partition and
@@ -162,7 +162,7 @@ class DynamoTableAdaptor:
             pk_value: DynamoItem,
             sk_value: DynamoItem,
             list_key_name: str,
-            list_item: DynamoItem
+            list_item: Optional[DynamoItem] = None
     ) -> None:
         """
         Attempts to locate an entry matching the supplied partition and
@@ -200,7 +200,11 @@ class DynamoTableAdaptor:
                 item[list_key_name] = list_item_value
                 self._get_table().put_item(Item=item)
 
-    def delete(self, pk_value: DynamoItem, sk_value: DynamoItem = None) -> None:
+    def delete(
+            self,
+            pk_value: DynamoItem,
+            sk_value: Optional[DynamoItem] = None
+    ) -> None:
         """
         Deletes all entries in the respective DynamoDB table which match
         supplied parameters.
