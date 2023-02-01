@@ -20,23 +20,23 @@ async def bot():
 
 def expected_dice_content(sides: int):
     if sides < 10:
-        return f'''╔══════╤═══════╤═════╗
+        return f'''```╔══════╤═══════╤═════╗
 ║ dice │ rolls │ sum ║
 ╠══════╪═══════╪═════╣
 ║ 1D{sides}  │   1   │  1  ║
-╚══════╧═══════╧═════╝'''
+╚══════╧═══════╧═════╝```'''
     elif sides < 100:
-        return f'''╔══════╤═══════╤═════╗
+        return f'''```╔══════╤═══════╤═════╗
 ║ dice │ rolls │ sum ║
 ╠══════╪═══════╪═════╣
 ║ 1D{sides} │   1   │  1  ║
-╚══════╧═══════╧═════╝'''
+╚══════╧═══════╧═════╝```'''
     else:
-        return f'''╔═══════╤═══════╤═════╗
+        return f'''```╔═══════╤═══════╤═════╗
 ║ dice  │ rolls │ sum ║
 ╠═══════╪═══════╪═════╣
 ║ 1D{sides} │   1   │  1  ║
-╚═══════╧═══════╧═════╝'''
+╚═══════╧═══════╧═════╝```'''
 
 
 @pytest.mark.asyncio
@@ -58,4 +58,4 @@ def expected_dice_content(sides: int):
 async def test_single_dice(mock_randint, command, expected_text, bot):
     mock_randint.return_value = 1
     await dpytest.message(f'!{command}')
-    assert dpytest.verify().message().contains().content(expected_text)
+    assert dpytest.verify().message().content(expected_text)
