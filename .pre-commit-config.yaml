@@ -51,3 +51,25 @@ repos:
     rev: v0.991
     hooks:
     -   id: mypy
+-   repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.10.0
+    hooks:
+    -   id: python-check-blanket-noqa
+    -   id: python-check-blanket-type-ignore
+    -   id: python-check-mock-methods
+    -   id: python-no-eval
+    -   id: python-no-log-warn
+    -   id: python-use-type-annotations
+    -   id: rst-backticks
+    -   id: rst-directive-colons
+    -   id: rst-inline-touching-normal
+    -   id: text-unicode-replacement-char
+-   repo: https://github.com/FalconSocial/pre-commit-mirrors-pep257
+    rev: v0.3.3
+    hooks:
+    -   id: pep257
+-   repo: https://github.com/tox-dev/tox-ini-fmt
+    rev: "0.6.1"
+    hooks:
+    -   id: tox-ini-fmt
+        args: ["-p", "fix_lint,type"]
