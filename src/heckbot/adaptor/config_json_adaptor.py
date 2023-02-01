@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import os
 from json import JSONDecodeError
@@ -11,14 +13,16 @@ class ConfigJsonAdaptor:
     Adaptor service for managing a configuration file on the local
     filesystem.
     """
-    _config_file = (os.path.dirname(os.path.realpath(__file__)) +
-                    '/../../resources/config/config.json')
+    _config_file = (
+        os.path.dirname(os.path.realpath(__file__)) +
+        '/../../resources/config/config.json'
+    )
 
     def __init(self):
         self.create_config_if_not_exists()
 
     def create_config_if_not_exists(
-            self
+            self,
     ):
         if not Path(self._config_file).is_file():
             with open(self._config_file, 'w') as f:
@@ -34,7 +38,7 @@ class ConfigJsonAdaptor:
         :param guild_id: Identifier for the server
         :param setting_parts: Setting parts
         """
-        with open(self._config_file, 'r') as f:
+        with open(self._config_file) as f:
             try:
                 config_data = json.load(f)
             except JSONDecodeError:
@@ -64,7 +68,7 @@ class ConfigJsonAdaptor:
         :param guild_id: Identifier for the server
         :param setting_parts: Setting parts
         """
-        with open(self._config_file, 'r') as f:
+        with open(self._config_file) as f:
             config_data = json.load(f)
             config_node = config_data.get(guild_id, {})
             for setting in setting_parts:

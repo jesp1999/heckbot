@@ -1,11 +1,15 @@
+from __future__ import annotations
+
 import os
-from typing import TypeVar, Optional
+from typing import Optional
+from typing import TypeVar
 from weakref import WeakValueDictionary
 
 import boto3.session as session
 from boto3.dynamodb.conditions import Key
 from boto3.resources.base import ServiceResource
-from mypy_boto3_dynamodb.service_resource import Table, DynamoDBServiceResource
+from mypy_boto3_dynamodb.service_resource import DynamoDBServiceResource
+from mypy_boto3_dynamodb.service_resource import Table
 
 _DYNAMO_TABLES: WeakValueDictionary[str, Table] = WeakValueDictionary()
 _DYNAMO_RESOURCES: WeakValueDictionary[str, ServiceResource] = \
@@ -27,7 +31,7 @@ class DynamoTableAdaptor:
             self,
             table_name: str,
             pk_name: str,
-            sk_name: str
+            sk_name: str,
     ) -> None:
         """
         Constructor method
@@ -40,7 +44,7 @@ class DynamoTableAdaptor:
         self._sk_name: str = sk_name
 
     def _get_table(
-            self
+            self,
     ) -> Table:
         """
         Returns a DynamoDB Table Resource with the name
@@ -55,7 +59,7 @@ class DynamoTableAdaptor:
         dynamodb_resource: DynamoDBServiceResource = session.Session(
             aws_access_key_id=self._aws_access_key_id,
             aws_secret_access_key=self._aws_secret_access_key,
-            region_name=self._aws_region
+            region_name=self._aws_region,
         ).resource(service_name='dynamodb')
         _DYNAMO_RESOURCES[self._table_name] = dynamodb_resource
 
@@ -67,8 +71,8 @@ class DynamoTableAdaptor:
     def _create_item(
             self,
             pk_value: DynamoItem,
-            sk_value: Optional[DynamoItem] = None,
-            extra: Optional[dict] = None
+            sk_value: DynamoItem | None = None,
+            extra: dict | None = None,
     ) -> dict[str, DynamoItem]:
         """
         Creates a DynamoDB-formatted item dict.
@@ -81,7 +85,7 @@ class DynamoTableAdaptor:
             extra = dict()
         item = {
             self._pk_name: pk_value,
-            **extra
+            **extra,
         }
         if sk_value is not None:
             item[self._sk_name] = sk_value
@@ -90,7 +94,7 @@ class DynamoTableAdaptor:
     def read(
             self,
             pk_value: DynamoItem,
-            sk_value: Optional[DynamoItem] = None
+            sk_value: DynamoItem | None = None,
     ) -> list[dict[str, DynamoItem]] | None:
         """
         Reads all entries in the respective DynamoDB table which match
@@ -106,7 +110,7 @@ class DynamoTableAdaptor:
             expr &= Key(self._sk_name).eq(sk_value)
 
         response = self._get_table().query(
-            KeyConditionExpression=expr
+            KeyConditionExpression=expr,
         )
 
         items = response.get('Items')
@@ -118,8 +122,8 @@ class DynamoTableAdaptor:
             self,
             pk_value: DynamoItem,
             sk_value: DynamoItem,
-            list_key_name: Optional[str] = None,
-            list_item: Optional[DynamoItem] = None
+            list_key_name: str | None = None,
+            list_item: DynamoItem | None = None,
     ) -> None:
         """
         Attempts to locate an entry matching the supplied partition and
@@ -140,7 +144,7 @@ class DynamoTableAdaptor:
             item = self._create_item(
                 pk_value,
                 sk_value,
-                {list_key_name: [list_item]}
+                {list_key_name: [list_item]},
             )
             self._get_table().put_item(Item=item)
         else:
@@ -151,8 +155,10 @@ class DynamoTableAdaptor:
             self._get_table().delete_item(Key=item)
 
             item = existing_entry
-            if (list_key_name not in item
-                    or len(item[list_key_name]) < 1):
+            if (
+                list_key_name not in item
+                or len(item[list_key_name]) < 1
+            ):
                 item[list_key_name] = []
             item[list_key_name].append(list_item)
             self._get_table().put_item(Item=item)
@@ -162,7 +168,7 @@ class DynamoTableAdaptor:
             pk_value: DynamoItem,
             sk_value: DynamoItem,
             list_key_name: str,
-            list_item: Optional[DynamoItem] = None
+            list_item: DynamoItem | None = None,
     ) -> None:
         """
         Attempts to locate an entry matching the supplied partition and
@@ -191,7 +197,7 @@ class DynamoTableAdaptor:
         else:
             list_item_value = [
                 elem for elem in existing_entry.get(
-                    list_key_name, []
+                    list_key_name, [],
                 ) if elem != list_item
             ]
 
@@ -203,7 +209,7 @@ class DynamoTableAdaptor:
     def delete(
             self,
             pk_value: DynamoItem,
-            sk_value: Optional[DynamoItem] = None
+            sk_value: DynamoItem | None = None,
     ) -> None:
         """
         Deletes all entries in the respective DynamoDB table which match

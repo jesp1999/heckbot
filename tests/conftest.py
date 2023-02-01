@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import os
-from os.path import join, dirname
+from os.path import dirname
+from os.path import join
 
 from dotenv import load_dotenv
 

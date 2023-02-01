@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import unittest
 from unittest.mock import MagicMock
 
@@ -22,10 +24,10 @@ class DynamoTableAdaptorTest(unittest.TestCase):
         mock_session.assert_called_with(
             aws_access_key_id='access_key_id',
             aws_secret_access_key='secret_access_key',
-            region_name='region'
+            region_name='region',
         )
         mock_session.return_value.resource.assert_called_with(
-            service_name='dynamodb'
+            service_name='dynamodb',
         )
 
 

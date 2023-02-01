@@ -1,13 +1,16 @@
+from __future__ import annotations
+
 import random
 from collections import namedtuple
 
-from table2ascii import table2ascii, PresetStyle, TableStyle
-
 from heckbot.utils.chatutils import codeblock
+from table2ascii import PresetStyle
+from table2ascii import table2ascii
+from table2ascii import TableStyle
 
 Bounds: namedtuple = namedtuple(
     'Bounds',
-    ['min', 'max']
+    ['min', 'max'],
 )
 RESULT_DICE_LENGTH_BOUNDS: Bounds = Bounds(6, 9)
 RESULT_ROLLS_LENGTH_BOUNDS: Bounds = Bounds(7, 21)
@@ -16,11 +19,11 @@ RESULT_SUM_LENGTH_BOUNDS: Bounds = Bounds(5, 8)
 RollRequest: namedtuple = namedtuple(
     'RollRequest',
     ['num', 'sides'],
-    defaults=(1, 6)
+    defaults=(1, 6),
 )
 RollResult: namedtuple = namedtuple(
     'RollResult',
-    ['dice', 'rolls']
+    ['dice', 'rolls'],
 )
 
 
@@ -32,7 +35,7 @@ class RollService:
 
     @staticmethod
     def roll_many(
-            roll_requests: list[RollRequest]
+            roll_requests: list[RollRequest],
     ) -> list[RollResult]:
         """
         Simulates the rolling of a set of dice according to an input
@@ -49,14 +52,14 @@ class RollService:
             roll_results.append(
                 RollResult(
                     dice=f'{roll_request.num}D{roll_request.sides}',
-                    rolls=rolls
-                )
+                    rolls=rolls,
+                ),
             )
         return roll_results
 
     @staticmethod
     def parse_roll_requests(
-            roll_requests: list[str]
+            roll_requests: list[str],
     ) -> list[RollRequest]:
         """
         Parses raw roll requests from command args into the RoleRequest
@@ -71,15 +74,15 @@ class RollService:
             sides = int(sides_str) if sides_str.isdigit() else 6
             parsed_roll_requests.append(
                 RollRequest(
-                    num=num, sides=sides
-                )
+                    num=num, sides=sides,
+                ),
             )
         return parsed_roll_requests
 
     @staticmethod
     def get_rolls_pretty(
             rolls: list[int],
-            line_length: int = RESULT_ROLLS_LENGTH_BOUNDS.max
+            line_length: int = RESULT_ROLLS_LENGTH_BOUNDS.max,
     ) -> str:
         """
         Format the rolls of a roll command to span multiple lines as to
@@ -103,7 +106,7 @@ class RollService:
     @staticmethod
     def format_roll_results(
             roll_results: list[RollResult],
-            table_style: TableStyle = PresetStyle.double_thin_box
+            table_style: TableStyle = PresetStyle.double_thin_box,
     ) -> str:
         """
         Format results of a roll command into an ascii table with
@@ -133,14 +136,20 @@ class RollService:
         # TODO input validation on roll requests which don't fit on
         #  mobile, maybe this could be a config option?
         if max_dice_strlen > RESULT_DICE_LENGTH_BOUNDS.max:
-            print('Warning: dice string exceeds the set '
-                  'limit for optimal mobile display')
+            print(
+                'Warning: dice string exceeds the set '
+                'limit for optimal mobile display',
+            )
         if max_rolls_strlen > RESULT_ROLLS_LENGTH_BOUNDS.max:
-            print('Warning: rolls string exceeds the set '
-                  'limit for optimal mobile display')
+            print(
+                'Warning: rolls string exceeds the set '
+                'limit for optimal mobile display',
+            )
         if max_sum_strlen > RESULT_SUM_LENGTH_BOUNDS.max:
-            print('Warning: sum string exceeds the set '
-                  'limit for optimal mobile display')
+            print(
+                'Warning: sum string exceeds the set '
+                'limit for optimal mobile display',
+            )
 
         # TODO find a way to have equal character spacing without this
         #  being in a codeblock
@@ -151,9 +160,9 @@ class RollService:
                 column_widths=[
                     max_dice_strlen,
                     max_rolls_strlen,
-                    max_sum_strlen
+                    max_sum_strlen,
                 ],
-                style=table_style
-            )
+                style=table_style,
+            ),
         )
         return results
