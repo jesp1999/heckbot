@@ -6,9 +6,8 @@ from discord.ext import commands, tasks
 from discord.ext.commands import Bot, Context
 
 from bot import HeckBot
-from src.service.config_service import ConfigService
-from src.service.roll_service import RollService, RollRequest
-from src.utils.chatutils import bold
+from heckbot.service.roll_service import RollService, RollRequest
+from heckbot.utils.chatutils import bold
 
 
 class Poll(commands.Cog):
@@ -33,10 +32,9 @@ class Poll(commands.Cog):
         self._active_polls: List[Message] = []
 
     @commands.command()
-    @commands.check(ConfigService.is_enabled)
     async def poll(
             self,
-            ctx: Context,
+            ctx: Context[Bot],
             *args
     ) -> None:
         """
@@ -89,10 +87,9 @@ class Poll(commands.Cog):
         await channel.send(embed=embed)
 
     @commands.command()
-    @commands.check(ConfigService.is_enabled)
     async def d(
             self,
-            ctx: Context,
+            ctx: Context[Bot],
             num_sides: int = 6
     ) -> None:
         """
@@ -111,10 +108,9 @@ class Poll(commands.Cog):
         await ctx.send(self._roll_service.format_roll_results(roll_results))
 
     @commands.command()
-    @commands.check(ConfigService.is_enabled)
     async def d1(
             self,
-            ctx: Context
+            ctx: Context[Bot]
     ) -> None:
         """
         Dice rolling command. The commander specified in the command
@@ -130,10 +126,9 @@ class Poll(commands.Cog):
         await ctx.send(self._roll_service.format_roll_results(roll_results))
 
     @commands.command(aliases=['flip', 'coinflip'])
-    @commands.check(ConfigService.is_enabled)
     async def d2(
             self,
-            ctx: Context
+            ctx: Context[Bot]
     ) -> None:
         """
         Dice rolling command. The commander specified in the command
@@ -149,10 +144,9 @@ class Poll(commands.Cog):
         await ctx.send(self._roll_service.format_roll_results(roll_results))
 
     @commands.command()
-    @commands.check(ConfigService.is_enabled)
     async def d4(
             self,
-            ctx: Context
+            ctx: Context[Bot]
     ) -> None:
         """
         Dice rolling command. The commander specified in the command
@@ -168,10 +162,9 @@ class Poll(commands.Cog):
         await ctx.send(self._roll_service.format_roll_results(roll_results))
 
     @commands.command()
-    @commands.check(ConfigService.is_enabled)
     async def d6(
             self,
-            ctx: Context
+            ctx: Context[Bot]
     ) -> None:
         """
         Dice rolling command. The commander specified in the command
@@ -190,10 +183,9 @@ class Poll(commands.Cog):
         await ctx.send(self._roll_service.format_roll_results(roll_results))
 
     @commands.command()
-    @commands.check(ConfigService.is_enabled)
     async def d8(
             self,
-            ctx: Context
+            ctx: Context[Bot]
     ) -> None:
         """
         Dice rolling command. The commander specified in the command
@@ -209,10 +201,9 @@ class Poll(commands.Cog):
         await ctx.send(self._roll_service.format_roll_results(roll_results))
 
     @commands.command()
-    @commands.check(ConfigService.is_enabled)
     async def d10(
             self,
-            ctx: Context
+            ctx: Context[Bot]
     ) -> None:
         """
         Dice rolling command. The commander specified in the command
@@ -228,10 +219,9 @@ class Poll(commands.Cog):
         await ctx.send(self._roll_service.format_roll_results(roll_results))
 
     @commands.command()
-    @commands.check(ConfigService.is_enabled)
     async def d12(
             self,
-            ctx: Context
+            ctx: Context[Bot]
     ) -> None:
         """
         Dice rolling command. The commander specified in the command
@@ -247,10 +237,9 @@ class Poll(commands.Cog):
         await ctx.send(self._roll_service.format_roll_results(roll_results))
 
     @commands.command()
-    @commands.check(ConfigService.is_enabled)
     async def d20(
             self,
-            ctx: Context
+            ctx: Context[Bot]
     ) -> None:
         """
         Dice rolling command. The commander specified in the command
@@ -266,10 +255,9 @@ class Poll(commands.Cog):
         await ctx.send(self._roll_service.format_roll_results(roll_results))
 
     @commands.command()
-    @commands.check(ConfigService.is_enabled)
     async def d100(
             self,
-            ctx: Context
+            ctx: Context[Bot]
     ) -> None:
         """
         Dice rolling command. The commander specified in the command
@@ -285,10 +273,9 @@ class Poll(commands.Cog):
         await ctx.send(self._roll_service.format_roll_results(roll_results))
 
     @commands.command()
-    @commands.check(ConfigService.is_enabled)
     async def roll(
             self,
-            ctx: Context,
+            ctx: Context[Bot],
             *args
     ) -> None:
         """

@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import MagicMock
 
-from src.adaptor.dynamo_table_adaptor import DynamoTableAdaptor
+from heckbot.adaptor.dynamo_table_adaptor import DynamoTableAdaptor
 
 
 class DynamoTableAdaptorTest(unittest.TestCase):

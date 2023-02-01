@@ -1,4 +1,9 @@
+.coverage
+*.egg-info
 .env
 .idea
-venv
+.pytest_cache
+.run
 *.run.xml
+.tox
+venv

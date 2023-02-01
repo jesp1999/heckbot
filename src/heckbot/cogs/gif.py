@@ -4,7 +4,7 @@ import aiohttp
 from discord.ext import commands
 from discord.ext.commands import Bot, Context
 
-from src.service.config_service import ConfigService
+from heckbot.service.config_service import ConfigService
 
 
 class Gif(commands.Cog):
@@ -28,7 +28,7 @@ class Gif(commands.Cog):
     @commands.check(ConfigService.is_enabled)
     async def gif(
             self,
-            ctx: Context,
+            ctx: Context[Bot],
             *search_term_parts
     ) -> None:
         """

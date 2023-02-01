@@ -4,19 +4,19 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import Context, Bot
 
-from src.service.config_service import ConfigService
+from heckbot.service.config_service import ConfigService
 
 
 def embed_for_message(
-        ctx: Context,
+        ctx: Context[Bot],
         message: str
 ):
     return discord.Embed(
-        color=ConfigService.get_config_option(
+        int(ConfigService.get_config_option(
             str(ctx.guild.id),
             'colors',
             'embedColor'
-        ),
+        )),
         title="Error",
         description=message
     )
@@ -32,7 +32,7 @@ class Moderation(commands.Cog):
     @commands.bot_has_permissions(manage_roles=True)
     async def add_role(
             self,
-            ctx: Context,
+            ctx: Context[Bot],
             role: discord.Role,
             member: discord.Member
     ):
@@ -62,11 +62,11 @@ class Moderation(commands.Cog):
             await member.add_roles(role)
             await ctx.send(
                 embed=discord.Embed(
-                    color=ConfigService.get_config_option(
+                    color=int(ConfigService.get_config_option(
                         str(ctx.guild.id),
                         'colors',
                         'embedColor'
-                    ),
+                    )),
                     title="Success",
                     description=f'{member.mention} has been granted the role '
                                 f'`{role}`'
@@ -80,7 +80,7 @@ class Moderation(commands.Cog):
     @commands.bot_has_permissions(ban_members=True)
     async def ban(
             self,
-            ctx: Context,
+            ctx: Context[Bot],
             member: discord.Member,
             *,
             reason="No reason provided!"
@@ -109,11 +109,11 @@ class Moderation(commands.Cog):
             )
         elif ctx.guild.me.top_role > member.top_role:
             embed = discord.Embed(
-                color=ConfigService.get_config_option(
+                color=int(ConfigService.get_config_option(
                     str(ctx.guild.id),
                     'colors',
                     'embedColor'
-                ),
+                )),
                 title="Success",
                 description=f"{member.mention} has been banned."
             )
@@ -124,15 +124,15 @@ class Moderation(commands.Cog):
             await ctx.send(embed=embed)
 
             embed2 = discord.Embed(
-                color=ConfigService.get_config_option(
+                color=int(ConfigService.get_config_option(
                     str(ctx.guild.id),
                     'colors',
                     'embedColor'
-                ),
+                )),
                 title=f"{member} → You Have Been Banned!"
             )
-            embed2.add_field(name=f"• Moderator", value=f"{sender}")
-            embed2.add_field(name="• Reason", value=f"{reason}")
+            embed2.add_field(name='• Moderator', value=f"{sender}")
+            embed2.add_field(name='• Reason', value=f"{reason}")
             embed2.set_footer(text=f"Banned from: {ctx.guild}")
 
             await member.send(embed=embed2)
@@ -150,11 +150,11 @@ class Moderation(commands.Cog):
         await ctx.guild.ban(discord.Object(member_id))
         await ctx.send(
             embed=discord.Embed(
-                color=ConfigService.get_config_option(
+                color=int(ConfigService.get_config_option(
                     str(ctx.guild.id),
                     'colors',
                     'embedColor'
-                ),
+                )),
                 title="Success",
                 description=f"<@{member_id}> has been forcefully banned."
             )
@@ -165,7 +165,7 @@ class Moderation(commands.Cog):
     @commands.bot_has_permissions(kick_members=True)
     async def kick(
             self,
-            ctx: Context,
+            ctx: Context[Bot],
             member: discord.Member,
             *,
             reason="No reason provided!"
@@ -197,25 +197,25 @@ class Moderation(commands.Cog):
             await member.kick(reason=reason)
             await ctx.send(
                 embed=discord.Embed(
-                    color=ConfigService.get_config_option(
+                    color=int(ConfigService.get_config_option(
                         str(ctx.guild.id),
                         'colors',
                         'embedColor'
-                    ),
+                    )),
                     title="Success",
                     description=f'{member.mention} has been kicked.'
                 )
             )
             embed = discord.Embed(
-                color=ConfigService.get_config_option(
+                color=int(ConfigService.get_config_option(
                     str(ctx.guild.id),
                     'colors',
                     'embedColor'
-                ),
+                )),
                 title=f"{member}, you have been kicked."
             )
-            embed.add_field(name=f"Moderator", value=f"{sender}")
-            embed.add_field(name="Reason", value=f"{reason}")
+            embed.add_field(name='Moderator', value=f"{sender}")
+            embed.add_field(name='Reason', value=f"{reason}")
             embed.set_footer(text=f"Kicked from: {ctx.guild}")
             await member.send(embed=embed)
         else:
@@ -226,7 +226,7 @@ class Moderation(commands.Cog):
     @commands.bot_has_permissions(manage_nicknames=True)
     async def nickname(
             self,
-            ctx: Context,
+            ctx: Context[Bot],
             member: discord.Member,
             *,
             nickname):
@@ -255,11 +255,11 @@ class Moderation(commands.Cog):
         elif ctx.guild.me.top_role > member.top_role:
             await member.edit(nick=nickname)
             embed = discord.Embed(
-                color=ConfigService.get_config_option(
+                color=int(ConfigService.get_config_option(
                     str(ctx.guild.id),
                     'colors',
                     'embedColor'
-                ),
+                )),
                 title="Success",
                 description=f"{member.mention}'s nickname has been changed."
             )
@@ -270,14 +270,22 @@ class Moderation(commands.Cog):
     @commands.command()
     @commands.has_permissions(manage_messages=True)
     @commands.bot_has_permissions(manage_messages=True)
-    async def purge(self, ctx, amount: int):
+    async def purge(
+            self,
+            ctx,
+            amount: int
+    ):
         await ctx.channel.purge(limit=amount)
 
     @commands.command(aliases=["removerole", "delrole"])
     @commands.has_permissions(manage_roles=True)
     @commands.bot_has_permissions(manage_roles=True)
-    async def remove_role(self, ctx, role: discord.Role,
-                          member: discord.Member, ):
+    async def remove_role(
+            self,
+            ctx,
+            role: discord.Role,
+            member: discord.Member
+    ):
         if ctx.guild.me.top_role < member.top_role:
             await ctx.send(
                 embed=embed_for_message(
@@ -304,11 +312,11 @@ class Moderation(commands.Cog):
             await member.remove_roles(role)
             await ctx.send(
                 embed=discord.Embed(
-                    color=ConfigService.get_config_option(
+                    color=int(ConfigService.get_config_option(
                         str(ctx.guild.id),
                         'colors',
                         'embedColor'
-                    ),
+                    )),
                     title="Success",
                     description=f"{member.mention} lost the role `{role}`."
                 )
@@ -319,7 +327,10 @@ class Moderation(commands.Cog):
     @commands.command(aliases=['resetnick', 'resetnickname', 'reset_nickname'])
     @commands.has_permissions(manage_nicknames=True)
     @commands.bot_has_permissions(manage_nicknames=True)
-    async def reset_nick(self, ctx, member: discord.Member):
+    async def reset_nick(
+            self,
+            ctx,
+            member: discord.Member):
         if ctx.guild.me.top_role < member.top_role:
             await ctx.send(
                 embed=embed_for_message(
@@ -349,11 +360,11 @@ class Moderation(commands.Cog):
             await member.edit(nick=None)
             await ctx.send(
                 embed=discord.Embed(
-                    color=ConfigService.get_config_option(
+                    color=int(ConfigService.get_config_option(
                         str(ctx.guild.id),
                         'colors',
                         'embedColor'
-                    ),
+                    )),
                     title="Success",
                     description=f"{member.mention}'s nickname has been reset."
                 )
@@ -364,14 +375,19 @@ class Moderation(commands.Cog):
     @commands.command()
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_permissions(ban_members=True)
-    async def unban(self, ctx: Context, *, member_id: int):
+    async def unban(
+            self,
+            ctx: Context[Bot],
+            *,
+            member_id: int
+    ):
         await ctx.guild.unban(discord.Object(member_id))
         embed = discord.Embed(
-            color=ConfigService.get_config_option(
+            color=int(ConfigService.get_config_option(
                 str(ctx.guild.id),
                 'colors',
                 'embedColor'
-            ),
+            )),
             title="Success",
             description=f'<@{member_id}> has been unbanned.'
         )
@@ -380,8 +396,13 @@ class Moderation(commands.Cog):
     @commands.command()
     @commands.has_permissions(manage_messages=True)
     @commands.bot_has_permissions(manage_messages=True)
-    async def warn(self, ctx, member: discord.Member, *,
-                   reason="No reason provided!"):
+    async def warn(
+            self,
+            ctx,
+            member: discord.Member,
+            *,
+            reason="No reason provided!"
+    ):
         if ctx.guild.me.top_role < member.top_role:
             await ctx.send(
                 'Error: The specified user has higher permissions than you.'
@@ -390,24 +411,24 @@ class Moderation(commands.Cog):
             sender = ctx.author
             await ctx.send(
                 embed=discord.Embed(
-                    color=ConfigService.get_config_option(
+                    color=int(ConfigService.get_config_option(
                         str(ctx.guild.id),
                         'colors',
                         'embedColor'
-                    ),
+                    )),
                     title="Success",
                     description=f'{member.mention} has been warned.'
                 )
             )
             embed = discord.Embed(
-                color=ConfigService.get_config_option(
+                color=int(ConfigService.get_config_option(
                     str(ctx.guild.id),
                     'colors',
                     'embedColor'
-                ),
+                )),
                 title=f"{member}, you have been warned."
             )
-            embed.add_field(name=f'Moderator', value=f'`{sender}`')
+            embed.add_field(name='Moderator', value=f'`{sender}`')
             embed.add_field(name='Reason', value=f'`{reason}`')
             embed.set_footer(text=f'Warning sent from: {ctx.guild}')
             await member.send(embed=embed)
