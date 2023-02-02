@@ -101,7 +101,9 @@ class HeckBot(commands.Bot):
             if guild.id == PRIMARY_GUILD_ID:
                 channel = guild.get_channel(ADMIN_CONSOLE_CHANNEL_ID)
                 await channel.send(
-                    self.config.get_message(guild.id, 'welcomeMessage'),
+                    self.config.get_message(
+                        guild.id, 'welcomeMessage',
+                    ),
                 )
 
         print(
