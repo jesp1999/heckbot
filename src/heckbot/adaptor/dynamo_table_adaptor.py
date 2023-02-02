@@ -72,8 +72,8 @@ class DynamoTableAdaptor:
     def _fmt_item(
             self,
             pk_value: DynamoItem,
-            sk_value: Optional[DynamoItem] = None,
-            extra: Optional[dict] = None,
+            sk_value: DynamoItem | None = None,
+            extra: dict | None = None,
     ) -> dict[str, DynamoItem]:
         """
         Creates a DynamoDB-formatted item dict.
@@ -95,8 +95,8 @@ class DynamoTableAdaptor:
     def read(
             self,
             pk_value: DynamoItem,
-            sk_value: Optional[DynamoItem] = None,
-    ) -> Optional[list[dict[str, DynamoItem]]]:
+            sk_value: DynamoItem | None = None,
+    ) -> list[dict[str, DynamoItem]] | None:
         """
         Reads all entries in the respective DynamoDB table which match
         supplied parameters.
@@ -116,8 +116,8 @@ class DynamoTableAdaptor:
             self,
             pk_value: DynamoItem,
             sk_value: DynamoItem,
-            list_name: Optional[str] = None,
-            item: Optional[DynamoItem] = None,
+            list_name: str | None = None,
+            item: DynamoItem | None = None,
     ) -> None:
         """
         Attempts to locate an entry matching the supplied partition and
@@ -173,7 +173,7 @@ class DynamoTableAdaptor:
     def delete(
             self,
             pk_value: DynamoItem,
-            sk_value: Optional[DynamoItem] = None,
+            sk_value: DynamoItem | None = None,
     ) -> None:
         """
         Deletes all entries in the respective DynamoDB table which match
