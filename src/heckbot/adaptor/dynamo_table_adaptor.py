@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from typing import Optional
 from typing import TypeVar
 from weakref import WeakValueDictionary
 
@@ -71,8 +72,8 @@ class DynamoTableAdaptor:
     def _fmt_item(
             self,
             pk_value: DynamoItem,
-            sk_value: DynamoItem | None = None,
-            extra: dict | None = None,
+            sk_value: Optional[DynamoItem] = None,
+            extra: Optional[dict] = None,
     ) -> dict[str, DynamoItem]:
         """
         Creates a DynamoDB-formatted item dict.
@@ -94,8 +95,8 @@ class DynamoTableAdaptor:
     def read(
             self,
             pk_value: DynamoItem,
-            sk_value: DynamoItem | None = None,
-    ) -> list[dict[str, DynamoItem]] | None:
+            sk_value: Optional[DynamoItem] = None,
+    ) -> Optional[list[dict[str, DynamoItem]]]:
         """
         Reads all entries in the respective DynamoDB table which match
         supplied parameters.
@@ -115,8 +116,8 @@ class DynamoTableAdaptor:
             self,
             pk_value: DynamoItem,
             sk_value: DynamoItem,
-            list_name: str | None = None,
-            item: DynamoItem | None = None,
+            list_name: Optional[str] = None,
+            item: Optional[DynamoItem] = None,
     ) -> None:
         """
         Attempts to locate an entry matching the supplied partition and
@@ -166,12 +167,13 @@ class DynamoTableAdaptor:
         :param item: Value to be appended to the `list_name`
         column of the matching entry
         """
+        # TODO implement
         raise NotImplementedError
 
     def delete(
             self,
             pk_value: DynamoItem,
-            sk_value: DynamoItem | None = None,
+            sk_value: Optional[DynamoItem] = None,
     ) -> None:
         """
         Deletes all entries in the respective DynamoDB table which match
