@@ -46,10 +46,10 @@ repos:
     rev: 6.0.0
     hooks:
     -   id: flake8
-#-   repo: https://github.com/pre-commit/mirrors-mypy
-#    rev: v0.991
-#    hooks:
-#    -   id: mypy
+-   repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v0.991
+    hooks:
+    -   id: mypy
 -   repo: https://github.com/pre-commit/pygrep-hooks
     rev: v1.10.0
     hooks:
@@ -60,8 +60,3 @@ repos:
     -   id: rst-backticks
     -   id: rst-directive-colons
     -   id: rst-inline-touching-normal
--   repo: https://github.com/tox-dev/tox-ini-fmt
-    rev: "0.6.1"
-    hooks:
-    -   id: tox-ini-fmt
-        args: ["-p", "fix_lint,type"]
