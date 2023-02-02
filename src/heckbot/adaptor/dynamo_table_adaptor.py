@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-from typing import Optional
 from typing import TypeVar
 from weakref import WeakValueDictionary
 
