@@ -1,21 +1,23 @@
+from __future__ import annotations
+
 import asyncio
 import os
 import random
 import sys
 from datetime import datetime
-from os.path import join, dirname
+from os.path import dirname
+from os.path import join
 from typing import Final
 
 import discord
 from discord import Intents
 from discord.ext import commands
 from dotenv import load_dotenv
-
-from heckbot.service.config_service import ConfigService
-from heckbot.types.constants import (PRIMARY_GUILD_ID,
-                                     ADMIN_CONSOLE_CHANNEL_ID,
-                                     BOT_CUSTOM_STATUS,
-                                     BOT_COMMAND_PREFIX)
+from heckbot.adaptor.config_adaptor import ConfigAdaptor
+from heckbot.types.constants import ADMIN_CONSOLE_CHANNEL_ID
+from heckbot.types.constants import BOT_COMMAND_PREFIX
+from heckbot.types.constants import BOT_CUSTOM_STATUS
+from heckbot.types.constants import PRIMARY_GUILD_ID
 
 load_dotenv(join(dirname(__file__), '.env'))
 
@@ -29,7 +31,7 @@ class HeckBot(commands.Bot):
         'gif',
         'moderation',
         'poll',
-        'react'
+        'react',
     ]
 
     def __init__(self):
@@ -38,22 +40,24 @@ class HeckBot(commands.Bot):
             message_content=True,
             typing=True,
             presences=True,
-            members=True)
+            members=True,
+        )
         super().__init__(
             command_prefix=BOT_COMMAND_PREFIX,
             intents=intents,
             owner_id=277859399903608834,
             reconnect=True,
-            case_insensitive=False
+            case_insensitive=False,
         )
         self.uptime: datetime = datetime.utcnow()
+        self.config = ConfigAdaptor()
 
     def run(self, **kwargs):
         load_dotenv(join(dirname(__file__), '.env'))
         super().run(os.getenv('DISCORD_TOKEN'))
 
     async def setup_hook(
-            self
+            self,
     ) -> None:
         """
         Asynchronous setup code for the bot before gateway connection
@@ -72,7 +76,7 @@ class HeckBot(commands.Bot):
                 raise ex
 
     async def after_ready(
-            self
+            self,
     ):
         """
         Asynchronous post-ready code for the bot
@@ -85,30 +89,29 @@ class HeckBot(commands.Bot):
         await self.change_presence(
             status=discord.Status.online,
             # TODO save this constant into a global config elsewhere
-            activity=discord.Game(BOT_CUSTOM_STATUS)
+            activity=discord.Game(BOT_CUSTOM_STATUS),
         )
 
         # alert channels of bot online status
         for guild in self.guilds:
-            ConfigService.generate_default_config(self, str(guild.id))
-            print(f'{self.user} has connected to the following guild: '
-                  f'{guild.name}(id: {guild.id})')
+            print(
+                f'{self.user} has connected to the following guild: '
+                f'{guild.name}(id: {guild.id})',
+            )
             if guild.id == PRIMARY_GUILD_ID:
                 channel = guild.get_channel(ADMIN_CONSOLE_CHANNEL_ID)
                 await channel.send(
-                    ConfigService.get_config_option(
-                        str(guild.id),
-                        'messages',
-                        'welcomeMessage'
-                    )
+                    self.config.get_message(
+                        guild.id, 'welcomeMessage',
+                    ),
                 )
 
         print(
-            f"----------------HeckBot---------------------"
-            f"\nBot is online as user {self.user}"
-            f"\nConnected to {(len(self.guilds))} guilds."
-            f"\nDetected OS: {sys.platform.title()}"
-            f"\n--------------------------------------------"
+            f'----------------HeckBot---------------------'
+            f'\nBot is online as user {self.user}'
+            f'\nConnected to {(len(self.guilds))} guilds.'
+            f'\nDetected OS: {sys.platform.title()}'
+            f'\n--------------------------------------------',
         )
 
 

@@ -1,11 +1,15 @@
+from __future__ import annotations
+
 import os
-from typing import TypeVar, Optional
+from typing import TypeVar
 from weakref import WeakValueDictionary
 
 import boto3.session as session
+from boto3.dynamodb.conditions import ConditionBase
 from boto3.dynamodb.conditions import Key
 from boto3.resources.base import ServiceResource
-from mypy_boto3_dynamodb.service_resource import Table, DynamoDBServiceResource
+from mypy_boto3_dynamodb.service_resource import DynamoDBServiceResource
+from mypy_boto3_dynamodb.service_resource import Table
 
 _DYNAMO_TABLES: WeakValueDictionary[str, Table] = WeakValueDictionary()
 _DYNAMO_RESOURCES: WeakValueDictionary[str, ServiceResource] = \
@@ -27,7 +31,7 @@ class DynamoTableAdaptor:
             self,
             table_name: str,
             pk_name: str,
-            sk_name: str
+            sk_name: str,
     ) -> None:
         """
         Constructor method
@@ -40,7 +44,7 @@ class DynamoTableAdaptor:
         self._sk_name: str = sk_name
 
     def _get_table(
-            self
+            self,
     ) -> Table:
         """
         Returns a DynamoDB Table Resource with the name
@@ -55,7 +59,7 @@ class DynamoTableAdaptor:
         dynamodb_resource: DynamoDBServiceResource = session.Session(
             aws_access_key_id=self._aws_access_key_id,
             aws_secret_access_key=self._aws_secret_access_key,
-            region_name=self._aws_region
+            region_name=self._aws_region,
         ).resource(service_name='dynamodb')
         _DYNAMO_RESOURCES[self._table_name] = dynamodb_resource
 
@@ -64,11 +68,11 @@ class DynamoTableAdaptor:
         _DYNAMO_TABLES[self._table_name] = table
         return table
 
-    def _create_item(
+    def _fmt_item(
             self,
             pk_value: DynamoItem,
-            sk_value: Optional[DynamoItem] = None,
-            extra: Optional[dict] = None
+            sk_value: DynamoItem | None = None,
+            extra: dict | None = None,
     ) -> dict[str, DynamoItem]:
         """
         Creates a DynamoDB-formatted item dict.
@@ -78,10 +82,10 @@ class DynamoTableAdaptor:
         :return: DynamoDB-formatted item dict
         """
         if extra is None:
-            extra = dict()
+            extra = {}
         item = {
             self._pk_name: pk_value,
-            **extra
+            **extra,
         }
         if sk_value is not None:
             item[self._sk_name] = sk_value
@@ -90,120 +94,85 @@ class DynamoTableAdaptor:
     def read(
             self,
             pk_value: DynamoItem,
-            sk_value: Optional[DynamoItem] = None
+            sk_value: DynamoItem | None = None,
     ) -> list[dict[str, DynamoItem]] | None:
         """
         Reads all entries in the respective DynamoDB table which match
         supplied parameters.
         :param pk_value: Partition key value
         :param sk_value: Sort key value
-        :return: None if no entries found, a DynamoDB item dict if one
-        present, or a list of DynamoDB item dicts if
-        multiple are present
+        :return: a list of DynamoDB item dicts
         """
-        expr = Key(self._pk_name).eq(pk_value)
+        expr: ConditionBase = Key(self._pk_name).eq(pk_value)
         if sk_value is not None:
             expr &= Key(self._sk_name).eq(sk_value)
 
-        response = self._get_table().query(
-            KeyConditionExpression=expr
-        )
+        response = self._get_table().query(KeyConditionExpression=expr)
 
-        items = response.get('Items')
-        if items is None or len(items) < 1:
-            return None
-        return items
+        return response.get('Items', [])
 
     def add_list_item(
             self,
             pk_value: DynamoItem,
             sk_value: DynamoItem,
-            list_key_name: Optional[str] = None,
-            list_item: Optional[DynamoItem] = None
+            list_name: str | None = None,
+            item: DynamoItem | None = None,
     ) -> None:
         """
         Attempts to locate an entry matching the supplied partition and
         sort key. If an entry is found, appends the specified
-        `list_item` to the element in the `list_key_name` column. If an
+        `item` to the element in the `list_name` column. If an
         entry is not found, creates a new entry with the supplied
-        partition and sort key and a list containing only `list_item`
-        in the `list_key_name` column.
+        partition and sort key and a list containing only `item`
+        in the `list_name` column.
         :param pk_value: Partition key value
         :param sk_value: Sort key value
-        :param list_key_name: Key name for the column in DynamoDB with a
+        :param list_name: Key name for the column in DynamoDB with a
         list to be appended to
-        :param list_item: Value to be appended to the `list_key_name`
+        :param item: Value to be appended to the `list_name`
         column of the matching entry
         """
-        existing_entry = self.read(pk_value, sk_value)
-        if not existing_entry:
-            item = self._create_item(
-                pk_value,
-                sk_value,
-                {list_key_name: [list_item]}
-            )
-            self._get_table().put_item(Item=item)
-        else:
-            # TODO make this an update
-            if type(existing_entry) is list:
-                existing_entry = existing_entry[0]
-            item = self._create_item(pk_value, sk_value)
-            self._get_table().delete_item(Key=item)
-
-            item = existing_entry
-            if (list_key_name not in item
-                    or len(item[list_key_name]) < 1):
-                item[list_key_name] = []
-            item[list_key_name].append(list_item)
-            self._get_table().put_item(Item=item)
+        result = self._get_table().update_item(
+            Key=self._fmt_item(pk_value, sk_value),
+            UpdateExpression=(
+                f'SET {list_name} = list_append(if_not_exists({list_name}, :empty_list), :i'
+            ),
+            ExpressionAttributeValues={
+                ':i': [item],
+                ':empty_list': [],
+            },
+            ReturnValues='UPDATED_NEW',
+        )
+        if result['ResponseMetadata']['HTTPStatusCode'] == 200 and 'Attributes' in result:
+            return result['Attributes']['some_attr']
 
     def remove_list_item(
             self,
             pk_value: DynamoItem,
             sk_value: DynamoItem,
-            list_key_name: str,
-            list_item: Optional[DynamoItem] = None
+            list_name: str,
+            item: DynamoItem,
     ) -> None:
         """
         Attempts to locate an entry matching the supplied partition and
         sort key. If an entry is found, removes all instances of
-        `list_item`  from the element in the `list_key_name` column. If
+        `item`  from the element in the `list_name` column. If
         after removal of all such instances the list at the specified
         entry is empty, removes the entry from the DynamoDB table.
         :param pk_value: Partition key value
         :param sk_value: Sort key value
-        :param list_key_name: Key name for the column in DynamoDB with a
+        :param list_name: Key name for the column in DynamoDB with a
         list to be appended to
-        :param list_item: Value to be appended to the `list_key_name`
+        :param item: Value to be appended to the `list_name`
         column of the matching entry
         """
-        item = self._create_item(pk_value, sk_value)
-
-        existing_entry = self.read(pk_value, sk_value)
-        if existing_entry is None:
-            # TODO notify / error handle
-            return
-        if type(existing_entry) is list:
-            existing_entry = existing_entry[0]
-
-        if list_item is None:
-            self._get_table().delete_item(Key=item)
-        else:
-            list_item_value = [
-                elem for elem in existing_entry.get(
-                    list_key_name, []
-                ) if elem != list_item
-            ]
-
-            self._get_table().delete_item(Key=item)
-            if len(list_item_value) > 0:
-                item[list_key_name] = list_item_value
-                self._get_table().put_item(Item=item)
+        # TODO implement
+        raise NotImplementedError
 
     def delete(
             self,
             pk_value: DynamoItem,
-            sk_value: Optional[DynamoItem] = None
+            sk_value: DynamoItem | None = None,
     ) -> None:
         """
         Deletes all entries in the respective DynamoDB table which match
@@ -211,6 +180,6 @@ class DynamoTableAdaptor:
         :param pk_value: Partition key value
         :param sk_value: Sort key value
         """
-        item = self._create_item(pk_value, sk_value)
-
-        self._get_table().delete_item(Key=item)
+        self._get_table().delete_item(
+            Key=self._fmt_item(pk_value, sk_value),
+        )

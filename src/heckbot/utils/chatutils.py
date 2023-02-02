@@ -1,22 +1,25 @@
+from __future__ import annotations
+
+
 def bold(
-        text: str
+        text: str,
 ) -> str:
     return '**' + text + '**'
 
 
 def italicize(
-        text: str
+        text: str,
 ) -> str:
     return '*' + text + '*'
 
 
 def code(
-        text: str
+        text: str,
 ) -> str:
     return '`' + text + '`'
 
 
 def codeblock(
-        text: str
+        text: str,
 ) -> str:
     return '```' + text + '```'
