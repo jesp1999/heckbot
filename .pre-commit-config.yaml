@@ -7,10 +7,6 @@ repos:
     -   id: check-case-conflict
     -   id: check-docstring-first
     -   id: check-merge-conflict
-    -   id: check-json
-        args: ['resources/config/config.json', 'resources/config/default_config.json']
-    -   id: check-toml
-        args: ['pyproject.toml']
     -   id: check-yaml
         args: ['.pre-commit-config.yaml']
     -   id: debug-statements

@@ -19,7 +19,7 @@ class ConfigAdaptor:
                 ],
             ],
         ] = {}
-        self.config_file: str = 'config.yaml'
+        self.config_file: str = os.getcwd() + '/../../../resources/config/config.yaml'
 
     def get_config(
             self,
