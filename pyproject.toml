@@ -2,6 +2,7 @@
 name = "heckbot"
 description = "For-fun Discord bot"
 version = "0.1.0"
+dynamic = ["version", "description"]
 authors = [
     { name = "Julian Espada", email = "jesp1999@gmail.com" }
 ]
