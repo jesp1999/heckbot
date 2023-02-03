@@ -18,7 +18,7 @@ class Gif(commands.Cog):
 
     def __init__(
             self,
-            bot: Bot,
+            bot: HeckBot,
     ) -> None:
         """
         Constructor method
@@ -65,7 +65,7 @@ class Gif(commands.Cog):
 
 
 async def setup(
-        bot: Bot,
+        bot: HeckBot,
 ):
     """
     Setup function for registering the gif cog.
