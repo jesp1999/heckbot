@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import random
 from collections import namedtuple
+from typing import Sequence
 
 from discord.ext import commands
 from discord.ext.commands import Bot
@@ -11,6 +12,8 @@ from heckbot.utils.chatutils import codeblock
 from table2ascii import PresetStyle
 from table2ascii import table2ascii
 from table2ascii import TableStyle
+
+from bot import HeckBot
 
 Bounds: namedtuple = namedtuple(
     'Bounds',
@@ -43,18 +46,18 @@ class Poll(commands.Cog):
 
     def __init__(
             self,
-            bot: Bot,
+            bot: HeckBot,
     ) -> None:
         """
         Constructor method
         :param bot: Instance of the running Bot
         """
-        self._bot: Bot = bot
+        self._bot: HeckBot = bot
 
     @staticmethod
     def roll_many(
-            roll_requests: list[RollRequest],
-    ) -> list[RollResult]:
+            roll_requests: Sequence[RollRequest],
+    ) -> Sequence[RollResult]:
         """
         Simulates the rolling of a set of dice according to an input
         list of RollRequests.
@@ -77,8 +80,8 @@ class Poll(commands.Cog):
 
     @staticmethod
     def parse_roll_requests(
-            roll_requests: list[str],
-    ) -> list[RollRequest]:
+            roll_requests: Sequence[str],
+    ) -> Sequence[RollRequest]:
         """
         Parses raw roll requests from command args into the RoleRequest
         data type.
@@ -123,7 +126,7 @@ class Poll(commands.Cog):
 
     @staticmethod
     def format_roll_results(
-            roll_results: list[RollResult],
+            roll_results: Sequence[RollResult],
             table_style: TableStyle = PresetStyle.double_thin_box,
     ) -> str:
         """
@@ -414,7 +417,7 @@ class Poll(commands.Cog):
     async def roll(
             self,
             ctx: Context[Bot],
-            *args
+            *args: str
     ) -> None:
         """
         Dice rolling command. The commander specifies a series of
@@ -428,14 +431,13 @@ class Poll(commands.Cog):
         """
         if any([type(arg) is not str for arg in args]):
             return  # TODO give advice on how to reformat
-        args: list[str]
         roll_requests = Poll.parse_roll_requests(args)
         roll_results = Poll.roll_many(roll_requests)
         await ctx.send(Poll.format_roll_results(roll_results))
 
 
 async def setup(
-        bot: Bot,
+        bot: HeckBot,
 ) -> None:
     """
     Setup function for registering the poll cog.

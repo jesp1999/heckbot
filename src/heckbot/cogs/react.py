@@ -8,6 +8,8 @@ from discord.ext.commands import Bot
 from discord.ext.commands import Context
 from heckbot.adaptor.dynamo_table_adaptor import DynamoTableAdaptor
 
+from bot import HeckBot
+
 
 class React(commands.Cog):
     """
@@ -20,6 +22,16 @@ class React(commands.Cog):
         sk_name='Pattern',
     )
 
+    def __init__(
+            self,
+            bot: HeckBot,
+    ) -> None:
+        """
+        Constructor method
+        :param bot: Instance of the running Bot
+        """
+        self._bot: HeckBot = bot
+
     def get_all_associations(
             self,
             guild: str,
@@ -30,13 +42,11 @@ class React(commands.Cog):
         :return: Mapping of text patterns to lists of associated emojis
         in order
         """
-        results = self._association_table.read(
+        results: list[dict[str, list[str]]] = self._association_table.read(
             pk_value=guild,
         )
-        if results is None:
-            return {}
 
-        associations = {
+        associations: dict[str, list[str]] = {
             result['Pattern']: result['Reactions']
             for result in results
         }
@@ -54,13 +64,13 @@ class React(commands.Cog):
         :param pattern: Text pattern
         :return: List of associated emojis in order
         """
-        associations = self._association_table.read(
-            pk_value=guild,
-            sk_value=pattern,
+        associations: list[dict[str, list[str]]] = (
+            self._association_table.read(
+                pk_value=guild,
+                sk_value=pattern,
+            )
         )
-        if associations is None:
-            return []
-        return associations[0].get('Reactions')
+        return associations[0]['Reactions']
 
     def add_association(
             self,
@@ -103,16 +113,6 @@ class React(commands.Cog):
                 pk_value=guild, sk_value=pattern,
                 list_name='Reactions', item=reaction,
             )
-
-    def __init__(
-            self,
-            bot: Bot,
-    ) -> None:
-        """
-        Constructor method
-        :param bot: Instance of the running Bot
-        """
-        self._bot: Bot = bot
 
     @commands.command()
     async def react(
@@ -307,7 +307,7 @@ class React(commands.Cog):
 
 
 async def setup(
-        bot: Bot,
+        bot: HeckBot,
 ) -> None:
     """
     Setup function for registering the react-match cog.

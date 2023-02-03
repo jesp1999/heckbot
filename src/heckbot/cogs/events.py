@@ -1,23 +1,24 @@
 from __future__ import annotations
 
 import discord
+from discord import TextChannel
 from discord.ext import commands
-from discord.ext.commands import Bot
-from heckbot.adaptor.config_adaptor import ConfigService
 from heckbot.types.constants import PRIMARY_GUILD_ID
 from heckbot.types.constants import WELCOME_CHANNEL_ID
+
+from bot import HeckBot
 
 
 class Events(commands.Cog):
     def __init__(
             self,
-            bot: Bot,
+            bot: HeckBot,
     ) -> None:
         """
         Constructor method
         :param bot: Instance of the running Bot
         """
-        self._bot: Bot = bot
+        self._bot: HeckBot = bot
 
     @commands.Cog.listener()
     async def on_member_join(
@@ -32,25 +33,30 @@ class Events(commands.Cog):
         """
         if member.guild.id == PRIMARY_GUILD_ID:
             channel = member.guild.get_channel(WELCOME_CHANNEL_ID)
-            await channel.send(
-                ConfigService.get_config_option(
-                    str(member.guild.id), 'messages', 'welcomeMessage',
-                ).format(member.id),
-            )
+            if isinstance(channel, TextChannel):
+                await channel.send(
+                    self._bot.config.get_message(
+                        member.guild.id,
+                        'welcomeMessage',
+                    ).format(member.id),
+                )
 
     @commands.Cog.listener()
-    async def on_guild_join(self, guild):
+    async def on_guild_join(
+            self,
+            guild,
+    ):
         welcome_channel = guild.system_channel
 
         embed = discord.Embed(
-            color=ConfigService.get_config_option(
-                str(guild.id), 'colors', 'embedColor',
+            color=self._bot.config.get_color(guild.id, 'embedColor'),
+            title=self._bot.config.get_message(
+                guild.id,
+                'guildJoinMessageTitle',
             ),
-            title=ConfigService.get_config_option(
-                str(guild.id), 'messages', 'guildJoinMessageTitle',
-            ),
-            description=ConfigService.get_config_option(
-                str(guild.id), 'messages', 'guildJoinMessage',
+            description=self._bot.config.get_message(
+                guild.id,
+                'guildJoinMessage',
             ),
         )
 
@@ -65,7 +71,7 @@ class Events(commands.Cog):
 
 
 async def setup(
-        bot: Bot,
+        bot: HeckBot,
 ) -> None:
     """
     Setup function for registering the events cog.

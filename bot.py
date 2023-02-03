@@ -11,6 +11,7 @@ from typing import Final
 
 import discord
 from discord import Intents
+from discord import TextChannel
 from discord.ext import commands
 from dotenv import load_dotenv
 from heckbot.adaptor.config_adaptor import ConfigAdaptor
@@ -23,9 +24,8 @@ load_dotenv(join(dirname(__file__), '.env'))
 
 
 class HeckBot(commands.Bot):
-    _token: str = os.getenv('DISCORD_TOKEN')
     after_ready_task: asyncio.Task[None]
-    _cogs: Final[list] = [
+    _cogs: Final[list[str]] = [
         'config',
         'events',
         'gif',
@@ -54,7 +54,7 @@ class HeckBot(commands.Bot):
 
     def run(self, **kwargs):
         load_dotenv(join(dirname(__file__), '.env'))
-        super().run(os.getenv('DISCORD_TOKEN'))
+        super().run(os.environ['DISCORD_TOKEN'])
 
     async def setup_hook(
             self,
@@ -100,11 +100,10 @@ class HeckBot(commands.Bot):
             )
             if guild.id == PRIMARY_GUILD_ID:
                 channel = guild.get_channel(ADMIN_CONSOLE_CHANNEL_ID)
-                await channel.send(
-                    self.config.get_message(
-                        guild.id, 'welcomeMessage',
-                    ),
-                )
+                if isinstance(channel, TextChannel):
+                    await channel.send(
+                        self.config.get_message(guild.id, 'welcomeMessage'),
+                    )
 
         print(
             f'----------------HeckBot---------------------'

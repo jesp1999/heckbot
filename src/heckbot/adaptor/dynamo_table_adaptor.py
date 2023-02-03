@@ -95,7 +95,7 @@ class DynamoTableAdaptor:
             self,
             pk_value: DynamoItem,
             sk_value: DynamoItem | None = None,
-    ) -> list[dict[str, DynamoItem]] | None:
+    ) -> list[dict[str, DynamoItem]]:
         """
         Reads all entries in the respective DynamoDB table which match
         supplied parameters.
@@ -144,7 +144,7 @@ class DynamoTableAdaptor:
             ReturnValues='UPDATED_NEW',
         )
         if result['ResponseMetadata']['HTTPStatusCode'] == 200 and 'Attributes' in result:
-            return result['Attributes']['some_attr']
+            pass  # TODO do something to indicate success or failure
 
     def remove_list_item(
             self,
