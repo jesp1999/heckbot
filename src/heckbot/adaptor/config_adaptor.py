@@ -1,104 +1,90 @@
 from __future__ import annotations
 
 import os
+from collections import defaultdict
+from typing import Final
+from typing import Literal
+from typing import TypedDict
 
 import yaml
+
+DEFAULT_MODULE_BEHAVIOR: Final[bool] = True
+ConfigGroup = Literal['messages', 'colors', 'modules']
+ModuleConfig = TypedDict(
+    'ModuleConfig', {
+        'enabled': bool,
+    },
+)
+
+GuildConfig = TypedDict(
+    'GuildConfig', {
+        'messages': defaultdict[str, str],
+        'colors': defaultdict[str, int],
+        'modules': defaultdict[str, ModuleConfig],
+    },
+)
+DEFAULT_MESSAGE_INFO: Final[dict[str, str]] = {
+    'welcomeMessage': 'Welcome to HeckBoiCrue <@!{}>!',
+    'botOnlineMessage': 'hello, i am online',
+    'guildJoinMessageTitle': '',
+    'guildJoinMessage': '',
+    'higherPermissionErrorMessage':
+        'Error: The specified user has higher permissions than you.',
+    'equalPermissionErrorMessage':
+        'Error: The specified user has higher permissions than you or '
+        'equal permissions.',
+}
+
+DEFAULT_COLOR_INFO: Final[dict[str, int]] = {
+    'embedColor': 0x040273,
+}
 
 
 class ConfigAdaptor:
     def __init__(
             self,
-    ):
+    ) -> None:
         # guild_id -> group_name -> option -> value OR nested option
-        self.configs: dict[
-            str, dict[
-                str, dict[
-                    str, (
-                        str | int | bool | dict[str, str | int | bool]
-                    ),
-                ],
-            ],
-        ] = {}
+        self.configs: dict[str, GuildConfig] = {}
         self.config_file: str = os.getcwd() + '/../../../resources/config/config.yaml'
 
-    def get_config(
-            self,
-            guild_id: int,
-            group: str,
-    ) -> dict[str, str | int | float | bool]:
-        if str(guild_id) not in self.configs:
-            # Load the config for the guild if it doesn't exist in memory
-            self.load_config(guild_id)
-
-        return self.configs[str(guild_id)].get(group, {})
+    @classmethod
+    def get_default_guild_config(cls) -> GuildConfig:
+        return {
+            'messages': defaultdict(str),
+            'colors': defaultdict(int),
+            # Each module setting in a module defaults to the setting
+            #  defined by DEFAULT_MODULE_BEHAVIOR
+            'modules': defaultdict(
+                lambda: {'enabled': DEFAULT_MODULE_BEHAVIOR},
+            ),
+        }
 
     def load_config(
             self,
             guild_id: int,
-    ):
+    ) -> None:
         # Load the config from the file
-        data = {}
+        data: dict[str, GuildConfig] = {}
         if os.path.exists(self.config_file):
             with open(self.config_file) as f:
                 data = yaml.safe_load(f)
 
-        guild_config = data.get(str(guild_id), {})
-        self.configs[str(guild_id)] = guild_config
+        if str(guild_id) not in data:
+            guild_config: GuildConfig = self.get_default_guild_config()
+            data[str(guild_id)] = guild_config
+        else:
+            guild_config = data[str(guild_id)]
 
         # Generate default values if not present
+        for m_key, m_val in DEFAULT_MESSAGE_INFO.items():
+            guild_config['messages'][m_key] = m_val
 
-        default_message_info = {
-            'welcomeMessage': 'Welcome to HeckBoiCrue <@!{}>!',
-            'botOnlineMessage': 'hello, i am online',
-            'guildJoinMessageTitle': '',
-            'guildJoinMessage': '',
-            'higherPermissionErrorMessage':
-                'Error: The specified user has higher permissions than you.',
-            'equalPermissionErrorMessage':
-                'Error: The specified user has higher permissions than you or '
-                'equal permissions.',
-        }
-
-        default_color_info = {
-            'embedColor': '0x040273',
-        }
-
-        for m_key, m_val in default_message_info.items():
-            if m_key not in guild_config['messages']:
-                guild_config['messages'][m_key] = m_val
-
-        for c_key, c_val in default_color_info.items():
-            if c_key not in guild_config['colors']:
-                guild_config['colors'][c_key] = c_val
+        for c_key, c_val in DEFAULT_COLOR_INFO.items():
+            guild_config['colors'][c_key] = c_val
 
         # TODO add default module enablement
 
-        with open(self.config_file, 'w') as f:
-            yaml.dump(self.configs, f, default_flow_style=False)
-
-    def set_config(
-            self,
-            guild_id: int,
-            group: str,
-            key: str,
-            value: str | int | bool,
-            nested_value: str | int | bool | None = None,
-    ):
-        # Load the config for the guild if it doesn't exist in memory
-        if str(guild_id) not in self.configs:
-            self.load_config(guild_id)
-
-        if group not in self.configs[str(guild_id)]:
-            self.configs[str(guild_id)][group] = {}
-        if key not in self.configs[str(guild_id)][group]:
-            self.configs[str(guild_id)][group][key] = {}
-
-        if nested_value:
-            self.configs[str(guild_id)][group][key][value] = nested_value
-        else:
-            self.configs[str(guild_id)][group][key] = value
-
-        # Write the updated config to the file
         with open(self.config_file, 'w') as f:
             yaml.dump(self.configs, f, default_flow_style=False)
 
@@ -107,45 +93,60 @@ class ConfigAdaptor:
             guild_id: int,
             message_type: str,
     ) -> str:
-        config = self.get_config(guild_id, 'messages')
-        return config.get(message_type, '')
+        if str(guild_id) not in self.configs:
+            self.load_config(guild_id)
+        return self.configs[str(guild_id)]['messages'][message_type]
 
     def set_message(
             self,
             guild_id: int,
             message_type: str,
             message: str,
-    ):
-        self.set_config(guild_id, 'messages', message_type, message)
+    ) -> None:
+        if str(guild_id) not in self.configs:
+            self.load_config(guild_id)
+        self.configs[str(guild_id)]['messages'][message_type] = message
+        with open(self.config_file, 'w') as f:
+            yaml.dump(self.configs, f, default_flow_style=False)
 
     def get_color(
             self,
             guild_id: int,
             color_type: str,
     ) -> int:
-        config = self.get_config(guild_id, 'color')
-        return config.get(color_type, 0x000000)
+        if str(guild_id) not in self.configs:
+            self.load_config(guild_id)
+        return self.configs[str(guild_id)]['colors'][color_type]
 
     def set_color(
             self,
             guild_id: int,
             color_type: str,
             color: int,
-    ):
-        self.set_config(guild_id, 'colors', color_type, color)
+    ) -> None:
+        if str(guild_id) not in self.configs:
+            self.load_config(guild_id)
+        self.configs[str(guild_id)]['colors'][color_type] = color
+        with open(self.config_file, 'w') as f:
+            yaml.dump(self.configs, f, default_flow_style=False)
 
     def is_module_enabled(
             self,
             guild_id: int,
             module: str,
-    ):
-        config = self.get_config(guild_id, 'modules')
-        return config.get(module, {}).get('enabled', True)
+    ) -> bool:
+        if str(guild_id) not in self.configs:
+            self.load_config(guild_id)
+        return self.configs[str(guild_id)]['modules'][module]['enabled']
 
     def set_module_enabled(
             self,
             guild_id: int,
             module: str,
-    ):
+    ) -> None:
+        if str(guild_id) not in self.configs:
+            self.load_config(guild_id)
         state = self.is_module_enabled(guild_id, module)
-        self.set_config(guild_id, 'modules', module, 'enabled', not state)
+        self.configs[str(guild_id)]['modules'][module]['enabled'] = not state
+        with open(self.config_file, 'w') as f:
+            yaml.dump(self.configs, f, default_flow_style=False)
