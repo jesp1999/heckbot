@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import random
+import sqlite3
 from collections import namedtuple
+from datetime import datetime
+from datetime import timedelta
 from typing import Sequence
 
 from discord import Forbidden
@@ -16,6 +19,7 @@ from table2ascii import PresetStyle
 from table2ascii import table2ascii
 from table2ascii import TableStyle
 
+from bot import db_conn
 from bot import HeckBot
 
 Bounds: namedtuple = namedtuple(
@@ -56,6 +60,8 @@ class Poll(commands.Cog):
         :param bot: Instance of the running Bot
         """
         self._bot: HeckBot = bot
+        self._db_conn = sqlite3.connect('tasks.db')
+        self._cursor = db_conn.cursor()
 
     @staticmethod
     def roll_many(
@@ -212,7 +218,12 @@ class Poll(commands.Cog):
             message = await ctx.send(question)
             for reaction in self.YES_NO_REACTIONS:
                 await message.add_reaction(reaction)
-            # TODO enqueue poll results at a later time
+            self._cursor.execute(
+                'INSERT INTO tasks '
+                '(completed, task, message_id, channel_id, end_time)'
+                f'VALUES (false, "close_poll", {message.id}, {ctx.channel.id},'
+                f'"{datetime.now() + timedelta(seconds=5)}");',
+            )
         elif len(args) > 1:
             # Multi-choice poll
             question = bold(args[0])
@@ -225,7 +236,12 @@ class Poll(commands.Cog):
             # TODO handle more poll options than emojis in list
             for reaction in self.MULTI_CHOICE_REACTIONS[:num_choices]:
                 await message.add_reaction(reaction)
-            # TODO enqueue poll results at a later time
+            self._cursor.execute(
+                'INSERT INTO tasks '
+                '(completed, task, message_id, channel_id, end_time)'
+                f'VALUES (false, "close_poll", {message.id}, {ctx.channel.id},'
+                f'"{datetime.now() + timedelta(seconds=5)}");',
+            )
         else:
             await ctx.send(
                 'Incorrect syntax, try \"`!poll "<question>"'
