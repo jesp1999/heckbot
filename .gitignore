@@ -2,7 +2,7 @@
 .idea
 .run
 *.run.xml
-.db
+*.db
 
 
 # Created by https://www.toptal.com/developers/gitignore/api/python,jupyternotebooks
