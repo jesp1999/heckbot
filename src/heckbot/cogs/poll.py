@@ -4,6 +4,9 @@ import random
 from collections import namedtuple
 from typing import Sequence
 
+from discord import Forbidden
+from discord import Message
+from discord import TextChannel
 from discord.ext import commands
 from discord.ext.commands import Bot
 from discord.ext.commands import Context
@@ -229,12 +232,41 @@ class Poll(commands.Cog):
                 ' "[choice1]" "[choice2]" ...`\"',
             )
 
+    @classmethod
+    async def get_results_for_poll(
+            cls,
+            message: Message,
+    ) -> str:
+        options: list[str] = [
+            # Get content to right of ': '
+            m.rpartition(': ')[2]
+            # Get option lines (all but the first)
+            for m in message.content.split('\n')[1:]
+        ]
+        option_counts: list[int] = [
+            r.count
+            for r in message.reactions
+        ]
+        results: str = '\n'.join([
+            f'{opt}: {cnt}' for opt, cnt in zip(options, option_counts)
+        ])
+        return f'Poll results:\n{results}'
+
     async def close_poll(
             self,
-            message_id: str,
-            channel_id: str,
-    ):
-        raise NotImplementedError
+            message_id: int,
+            channel_id: int,
+    ) -> None:
+        channel = self._bot.get_channel(channel_id)
+        if not isinstance(channel, TextChannel):
+            return  # TODO handle
+        message: Message = await channel.fetch_message(message_id)
+        try:
+            await message.reply(
+                content=await self.get_results_for_poll(message),
+            )
+        except Forbidden:
+            pass  # TODO handle
 
     @commands.command()
     async def d(
