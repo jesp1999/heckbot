@@ -6,7 +6,7 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import Bot
 from discord.ext.commands import Context
-from heckbot.adaptor.dynamo_table_adaptor import DynamoTableAdaptor
+from heckbot.adaptor.reaction_table_adaptor import ReactionTableAdaptor
 
 from bot import HeckBot
 
@@ -16,11 +16,7 @@ class React(commands.Cog):
     Cog for enabling reaction-matching-related features in the bot.
     """
 
-    _association_table: DynamoTableAdaptor = DynamoTableAdaptor(
-        table_name='HeckBotAssociations',
-        pk_name='Server',
-        sk_name='Pattern',
-    )
+    _association_repository: ReactionTableAdaptor = ReactionTableAdaptor()
 
     def __init__(
             self,
@@ -31,88 +27,6 @@ class React(commands.Cog):
         :param bot: Instance of the running Bot
         """
         self._bot: HeckBot = bot
-
-    def get_all_associations(
-            self,
-            guild: str,
-    ) -> dict[str, list[str]]:
-        """
-        Gets all text-pattern-to-emoji mappings for a given guild.
-        :param guild: Identifier for the guild
-        :return: Mapping of text patterns to lists of associated emojis
-        in order
-        """
-        results: list[dict[str, list[str]]] = self._association_table.read(
-            pk_value=guild,
-        )
-
-        associations: dict[str, list[str]] = {
-            result['Pattern']: result['Reactions']
-            for result in results
-        }
-        return associations
-
-    def get_associations_for_pattern(
-            self,
-            guild: str,
-            pattern: str,
-    ) -> list[str]:
-        """
-        Gets all emojis associated with a given guild and text-pattern
-        for a given guild.
-        :param guild: Identifier for the guild
-        :param pattern: Text pattern
-        :return: List of associated emojis in order
-        """
-        associations: list[dict[str, list[str]]] = (
-            self._association_table.read(
-                pk_value=guild,
-                sk_value=pattern,
-            )
-        )
-        return associations[0]['Reactions']
-
-    def add_association(
-            self,
-            guild: str,
-            pattern: str,
-            reaction: str,
-    ) -> None:
-        """
-        Adds a text-pattern-to-emoji association for a given guild.
-        :param guild: Identifier for the guild
-        :param pattern: Text pattern
-        :param reaction: Emoji to be reacted
-        """
-        self._association_table.add_list_item(
-            pk_value=guild, sk_value=pattern,
-            list_name='Reactions',
-            item=reaction,
-        )
-
-    def remove_association(
-            self,
-            guild: str,
-            pattern: str,
-            reaction: str | None = None,
-    ) -> None:
-        """
-        Removes all emoji associations to a given text-pattern for a
-        given guild.
-        :param guild: Identifier for the guild
-        :param pattern: Text pattern
-        :param reaction: Emoji to be reacted
-        """
-        if reaction is None:
-            self._association_table.delete(
-                pk_value=guild,
-                sk_value=pattern,
-            )
-        else:
-            self._association_table.remove_list_item(
-                pk_value=guild, sk_value=pattern,
-                list_name='Reactions', item=reaction,
-            )
 
     @commands.command()
     async def react(
@@ -183,17 +97,6 @@ class React(commands.Cog):
         """
         await self.rdel(ctx, pattern, reaction)
 
-    @commands.command()
-    async def disassociate(
-            self,
-            ctx: Context[Bot],
-    ) -> None:
-        """
-        Joke command based on a misspelling of the dissociate command.
-        Directs the commander sarcastically in the right direction!
-        """
-        await ctx.send('The command is \"`!dissociate`\", y\'know 😉')
-
     @commands.command(
         aliases=[
             'reactlist', 'listassociations', 'rlist',
@@ -230,7 +133,7 @@ class React(commands.Cog):
         if guild is None:
             return
 
-        associations = self.get_all_associations(
+        associations = self._association_repository.get_all_reactions(
             str(guild.id),
         )
         for word, emojis in associations.items():
@@ -246,7 +149,7 @@ class React(commands.Cog):
             pattern,
             reaction,
     ):
-        self.add_association(
+        self._association_repository.add_reaction(
             str(ctx.guild.id),
             pattern,
             reaction,
@@ -264,7 +167,7 @@ class React(commands.Cog):
             reaction,
     ):
         if reaction is None:
-            self.remove_association(
+            self._association_repository.remove_all_reactions(
                 str(ctx.guild.id),
                 pattern,
             )
@@ -273,7 +176,7 @@ class React(commands.Cog):
                 f'\"{pattern}\" from all reactions!',
             )
         else:
-            self.remove_association(
+            self._association_repository.remove_reaction(
                 str(ctx.guild.id),
                 pattern,
                 reaction,
@@ -292,15 +195,15 @@ class React(commands.Cog):
     ):
         if pattern:
             associations: str = str(
-                self.get_associations_for_pattern(
-                    guild=str(guild_id),
-                    pattern=pattern,
+                self._association_repository.get_reactions(
+                    str(ctx.guild.id),
+                    pattern,
                 ),
             )
         else:
             associations = str(
-                self.get_all_associations(
-                    guild=str(ctx.guild.id),
+                self._association_repository.get_all_reactions(
+                    str(ctx.guild.id),
                 ),
             )
         await ctx.send(associations)
