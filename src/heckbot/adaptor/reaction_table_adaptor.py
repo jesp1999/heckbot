@@ -1,15 +1,22 @@
 from __future__ import annotations
 
+import os
 from typing import Sequence
 
 from pynamodb.attributes import ListAttribute
 from pynamodb.attributes import UnicodeAttribute
 from pynamodb.exceptions import DeleteError
+from pynamodb.exceptions import DoesNotExist
 from pynamodb.exceptions import GetError
 from pynamodb.models import Model
 
 
-class HeckBotReactions(Model):
+class ReactionAssociation(Model):
+    class Meta:
+        read_capacity_units: int = 1
+        write_capacity_units: int = 1
+        table_name = 'HeckBotReactions'
+        host = os.environ['AWS_HOST']
     guild_id: UnicodeAttribute = UnicodeAttribute(hash_key=True)
     pattern: UnicodeAttribute = UnicodeAttribute(range_key=True)
     reactions: ListAttribute[str] = ListAttribute(default=list)
@@ -18,8 +25,8 @@ class HeckBotReactions(Model):
 class ReactionTableAdaptor:
 
     def __init__(self):
-        if not HeckBotReactions.exists():
-            HeckBotReactions.create_table()
+        if not ReactionAssociation.exists():
+            ReactionAssociation.create_table()
 
     @classmethod
     def get_all_reactions(
@@ -31,14 +38,14 @@ class ReactionTableAdaptor:
         :param guild_id: Guild ID to match (PK)
         :return: a list of reactions
         """
-        return {q.pattern: q.reactions for q in HeckBotReactions.query(guild_id)}
+        return {q.pattern: q.reactions for q in ReactionAssociation.query(guild_id)}
 
     @classmethod
     def get_reactions(
             cls,
             guild_id: str,
             pattern: str | None = None,
-    ) -> dict[str, Sequence[str]] | Sequence[str]:
+    ) -> Sequence[str]:
         """
         Finds the desired reactions for a given guild and (optionally)
          pattern in the ReactionTableAdaptor
@@ -46,7 +53,8 @@ class ReactionTableAdaptor:
         :param pattern: pattern to match (SK)
         :return: a list of reactions
         """
-        return HeckBotReactions.get(guild_id, pattern).reactions
+        reactions: list[str] = ReactionAssociation.get(guild_id, pattern).reactions
+        return reactions
 
     @classmethod
     def add_reaction(
@@ -63,11 +71,15 @@ class ReactionTableAdaptor:
         :param reaction: Reaction to add
         """
         try:
-            association = HeckBotReactions.get(guild_id, pattern)
+            association = ReactionAssociation.get(guild_id, pattern)
             association.reactions.append(reaction)
         except GetError:
-            association = HeckBotReactions(
-                guild_id, pattern, Reaction=[reaction],
+            association = ReactionAssociation(
+                guild_id, pattern, reactions=[reaction],
+            )
+        except DoesNotExist:
+            association = ReactionAssociation(
+                guild_id, pattern, reactions=[reaction],
             )
         association.save()
 
@@ -84,9 +96,13 @@ class ReactionTableAdaptor:
         :param pattern: pattern to match (SK)
         """
         try:
-            association = HeckBotReactions.get(guild_id, pattern)
+            association = ReactionAssociation.get(guild_id, pattern)
             association.delete()
-        except GetError | DeleteError:
+        except GetError:
+            return  # TODO more
+        except DoesNotExist:
+            return  # TODO more
+        except DeleteError:
             return  # TODO more
 
     @classmethod
@@ -105,8 +121,12 @@ class ReactionTableAdaptor:
         all)
         """
         try:
-            association = HeckBotReactions.get(guild_id, pattern)
+            association = ReactionAssociation.get(guild_id, pattern)
             association.reactions.remove(reaction)
             association.save()
-        except GetError | DeleteError:
+        except GetError:
+            return  # TODO more
+        except DoesNotExist:
+            return  # TODO more
+        except DeleteError:
             return  # TODO more
