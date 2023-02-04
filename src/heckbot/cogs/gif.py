@@ -6,7 +6,8 @@ import aiohttp
 from discord.ext import commands
 from discord.ext.commands import Bot
 from discord.ext.commands import Context
-from heckbot.service.config_service import ConfigService
+
+from bot import HeckBot
 
 
 class Gif(commands.Cog):
@@ -17,17 +18,16 @@ class Gif(commands.Cog):
 
     def __init__(
             self,
-            bot: Bot,
+            bot: HeckBot,
     ) -> None:
         """
         Constructor method
         :param bot: Instance of the running Bot
         """
         self._tenor_api_key = os.getenv('TENOR_API_KEY')
-        self._bot: Bot = bot
+        self._bot: HeckBot = bot
 
     @commands.command()
-    @commands.check(ConfigService.is_enabled)
     async def gif(
             self,
             ctx: Context[Bot],
@@ -65,7 +65,7 @@ class Gif(commands.Cog):
 
 
 async def setup(
-        bot: Bot,
+        bot: HeckBot,
 ):
     """
     Setup function for registering the gif cog.

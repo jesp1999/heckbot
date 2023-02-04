@@ -5,9 +5,7 @@ import sqlite3
 import discord
 from discord.ext import tasks
 from discord.ext.commands import Bot
-from discord.ext.commands import Cog
-
-from src.cogs.poll import Poll
+from heckbot.cogs.poll import Poll
 
 db_conn = sqlite3.connect('tasks.db')
 cursor = db_conn.cursor()
@@ -37,12 +35,12 @@ class TaskService:
         await discord.utils.sleep_until(next_task['end_time'])
 
         # perform task
-        poll_cog: Cog = self._bot.get_cog('Poll')
-        poll_cog: Poll
-        await poll_cog.close_poll(
-            next_task['message_id'],
-            next_task['channel_id'],
-        )
+        poll_cog = self._bot.get_cog('Poll')
+        if isinstance(poll_cog, Poll):
+            await poll_cog.close_poll(
+                next_task['message_id'],
+                next_task['channel_id'],
+            )
 
         cursor.execute(
             'UPDATE tasks SET completed = true WHERE row_id = $1',

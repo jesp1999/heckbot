@@ -2,11 +2,10 @@
 name = "heckbot"
 description = "For-fun Discord bot"
 version = "0.1.0"
+dynamic = ["version", "description", "dependencies"]
 authors = [
     { name = "Julian Espada", email = "jesp1999@gmail.com" }
 ]
-
-dynamic = ["dependencies"]
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
