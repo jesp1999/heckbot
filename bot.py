@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from sqlite3 import Row
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -24,25 +25,18 @@ from discord import TextChannel
 from discord.ext import commands
 from discord.ext import tasks
 from dotenv import load_dotenv
-from heckbot.adapter.config_adapter import ConfigAdaptor
+from heckbot.adapter.config_adapter import ConfigAdapter
 from heckbot.types.constants import ADMIN_CONSOLE_CHANNEL_ID
 from heckbot.types.constants import BOT_COMMAND_PREFIX
 from heckbot.types.constants import BOT_CUSTOM_STATUS
 from heckbot.types.constants import PRIMARY_GUILD_ID
 
+TASK_LOOP_PERIOD = 5  # seconds
+
 load_dotenv(join(dirname(__file__), '.env'))
 
 db_conn = sqlite3.connect('tasks.db')
-
-
-def dict_factory(crs, row):
-    d = {}
-    for idx, col in enumerate(crs.description):
-        d[col[0]] = row[idx]
-    return d
-
-
-db_conn.row_factory = dict_factory
+db_conn.row_factory = Row
 cursor = db_conn.cursor()
 cursor.execute('DROP TABLE IF EXISTS tasks;')
 cursor.execute(
@@ -81,9 +75,9 @@ class HeckBot(commands.Bot):
             case_insensitive=False,
         )
         self.uptime: datetime = datetime.utcnow()
-        self.config = ConfigAdaptor()
+        self.config = ConfigAdapter()
 
-    @tasks.loop(seconds=5)
+    @tasks.loop(seconds=TASK_LOOP_PERIOD)
     async def task_loop(self):
         cursor.execute(
             'SELECT rowid,* FROM tasks WHERE NOT completed ORDER BY end_time LIMIT 1;',

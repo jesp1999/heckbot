@@ -6,7 +6,7 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import Bot
 from discord.ext.commands import Context
-from heckbot.adapter.reaction_table_adapter import ReactionTableAdaptor
+from heckbot.adapter.reaction_table_adapter import ReactionTableAdapter
 
 from bot import HeckBot
 
@@ -16,7 +16,7 @@ class React(commands.Cog):
     Cog for enabling reaction-matching-related features in the bot.
     """
 
-    _association_repository: ReactionTableAdaptor = ReactionTableAdaptor()
+    _association_repository: ReactionTableAdapter = ReactionTableAdapter()
 
     def __init__(
             self,

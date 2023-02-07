@@ -40,7 +40,7 @@ DEFAULT_COLOR_INFO: Final[dict[str, int]] = {
 }
 
 
-class ConfigAdaptor:
+class ConfigAdapter:
     def __init__(
             self,
     ) -> None:

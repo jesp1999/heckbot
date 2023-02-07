@@ -5,7 +5,7 @@ from typing import Literal
 from discord.ext import commands
 from discord.ext.commands import Bot
 from discord.ext.commands import Context
-from heckbot.adapter.config_adapter import ConfigAdaptor
+from heckbot.adapter.config_adapter import ConfigAdapter
 
 from bot import HeckBot
 
@@ -29,7 +29,7 @@ class Config(commands.Cog):
         :param bot: Instance of the running Bot
         """
         self._bot: HeckBot = bot
-        self._config_adaptor = ConfigAdaptor()
+        self._config_adapter = ConfigAdapter()
 
     @commands.command(
         aliases=[
