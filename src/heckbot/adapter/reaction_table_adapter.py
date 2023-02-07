@@ -13,8 +13,8 @@ from pynamodb.models import Model
 
 class ReactionAssociation(Model):
     class Meta:
-        read_capacity_units: int = 1
-        write_capacity_units: int = 1
+        read_capacity_units = 1
+        write_capacity_units = 1
         table_name = 'HeckBotReactions'
         host = os.environ['AWS_HOST']
     guild_id: UnicodeAttribute = UnicodeAttribute(hash_key=True)
@@ -22,7 +22,7 @@ class ReactionAssociation(Model):
     reactions: ListAttribute[str] = ListAttribute(default=list)
 
 
-class ReactionTableAdaptor:
+class ReactionTableAdapter:
 
     def __init__(self):
         if not ReactionAssociation.exists():
@@ -48,7 +48,7 @@ class ReactionTableAdaptor:
     ) -> Sequence[str]:
         """
         Finds the desired reactions for a given guild and (optionally)
-         pattern in the ReactionTableAdaptor
+         pattern in the ReactionTableAdapter
         :param guild_id: Guild ID to match (PK)
         :param pattern: pattern to match (SK)
         :return: a list of reactions
@@ -65,7 +65,7 @@ class ReactionTableAdaptor:
     ) -> None:
         """
         Adds the given reaction to the given guild id and pattern in the
-         ReactionTableAdaptor
+         ReactionTableAdapter
         :param guild_id: Guild ID to match (PK)
         :param pattern: pattern to match (SK)
         :param reaction: Reaction to add
@@ -91,7 +91,7 @@ class ReactionTableAdaptor:
     ) -> None:
         """
         Adds the given reaction to the given guild id and pattern in the
-         ReactionTableAdaptor
+         ReactionTableAdapter
         :param guild_id: Guild ID to match (PK)
         :param pattern: pattern to match (SK)
         """
@@ -114,7 +114,7 @@ class ReactionTableAdaptor:
     ) -> None:
         """
         Adds the given reaction to the given guild id and pattern in the
-         ReactionTableAdaptor
+         ReactionTableAdapter
         :param guild_id: Guild ID to match (PK)
         :param pattern: pattern to match (SK)
         :param reaction: Reaction to remove (if unspecified, will remove

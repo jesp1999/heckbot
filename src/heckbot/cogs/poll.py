@@ -2,8 +2,13 @@ from __future__ import annotations
 
 import random
 from collections import namedtuple
+from datetime import datetime
+from datetime import timedelta
 from typing import Sequence
 
+from discord import Forbidden
+from discord import Message
+from discord import TextChannel
 from discord.ext import commands
 from discord.ext.commands import Bot
 from discord.ext.commands import Context
@@ -13,6 +18,8 @@ from table2ascii import PresetStyle
 from table2ascii import table2ascii
 from table2ascii import TableStyle
 
+from bot import cursor
+from bot import db_conn
 from bot import HeckBot
 
 Bounds: namedtuple = namedtuple(
@@ -52,7 +59,9 @@ class Poll(commands.Cog):
         Constructor method
         :param bot: Instance of the running Bot
         """
-        self._bot: HeckBot = bot
+        self._bot = bot
+        self._db_conn = db_conn
+        self._cursor = cursor
 
     @staticmethod
     def roll_many(
@@ -209,6 +218,17 @@ class Poll(commands.Cog):
             message = await ctx.send(question)
             for reaction in self.YES_NO_REACTIONS:
                 await message.add_reaction(reaction)
+            self._cursor.execute(
+                'INSERT INTO tasks '
+                '(completed, task, message_id, channel_id, end_time)'
+                'VALUES (false, "close_poll", ?, ?, ?);',
+                (
+                    message.id,
+                    ctx.channel.id,
+                    (datetime.now() + timedelta(minutes=5)).strftime('%m/%d/%y %H:%M:%S'),
+                ),
+            )
+            self._db_conn.commit()
         elif len(args) > 1:
             # Multi-choice poll
             question = bold(args[0])
@@ -221,11 +241,50 @@ class Poll(commands.Cog):
             # TODO handle more poll options than emojis in list
             for reaction in self.MULTI_CHOICE_REACTIONS[:num_choices]:
                 await message.add_reaction(reaction)
+            self._cursor.execute(
+                'INSERT INTO tasks '
+                '(completed, task, message_id, channel_id, end_time)'
+                'VALUES (false, "close_poll", ?, ?, ?);',
+                (
+                    message.id,
+                    ctx.channel.id,
+                    (datetime.now() + timedelta(seconds=5)).strftime('%m/%d/%y %H:%M:%S'),
+                ),
+            )
+            self._db_conn.commit()
         else:
             await ctx.send(
                 'Incorrect syntax, try \"`!poll "<question>"'
                 ' "[choice1]" "[choice2]" ...`\"',
             )
+
+    @classmethod
+    async def get_results_for_poll(
+            cls,
+            message: Message,
+    ) -> str:
+        options = message.content.split('\n')[1:]
+        option_counts = [r.count - 1 for r in message.reactions]
+        results = '\n'.join([
+            f'{opt}: {cnt}' for opt, cnt in zip(options, option_counts)
+        ])
+        return f'Poll results:\n{results}'
+
+    async def close_poll(
+            self,
+            message_id: int,
+            channel_id: int,
+    ) -> None:
+        channel = await self._bot.fetch_channel(channel_id)
+        if not isinstance(channel, TextChannel):
+            return  # TODO handle
+        message = await channel.fetch_message(message_id)
+        try:
+            await message.reply(
+                content=await self.get_results_for_poll(message),
+            )
+        except Forbidden:
+            pass  # TODO handle
 
     @commands.command()
     async def d(

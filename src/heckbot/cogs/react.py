@@ -6,7 +6,7 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import Bot
 from discord.ext.commands import Context
-from heckbot.adaptor.reaction_table_adaptor import ReactionTableAdaptor
+from heckbot.adapter.reaction_table_adapter import ReactionTableAdapter
 
 from bot import HeckBot
 
@@ -16,7 +16,7 @@ class React(commands.Cog):
     Cog for enabling reaction-matching-related features in the bot.
     """
 
-    _association_repository: ReactionTableAdaptor = ReactionTableAdaptor()
+    _association_repository: ReactionTableAdapter = ReactionTableAdapter()
 
     def __init__(
             self,
@@ -26,7 +26,7 @@ class React(commands.Cog):
         Constructor method
         :param bot: Instance of the running Bot
         """
-        self._bot: HeckBot = bot
+        self._bot = bot
 
     @commands.command()
     async def react(
@@ -51,7 +51,7 @@ class React(commands.Cog):
         elif subcommand in ['remove', 'delete', 'rm', 'del']:
             await self.rdel(ctx, pattern, reaction)
         elif subcommand in ['list', 'lst']:
-            await self.rlist(ctx, pattern, reaction)
+            await self.rlist(ctx, pattern)
 
     @commands.command(aliases=['reactadd', 'associate', 'assoc', 'radd'])
     async def react_add(
@@ -109,7 +109,7 @@ class React(commands.Cog):
             pattern: str | None = None,
     ) -> None:
         if ctx.guild is not None:
-            await self.rlist(ctx, pattern, ctx.guild.id)
+            await self.rlist(ctx, pattern)
 
     @commands.Cog.listener('on_message')
     async def on_message(
@@ -191,10 +191,9 @@ class React(commands.Cog):
             self,
             ctx,
             pattern,
-            guild_id,
     ):
         if pattern:
-            associations: str = str(
+            associations = str(
                 self._association_repository.get_reactions(
                     str(ctx.guild.id),
                     pattern,

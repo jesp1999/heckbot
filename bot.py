@@ -1,31 +1,56 @@
 from __future__ import annotations
 
+from sqlite3 import Row
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    # noinspection PyUnresolvedReferences
+    from heckbot.cogs.poll import Poll
+
 import asyncio
 import os
 import random
+import sqlite3
 import sys
 from datetime import datetime
 from os.path import dirname
 from os.path import join
 from typing import Final
+from typing import Literal
+from typing import cast
 
 import discord
 from discord import Intents
 from discord import TextChannel
 from discord.ext import commands
+from discord.ext import tasks
 from dotenv import load_dotenv
-from heckbot.adaptor.config_adaptor import ConfigAdaptor
+from heckbot.adapter.config_adapter import ConfigAdapter
 from heckbot.types.constants import ADMIN_CONSOLE_CHANNEL_ID
 from heckbot.types.constants import BOT_COMMAND_PREFIX
 from heckbot.types.constants import BOT_CUSTOM_STATUS
 from heckbot.types.constants import PRIMARY_GUILD_ID
 
+TASK_LOOP_PERIOD = 5  # seconds
+
 load_dotenv(join(dirname(__file__), '.env'))
+
+db_conn = sqlite3.connect('tasks.db')
+db_conn.row_factory = Row
+cursor = db_conn.cursor()
+cursor.execute('DROP TABLE IF EXISTS tasks;')
+cursor.execute(
+    'CREATE TABLE IF NOT EXISTS tasks'
+    '(completed BOOLEAN, task TEXT, message_id INT, channel_id INT, end_time TEXT);',
+)
+db_conn.commit()
+
+TaskType = Literal['close_poll']
 
 
 class HeckBot(commands.Bot):
     after_ready_task: asyncio.Task[None]
-    _cogs: Final[list[str]] = [
+    _cogs: Final = [
         'config',
         'events',
         'gif',
@@ -35,7 +60,7 @@ class HeckBot(commands.Bot):
     ]
 
     def __init__(self):
-        intents: Intents = Intents(
+        intents = Intents(
             messages=True,
             message_content=True,
             typing=True,
@@ -49,8 +74,40 @@ class HeckBot(commands.Bot):
             reconnect=True,
             case_insensitive=False,
         )
-        self.uptime: datetime = datetime.utcnow()
-        self.config = ConfigAdaptor()
+        self.uptime = datetime.utcnow()
+        self.config = ConfigAdapter()
+
+    @tasks.loop(seconds=TASK_LOOP_PERIOD)
+    async def task_loop(self):
+        cursor.execute(
+            'SELECT rowid,* FROM tasks WHERE NOT completed ORDER BY end_time LIMIT 1;',
+        )
+        next_task = cursor.fetchone()
+        # if no remaining tasks, stop the loop
+        if next_task is None:
+            return
+
+        # sleep until the task should be done
+        await discord.utils.sleep_until(
+            datetime.strptime(next_task['end_time'], '%m/%d/%y %H:%M:%S'),
+        )
+        # perform task
+        task_type = next_task['task']
+        match task_type:
+            case 'close_poll':
+                poll_cog = cast('Poll', self.get_cog('Poll'))
+                await poll_cog.close_poll(
+                    next_task['message_id'],
+                    next_task['channel_id'],
+                )
+            case _:  # default
+                raise NotImplementedError
+
+        cursor.execute(
+            'UPDATE tasks SET completed = true WHERE rowid = ?;',
+            (next_task['rowid'],),
+        )
+        db_conn.commit()
 
     def run(self, **kwargs):
         load_dotenv(join(dirname(__file__), '.env'))
@@ -64,6 +121,7 @@ class HeckBot(commands.Bot):
         :return:
         """
         self.after_ready_task = asyncio.create_task(self.after_ready())
+        self.task_loop.start()
 
         self.remove_command('help')
 

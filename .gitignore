@@ -2,6 +2,7 @@
 .idea
 .run
 *.run.xml
+*.db
 
 
 # Created by https://www.toptal.com/developers/gitignore/api/python,jupyternotebooks
@@ -131,8 +132,8 @@ celerybeat.pid
 env/
 venv/
 ENV/
-env.bak/
-venv.bak/
+env.bak/venv
+.bak/
 
 # Spyder project settings
 .spyderproject

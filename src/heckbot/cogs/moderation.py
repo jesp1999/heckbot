@@ -305,7 +305,9 @@ class Moderation(commands.Cog):
             ctx: Context[Bot],
             member: Member,
     ) -> None:
-        if ctx.guild is None or not isinstance(ctx.author, Member):
+        if ctx.guild is None or not isinstance(
+            ctx.author, Member,
+        ):
             return
         if ctx.guild.me.top_role < member.top_role:
             await ctx.send(

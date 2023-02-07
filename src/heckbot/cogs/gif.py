@@ -25,7 +25,7 @@ class Gif(commands.Cog):
         :param bot: Instance of the running Bot
         """
         self._tenor_api_key = os.getenv('TENOR_API_KEY')
-        self._bot: HeckBot = bot
+        self._bot = bot
 
     @commands.command()
     async def gif(
