@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import random
-import sqlite3
 from collections import namedtuple
 from datetime import datetime
 from datetime import timedelta
@@ -19,6 +18,7 @@ from table2ascii import PresetStyle
 from table2ascii import table2ascii
 from table2ascii import TableStyle
 
+from bot import cursor
 from bot import db_conn
 from bot import HeckBot
 
@@ -60,8 +60,8 @@ class Poll(commands.Cog):
         :param bot: Instance of the running Bot
         """
         self._bot: HeckBot = bot
-        self._db_conn = sqlite3.connect('tasks.db')
-        self._cursor = db_conn.cursor()
+        self._db_conn = db_conn
+        self._cursor = cursor
 
     @staticmethod
     def roll_many(
@@ -221,9 +221,14 @@ class Poll(commands.Cog):
             self._cursor.execute(
                 'INSERT INTO tasks '
                 '(completed, task, message_id, channel_id, end_time)'
-                f'VALUES (false, "close_poll", {message.id}, {ctx.channel.id},'
-                f'"{datetime.now() + timedelta(seconds=5)}");',
+                'VALUES (false, "close_poll", ?, ?, ?);',
+                (
+                    message.id,
+                    ctx.channel.id,
+                    (datetime.now() + timedelta(seconds=5)).strftime('%m/%d/%y %H:%M:%S'),
+                ),
             )
+            self._db_conn.commit()
         elif len(args) > 1:
             # Multi-choice poll
             question = bold(args[0])
@@ -239,9 +244,14 @@ class Poll(commands.Cog):
             self._cursor.execute(
                 'INSERT INTO tasks '
                 '(completed, task, message_id, channel_id, end_time)'
-                f'VALUES (false, "close_poll", {message.id}, {ctx.channel.id},'
-                f'"{datetime.now() + timedelta(seconds=5)}");',
+                'VALUES (false, "close_poll", ?, ?, ?);',
+                (
+                    message.id,
+                    ctx.channel.id,
+                    (datetime.now() + timedelta(seconds=5)).strftime('%m/%d/%y %H:%M:%S'),
+                ),
             )
+            self._db_conn.commit()
         else:
             await ctx.send(
                 'Incorrect syntax, try \"`!poll "<question>"'
@@ -273,7 +283,7 @@ class Poll(commands.Cog):
             message_id: int,
             channel_id: int,
     ) -> None:
-        channel = self._bot.get_channel(channel_id)
+        channel = await self._bot.fetch_channel(channel_id)
         if not isinstance(channel, TextChannel):
             return  # TODO handle
         message: Message = await channel.fetch_message(message_id)

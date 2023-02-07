@@ -5,7 +5,7 @@ from typing import Literal
 from discord.ext import commands
 from discord.ext.commands import Bot
 from discord.ext.commands import Context
-from heckbot.adaptor.config_adaptor import ConfigAdaptor
+from heckbot.adapter.config_adapter import ConfigAdaptor
 
 from bot import HeckBot
 

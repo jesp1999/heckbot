@@ -1,5 +1,10 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from heckbot.cogs.poll import Poll
+
 import asyncio
 import os
 import random
@@ -10,6 +15,7 @@ from os.path import dirname
 from os.path import join
 from typing import Final
 from typing import Literal
+from typing import cast
 
 import discord
 from discord import Intents
@@ -17,7 +23,7 @@ from discord import TextChannel
 from discord.ext import commands
 from discord.ext import tasks
 from dotenv import load_dotenv
-from heckbot.adaptor.config_adaptor import ConfigAdaptor
+from heckbot.adapter.config_adapter import ConfigAdaptor
 from heckbot.types.constants import ADMIN_CONSOLE_CHANNEL_ID
 from heckbot.types.constants import BOT_COMMAND_PREFIX
 from heckbot.types.constants import BOT_CUSTOM_STATUS
@@ -26,11 +32,21 @@ from heckbot.types.constants import PRIMARY_GUILD_ID
 load_dotenv(join(dirname(__file__), '.env'))
 
 db_conn = sqlite3.connect('tasks.db')
+
+
+def dict_factory(crs, row):
+    d = {}
+    for idx, col in enumerate(crs.description):
+        d[col[0]] = row[idx]
+    return d
+
+
+db_conn.row_factory = dict_factory
 cursor = db_conn.cursor()
 cursor.execute('DROP TABLE IF EXISTS tasks;')
 cursor.execute(
     'CREATE TABLE IF NOT EXISTS tasks'
-    '(row_id INT, completed BOOLEAN, task TEXT, message_id INT, channel_id INT, end_time TEXT);',
+    '(completed BOOLEAN, task TEXT, message_id INT, channel_id INT, end_time TEXT);',
 )
 db_conn.commit()
 
@@ -66,25 +82,25 @@ class HeckBot(commands.Bot):
         self.uptime: datetime = datetime.utcnow()
         self.config = ConfigAdaptor()
 
-    @tasks.loop()
+    @tasks.loop(seconds=5)
     async def task_loop(self):
         cursor.execute(
-            'SELECT * FROM tasks WHERE NOT completed ORDER BY end_time LIMIT 1;',
+            'SELECT rowid,* FROM tasks WHERE NOT completed ORDER BY end_time LIMIT 1;',
         )
-        next_task = await cursor.fetchone()
-
+        next_task = cursor.fetchone()
         # if no remaining tasks, stop the loop
         if next_task is None:
-            self.task_loop.cancel()
+            return
 
         # sleep until the task should be done
-        await discord.utils.sleep_until(next_task['end_time'])
-
+        await discord.utils.sleep_until(
+            datetime.strptime(next_task['end_time'], '%m/%d/%y %H:%M:%S'),
+        )
         # perform task
-        task_type = next_task['task_type']
+        task_type = next_task['task']
         match task_type:
             case 'close_poll':
-                poll_cog = self.get_cog('Poll')
+                poll_cog = cast('Poll', self.get_cog('Poll'))
                 await poll_cog.close_poll(
                     next_task['message_id'],
                     next_task['channel_id'],
@@ -93,19 +109,10 @@ class HeckBot(commands.Bot):
                 raise NotImplementedError
 
         cursor.execute(
-            'UPDATE tasks SET completed = true WHERE row_id = $1',
-            next_task['row_id'],
+            'UPDATE tasks SET completed = true WHERE rowid = ?;',
+            (next_task['rowid'],),
         )
         db_conn.commit()
-
-        self.task_loop.before_loop(discord.Client.wait_until_ready)
-        self.task_loop.start()
-
-        # in a command that adds new task in db
-        if self.task_loop.is_running():
-            self.task_loop.restart()
-        else:
-            self.task_loop.start()
 
     def run(self, **kwargs):
         load_dotenv(join(dirname(__file__), '.env'))
@@ -119,6 +126,7 @@ class HeckBot(commands.Bot):
         :return:
         """
         self.after_ready_task = asyncio.create_task(self.after_ready())
+        self.task_loop.start()
 
         self.remove_command('help')
 

@@ -6,7 +6,7 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import Bot
 from discord.ext.commands import Context
-from heckbot.adaptor.reaction_table_adaptor import ReactionTableAdaptor
+from heckbot.adapter.reaction_table_adapter import ReactionTableAdaptor
 
 from bot import HeckBot
 
