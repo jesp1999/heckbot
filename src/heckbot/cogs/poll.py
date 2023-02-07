@@ -265,12 +265,12 @@ class Poll(commands.Cog):
     ) -> str:
         options: list[str] = [
             # Get content to right of ': '
-            m.rpartition(': ')[2]
+            m
             # Get option lines (all but the first)
             for m in message.content.split('\n')[1:]
         ]
         option_counts: list[int] = [
-            r.count
+            r.count - 1
             for r in message.reactions
         ]
         results: str = '\n'.join([
