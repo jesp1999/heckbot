@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    # noinspection PyUnresolvedReferences
     from heckbot.cogs.poll import Poll
 
 import asyncio
