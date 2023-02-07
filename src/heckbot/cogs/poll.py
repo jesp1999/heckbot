@@ -225,7 +225,7 @@ class Poll(commands.Cog):
                 (
                     message.id,
                     ctx.channel.id,
-                    (datetime.now() + timedelta(seconds=5)).strftime('%m/%d/%y %H:%M:%S'),
+                    (datetime.now() + timedelta(minutes=5)).strftime('%m/%d/%y %H:%M:%S'),
                 ),
             )
             self._db_conn.commit()
