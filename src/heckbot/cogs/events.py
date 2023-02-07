@@ -35,7 +35,6 @@ class Events(commands.Cog):
             channel = member.guild.get_channel(WELCOME_CHANNEL_ID)
             if isinstance(channel, TextChannel):
                 await channel.send(
-
                     self._bot.config.get_message(
                         member.guild.id,
                         'welcomeMessage',
