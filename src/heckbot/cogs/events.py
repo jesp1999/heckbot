@@ -18,7 +18,7 @@ class Events(commands.Cog):
         Constructor method
         :param bot: Instance of the running Bot
         """
-        self._bot: HeckBot = bot
+        self._bot = bot
 
     @commands.Cog.listener()
     async def on_member_join(

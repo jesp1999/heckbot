@@ -50,7 +50,7 @@ TaskType = Literal['close_poll']
 
 class HeckBot(commands.Bot):
     after_ready_task: asyncio.Task[None]
-    _cogs: Final[list[str]] = [
+    _cogs: Final = [
         'config',
         'events',
         'gif',
@@ -60,7 +60,7 @@ class HeckBot(commands.Bot):
     ]
 
     def __init__(self):
-        intents: Intents = Intents(
+        intents = Intents(
             messages=True,
             message_content=True,
             typing=True,
@@ -74,7 +74,7 @@ class HeckBot(commands.Bot):
             reconnect=True,
             case_insensitive=False,
         )
-        self.uptime: datetime = datetime.utcnow()
+        self.uptime = datetime.utcnow()
         self.config = ConfigAdapter()
 
     @tasks.loop(seconds=TASK_LOOP_PERIOD)

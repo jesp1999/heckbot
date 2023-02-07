@@ -26,7 +26,7 @@ class React(commands.Cog):
         Constructor method
         :param bot: Instance of the running Bot
         """
-        self._bot: HeckBot = bot
+        self._bot = bot
 
     @commands.command()
     async def react(
@@ -193,7 +193,7 @@ class React(commands.Cog):
             pattern,
     ):
         if pattern:
-            associations: str = str(
+            associations = str(
                 self._association_repository.get_reactions(
                     str(ctx.guild.id),
                     pattern,

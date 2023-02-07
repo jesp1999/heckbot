@@ -28,7 +28,7 @@ class Config(commands.Cog):
         Constructor method
         :param bot: Instance of the running Bot
         """
-        self._bot: HeckBot = bot
+        self._bot = bot
         self._config_adapter = ConfigAdapter()
 
     @commands.command(

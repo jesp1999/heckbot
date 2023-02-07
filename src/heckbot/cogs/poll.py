@@ -59,7 +59,7 @@ class Poll(commands.Cog):
         Constructor method
         :param bot: Instance of the running Bot
         """
-        self._bot: HeckBot = bot
+        self._bot = bot
         self._db_conn = db_conn
         self._cursor = cursor
 
@@ -264,10 +264,7 @@ class Poll(commands.Cog):
             message: Message,
     ) -> str:
         options = message.content.split('\n')[1:]
-        option_counts = [
-            r.count - 1
-            for r in message.reactions
-        ]
+        option_counts = [r.count - 1 for r in message.reactions]
         results = '\n'.join([
             f'{opt}: {cnt}' for opt, cnt in zip(options, option_counts)
         ])
@@ -281,7 +278,7 @@ class Poll(commands.Cog):
         channel = await self._bot.fetch_channel(channel_id)
         if not isinstance(channel, TextChannel):
             return  # TODO handle
-        message: Message = await channel.fetch_message(message_id)
+        message = await channel.fetch_message(message_id)
         try:
             await message.reply(
                 content=await self.get_results_for_poll(message),

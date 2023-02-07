@@ -13,8 +13,8 @@ from pynamodb.models import Model
 
 class ReactionAssociation(Model):
     class Meta:
-        read_capacity_units: int = 1
-        write_capacity_units: int = 1
+        read_capacity_units = 1
+        write_capacity_units = 1
         table_name = 'HeckBotReactions'
         host = os.environ['AWS_HOST']
     guild_id: UnicodeAttribute = UnicodeAttribute(hash_key=True)
