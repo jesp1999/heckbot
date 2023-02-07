@@ -263,17 +263,12 @@ class Poll(commands.Cog):
             cls,
             message: Message,
     ) -> str:
-        options: list[str] = [
-            # Get content to right of ': '
-            m
-            # Get option lines (all but the first)
-            for m in message.content.split('\n')[1:]
-        ]
-        option_counts: list[int] = [
+        options = message.content.split('\n')[1:]
+        option_counts = [
             r.count - 1
             for r in message.reactions
         ]
-        results: str = '\n'.join([
+        results = '\n'.join([
             f'{opt}: {cnt}' for opt, cnt in zip(options, option_counts)
         ])
         return f'Poll results:\n{results}'
