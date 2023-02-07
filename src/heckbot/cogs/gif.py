@@ -1,8 +1,13 @@
+from __future__ import annotations
+
 import os
 
 import aiohttp
 from discord.ext import commands
-from discord.ext.commands import Bot, Context
+from discord.ext.commands import Bot
+from discord.ext.commands import Context
+
+from bot import HeckBot
 
 
 class Gif(commands.Cog):
@@ -13,19 +18,19 @@ class Gif(commands.Cog):
 
     def __init__(
             self,
-            bot: Bot
+            bot: HeckBot,
     ) -> None:
         """
         Constructor method
         :param bot: Instance of the running Bot
         """
         self._tenor_api_key = os.getenv('TENOR_API_KEY')
-        self._bot: Bot = bot
+        self._bot = bot
 
     @commands.command()
     async def gif(
             self,
-            ctx: Context,
+            ctx: Context[Bot],
             *search_term_parts
     ) -> None:
         """
@@ -39,23 +44,28 @@ class Gif(commands.Cog):
         """
         search_term = ' '.join(search_term_parts)
         async with aiohttp.ClientSession() as session:
+            # TODO refactor this to add some randomness to the returned
+            #  image
             gif_request_url = (
                 'https://tenor.googleapis.com/v2/'
-                'search?q={}&key={}&client_key={}&limit=1').format(
+                'search?q={}&key={}&client_key={}&limit=1'
+            ).format(
                 search_term,
                 self._tenor_api_key,
-                self._client_key
+                self._client_key,
             )
             async with session.get(gif_request_url) as response:
                 if response.status == 200:
                     response_json = await response.json()
                     gif_url = response_json['results'][0]['media_formats'][
-                        'mediumgif']['url']
+                        'mediumgif'
+                    ]['url']
                     await ctx.send(gif_url)
+                response.raise_for_status()
 
 
 async def setup(
-        bot: Bot
+        bot: HeckBot,
 ):
     """
     Setup function for registering the gif cog.

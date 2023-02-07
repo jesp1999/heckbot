@@ -1,36 +1,40 @@
+from __future__ import annotations
+
 import asyncio
-from typing import Optional
 
 import discord
 from discord.ext import commands
-from discord.ext.commands import Context, Bot
+from discord.ext.commands import Bot
+from discord.ext.commands import Context
+from heckbot.adapter.reaction_table_adapter import ReactionTableAdapter
 
-from src.service.react_service import AssociationService
+from bot import HeckBot
 
 
 class React(commands.Cog):
     """
     Cog for enabling reaction-matching-related features in the bot.
     """
-    _association_service: AssociationService = AssociationService()
+
+    _association_repository: ReactionTableAdapter = ReactionTableAdapter()
 
     def __init__(
             self,
-            bot: Bot
+            bot: HeckBot,
     ) -> None:
         """
         Constructor method
         :param bot: Instance of the running Bot
         """
-        self._bot: Bot = bot
+        self._bot = bot
 
     @commands.command()
     async def react(
             self,
-            ctx: Context,
+            ctx: Context[Bot],
             subcommand: str,
-            pattern: Optional[str] = None,
-            reaction: Optional[str] = None
+            pattern: str | None = None,
+            reaction: str | None = None,
     ) -> None:
         """
         General purpose reaction-matching root command. Aliases the
@@ -43,18 +47,18 @@ class React(commands.Cog):
         :return:
         """
         if subcommand == 'add':
-            return await self.radd(ctx, pattern, reaction)
+            await self.radd(ctx, pattern, reaction)
         elif subcommand in ['remove', 'delete', 'rm', 'del']:
-            return await self.rdel(ctx, pattern, reaction)
+            await self.rdel(ctx, pattern, reaction)
         elif subcommand in ['list', 'lst']:
-            return await self.rlist(ctx, pattern, reaction)
+            await self.rlist(ctx, pattern)
 
-    @commands.command(aliases=['associate', 'assoc', 'radd'])
-    async def reactadd(
+    @commands.command(aliases=['reactadd', 'associate', 'assoc', 'radd'])
+    async def react_add(
             self,
-            ctx: Context,
+            ctx: Context[Bot],
             pattern: str,
-            reaction: str
+            reaction: str,
     ) -> None:
         """
         Reaction association command. Creates an association between a
@@ -67,13 +71,18 @@ class React(commands.Cog):
         """
         await self.radd(ctx, pattern, reaction)
 
-    @commands.command(aliases=['dissociate', 'dissoc', 'rdel', 'reactdel',
-                               'reactremove', 'reactrem', 'rrem'])
-    async def reactdelete(
+    @commands.command(
+        aliases=[
+            'reactdelete', 'dissociate', 'dissoc',
+            'rdel', 'reactdel', 'reactremove',
+            'reactrem', 'rrem',
+        ],
+    )
+    async def react_delete(
             self,
-            ctx: Context,
+            ctx: Context[Bot],
             pattern: str,
-            reaction: Optional[str] = None
+            reaction: str | None = None,
     ) -> None:
         """
         Reaction dissociation command. Removes an association between a
@@ -88,29 +97,24 @@ class React(commands.Cog):
         """
         await self.rdel(ctx, pattern, reaction)
 
-    @commands.command()
-    async def disassociate(
+    @commands.command(
+        aliases=[
+            'reactlist', 'listassociations', 'rlist',
+            'rlst',
+        ],
+    )
+    async def react_list(
             self,
-            ctx: Context
+            ctx: Context[Bot],
+            pattern: str | None = None,
     ) -> None:
-        """
-        Joke command based on a misspelling of the dissociate command.
-        Directs the commander sarcastically in the right direction!
-        """
-        await ctx.send('The command is \"`!dissociate`\", y\'know 😉')
-
-    @commands.command(aliases=['listassociations', 'rlist', 'rlst'])
-    async def reactlist(
-            self,
-            ctx: Context,
-            pattern: Optional[str] = None
-    ) -> None:
-        await self.rlist(ctx, pattern, ctx.guild.id)
+        if ctx.guild is not None:
+            await self.rlist(ctx, pattern)
 
     @commands.Cog.listener('on_message')
     async def on_message(
             self,
-            message: discord.Message
+            message: discord.Message,
     ) -> None:
         """
         Event listener triggered whenever the bot detects a message.
@@ -126,62 +130,86 @@ class React(commands.Cog):
 
         text = message.content.lower()
         guild = message.guild
+        if guild is None:
+            return
 
-        associations = self._association_service.get_all_associations(
-            str(guild.id)
+        associations = self._association_repository.get_all_reactions(
+            str(guild.id),
         )
         for word, emojis in associations.items():
             if word in text:
                 for emoji in emojis:
                     asyncio.get_event_loop().create_task(
-                        message.add_reaction(emoji)
+                        message.add_reaction(emoji),
                     )
 
-    async def radd(self, ctx, pattern, reaction):
-        self._association_service.add_association(
+    async def radd(
+            self,
+            ctx,
+            pattern,
+            reaction,
+    ):
+        self._association_repository.add_reaction(
             str(ctx.guild.id),
             pattern,
-            reaction
+            reaction,
         )
-        await ctx.send(f'Successfully associated the keyword '
-                       f'\"{pattern}\" with the reaction '
-                       f'\"{reaction}\"!')
+        await ctx.send(
+            f'Successfully associated the keyword '
+            f'\"{pattern}\" with the reaction '
+            f'\"{reaction}\"!',
+        )
 
-    async def rdel(self, ctx, pattern, reaction):
+    async def rdel(
+            self,
+            ctx,
+            pattern,
+            reaction,
+    ):
         if reaction is None:
-            self._association_service.remove_association(
-                str(ctx.guild.id),
-                pattern
-            )
-            await ctx.send(f'Successfully dissociated the keyword '
-                           f'\"{pattern}\" from all reactions!')
-        else:
-            self._association_service.remove_association(
+            self._association_repository.remove_all_reactions(
                 str(ctx.guild.id),
                 pattern,
-                reaction
             )
-            await ctx.send(f'Successfully dissociated the keyword '
-                           f'\"{pattern}\" with the reaction '
-                           f'\"{reaction}\"!')
-
-    async def rlist(self, ctx, pattern, guild_id):
-        if pattern:
-            associations = (
-                self._association_service.get_associations_for_pattern(
-                    guild=str(guild_id),
-                    pattern=pattern
-                )
+            await ctx.send(
+                f'Successfully dissociated the keyword '
+                f'\"{pattern}\" from all reactions!',
             )
         else:
-            associations = self._association_service.get_all_associations(
-                guild=str(ctx.guild.id)
+            self._association_repository.remove_reaction(
+                str(ctx.guild.id),
+                pattern,
+                reaction,
             )
-        await ctx.send(str(associations))
+            await ctx.send(
+                f'Successfully dissociated the keyword '
+                f'\"{pattern}\" with the reaction '
+                f'\"{reaction}\"!',
+            )
+
+    async def rlist(
+            self,
+            ctx,
+            pattern,
+    ):
+        if pattern:
+            associations = str(
+                self._association_repository.get_reactions(
+                    str(ctx.guild.id),
+                    pattern,
+                ),
+            )
+        else:
+            associations = str(
+                self._association_repository.get_all_reactions(
+                    str(ctx.guild.id),
+                ),
+            )
+        await ctx.send(associations)
 
 
 async def setup(
-        bot: Bot
+        bot: HeckBot,
 ) -> None:
     """
     Setup function for registering the react-match cog.
