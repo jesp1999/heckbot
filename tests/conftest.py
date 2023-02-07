@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 import os
-from os.path import dirname
-from os.path import join
+from pathlib import Path
 
 from dotenv import load_dotenv
 
@@ -12,4 +11,4 @@ os.environ['AWS_DEFAULT_REGION'] = 'region'
 
 
 def pytest_sessionstart(session):
-    load_dotenv(join(dirname(__file__), '.env'))
+    load_dotenv(Path(__file__).parent / '.env')
