@@ -197,24 +197,56 @@ class Poll(commands.Cog):
         )
         return results
 
+    @commands.command(aliases=['pollfor'])
+    async def poll_for(
+            self,
+            ctx: Context[Bot],
+            timeout_mins: int,
+            question: str,
+            *choices: str
+    ) -> None:
+        """
+        Polling command. The commander specifies the poll duration, poll
+        question, and answers as space-delimited strings which may
+        contain spaces as long as they are within quotes. If the
+        commander only specifies the poll question, the answers will be
+        assumed to be yes/no.
+        :param ctx: Command context
+        :param timeout_mins: Timeout duration for the poll
+        :param question: Question for the poll
+        :param choices: Answers for the poll
+        """
+        await self.poll_helper(ctx, timeout_mins, question, choices)
+
     @commands.command()
     async def poll(
             self,
             ctx: Context[Bot],
-            *args
+            question: str,
+            *choices: str
     ) -> None:
         """
         Polling command. The commander specifies the poll question and
         answers as space-delimited strings which may contain spaces as
         long as they are within quotes. If the commander only specifies
         the poll question, the answers will be assumed to be yes/no.
+        Polls generated with this command time out in 5 minutes.
         :param ctx: Command context
-        :param args: Command arguments, specifies the question and
-        answers
+        :param question: Question for the poll
+        :param choices: Answers for the poll
         """
-        if len(args) == 1:
+        await self.poll_helper(ctx, 5, question, choices)
+
+    async def poll_helper(
+            self,
+            ctx: Context[Bot],
+            timeout_mins: int,
+            question: str,
+            choices: Sequence[str],
+    ):
+        if len(choices) == 0:
             # Yes/no poll
-            question: str = bold(args[0])
+            question = bold(question)
             message = await ctx.send(question)
             for reaction in self.YES_NO_REACTIONS:
                 await message.add_reaction(reaction)
@@ -225,15 +257,16 @@ class Poll(commands.Cog):
                 (
                     message.id,
                     ctx.channel.id,
-                    (datetime.now() + timedelta(minutes=5)).strftime('%m/%d/%y %H:%M:%S'),
+                    (
+                        datetime.now() + timedelta(minutes=timeout_mins)
+                    ).strftime('%m/%d/%y %H:%M:%S'),
                 ),
             )
             self._db_conn.commit()
-        elif len(args) > 1:
+        elif len(choices) > 0:
             # Multi-choice poll
-            question = bold(args[0])
-            choices = args[1:]
-            num_choices = len(args) - 1
+            question = bold(question)
+            num_choices = len(choices)
             message_text = question
             for reaction, choice in zip(self.MULTI_CHOICE_REACTIONS, choices):
                 message_text += f'\n{reaction}: {choice}'
@@ -248,12 +281,14 @@ class Poll(commands.Cog):
                 (
                     message.id,
                     ctx.channel.id,
-                    (datetime.now() + timedelta(seconds=5)).strftime('%m/%d/%y %H:%M:%S'),
+                    (
+                        datetime.now() + timedelta(minutes=timeout_mins)
+                    ).strftime('%m/%d/%y %H:%M:%S'),
                 ),
             )
             self._db_conn.commit()
         else:
-            await ctx.send(
+            await ctx.send(  # TODO add separate check for poll and pollfor
                 'Incorrect syntax, try \"`!poll "<question>"'
                 ' "[choice1]" "[choice2]" ...`\"',
             )
@@ -264,6 +299,8 @@ class Poll(commands.Cog):
             message: Message,
     ) -> str:
         options = message.content.split('\n')[1:]
+        if len(options) == 0:
+            options = ['👍: Yes', '👎: No']
         option_counts = [r.count - 1 for r in message.reactions]
         results = '\n'.join([
             f'{opt}: {cnt}' for opt, cnt in zip(options, option_counts)
