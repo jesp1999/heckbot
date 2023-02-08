@@ -103,7 +103,7 @@ class HeckBot(commands.Bot):
             case _:  # default
                 raise NotImplementedError
 
-cursor.execute(
+        cursor.execute(
             'UPDATE tasks SET completed = true WHERE rowid = ?;',
             (next_task['rowid'],),
         )
