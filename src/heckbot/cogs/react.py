@@ -16,7 +16,7 @@ class React(commands.Cog):
     Cog for enabling reaction-matching-related features in the bot.
     """
 
-    _association_repository: ReactionTableAdapter = ReactionTableAdapter()
+    _reaction_table: ReactionTableAdapter = ReactionTableAdapter()
 
     def __init__(
             self,
@@ -40,10 +40,10 @@ class React(commands.Cog):
         General purpose reaction-matching root command. Aliases the
         functionality of all other reaction-matching commands by using
         the subcommand parameter to select which function to perform.
-        :param ctx:
-        :param subcommand:
-        :param pattern:
-        :param reaction:
+        :param ctx: Command context
+        :param subcommand: bruh
+        :param pattern: Pattern string to match with the reaction
+        :param reaction: Reaction to respond with
         :return:
         """
         if subcommand == 'add':
@@ -133,7 +133,7 @@ class React(commands.Cog):
         if guild is None:
             return
 
-        associations = self._association_repository.get_all_reactions(
+        associations = self._reaction_table.get_all_reactions(
             str(guild.id),
         )
         for word, emojis in associations.items():
@@ -149,7 +149,7 @@ class React(commands.Cog):
             pattern,
             reaction,
     ):
-        self._association_repository.add_reaction(
+        self._reaction_table.add_reaction(
             str(ctx.guild.id),
             pattern,
             reaction,
@@ -167,7 +167,7 @@ class React(commands.Cog):
             reaction,
     ):
         if reaction is None:
-            self._association_repository.remove_all_reactions(
+            self._reaction_table.remove_all_reactions(
                 str(ctx.guild.id),
                 pattern,
             )
@@ -176,7 +176,7 @@ class React(commands.Cog):
                 f'\"{pattern}\" from all reactions!',
             )
         else:
-            self._association_repository.remove_reaction(
+            self._reaction_table.remove_reaction(
                 str(ctx.guild.id),
                 pattern,
                 reaction,
@@ -194,14 +194,14 @@ class React(commands.Cog):
     ):
         if pattern:
             associations = str(
-                self._association_repository.get_reactions(
+                self._reaction_table.get_reactions(
                     str(ctx.guild.id),
                     pattern,
                 ),
             )
         else:
             associations = str(
-                self._association_repository.get_all_reactions(
+                self._reaction_table.get_all_reactions(
                     str(ctx.guild.id),
                 ),
             )

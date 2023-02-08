@@ -53,6 +53,7 @@ class HeckBot(commands.Bot):
         'config',
         'events',
         'gif',
+        'message',
         'moderation',
         'poll',
         'react',
