@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from pathlib import Path
 from sqlite3 import Row
 from typing import TYPE_CHECKING
 
@@ -13,8 +14,6 @@ import random
 import sqlite3
 import sys
 from datetime import datetime
-from os.path import dirname
-from os.path import join
 from typing import Final
 from typing import Literal
 from typing import cast
@@ -33,7 +32,7 @@ from heckbot.types.constants import PRIMARY_GUILD_ID
 
 TASK_LOOP_PERIOD = 5  # seconds
 
-load_dotenv(join(dirname(__file__), '.env'))
+load_dotenv(Path(__file__).parent / '.env')
 
 db_conn = sqlite3.connect('tasks.db')
 db_conn.row_factory = Row
@@ -110,7 +109,7 @@ class HeckBot(commands.Bot):
         db_conn.commit()
 
     def run(self, **kwargs):
-        load_dotenv(join(dirname(__file__), '.env'))
+        load_dotenv(Path(__file__).parent / '.env')
         super().run(os.environ['DISCORD_TOKEN'])
 
     async def setup_hook(
