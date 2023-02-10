@@ -12,4 +12,4 @@ PyYAML~=6.0
 setuptools==67.1.0
 table2ascii~=1.1.0
 types-PyYAML==6.0.12.4
-bandit~=1.7.3
+bandit~=1.7.4
