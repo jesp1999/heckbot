@@ -41,15 +41,17 @@ class React(commands.Cog):
         functionality of all other reaction-matching commands by using
         the subcommand parameter to select which function to perform.
         :param ctx: Command context
-        :param subcommand: bruh
+        :param subcommand: Sub-command of the react function call
         :param pattern: Pattern string to match with the reaction
         :param reaction: Reaction to respond with
         :return:
         """
         if subcommand == 'add':
-            await self.radd(ctx, pattern, reaction)
+            if isinstance(pattern, str) and isinstance(reaction, str):
+                await self.radd(ctx, pattern, reaction)
         elif subcommand in ['remove', 'delete', 'rm', 'del']:
-            await self.rdel(ctx, pattern, reaction)
+            if isinstance(pattern, str):
+                await self.rdel(ctx, pattern, reaction)
         elif subcommand in ['list', 'lst']:
             await self.rlist(ctx, pattern)
 
@@ -145,10 +147,12 @@ class React(commands.Cog):
 
     async def radd(
             self,
-            ctx,
-            pattern,
-            reaction,
-    ):
+            ctx: Context[Bot],
+            pattern: str,
+            reaction: str,
+    ) -> None:
+        if ctx.guild is None:
+            return
         self._reaction_table.add_reaction(
             str(ctx.guild.id),
             pattern,
@@ -162,10 +166,12 @@ class React(commands.Cog):
 
     async def rdel(
             self,
-            ctx,
-            pattern,
-            reaction,
-    ):
+            ctx: Context[Bot],
+            pattern: str,
+            reaction: str | None = None,
+    ) -> None:
+        if ctx.guild is None:
+            return
         if reaction is None:
             self._reaction_table.remove_all_reactions(
                 str(ctx.guild.id),
@@ -189,9 +195,11 @@ class React(commands.Cog):
 
     async def rlist(
             self,
-            ctx,
-            pattern,
-    ):
+            ctx: Context[Bot],
+            pattern: str | None = None,
+    ) -> None:
+        if ctx.guild is None:
+            return
         if pattern:
             associations = str(
                 self._reaction_table.get_reactions(

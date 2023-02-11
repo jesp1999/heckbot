@@ -28,36 +28,76 @@ class Message(commands.Cog):
         """
         self._bot = bot
 
-    @commands.command()
+    @commands.command(aliases=['message', 'addresponse', 'respond'])
     async def msg(
             self,
             ctx: Context[Bot],
-            pattern: str,
-            *message_parts
+            subcommand: str,
+            pattern: str | None = None,
+            *message_parts: str,
     ) -> None:
         """
-        Message association command. Creates the association between a
-        pattern and a reaction message such that any messages which
-        contain the specified pattern will be responded to with the
-        reaction message, permission permitting.
-
+        General purpose message-matching root command. Aliases the
+        functionality of all other message-matching commands by using
+        the subcommand parameter to select which function to perform.
         :param ctx: Command context
-        :param pattern: Key used for parsing messages
-        :param message_parts: parts of the desired message to be sent
+        :param subcommand: Sub-command of the message function call
+        :param pattern: Pattern string to match with the reaction
+        :param message_parts: Parts of the message to respond with
+        :return:
         """
-        if ctx.guild is None:
-            return
         message = ' '.join(message_parts)
-        self._message_table.add_message(
-            str(ctx.guild.id),
-            pattern,
-            message,
-        )
-        await ctx.send(
-            f'Successfully associated the keyword '
-            f'\"{pattern}\" with the message '
-            f'\"{message}\"!',
-        )
+        if subcommand == 'add':
+            if isinstance(pattern, str) and isinstance(message, str):
+                await self.madd(ctx, pattern, message)
+        elif subcommand in ['remove', 'delete', 'rm', 'del']:
+            if isinstance(pattern, str):
+                await self.mdel(ctx, pattern, message)
+        # elif subcommand in ['list', 'lst']:
+        #     await self.mlist(ctx, pattern)
+
+    @commands.command(aliases=['messageadd', 'msgadd', 'madd'])
+    async def message_add(
+            self,
+            ctx: Context[Bot],
+            pattern: str,
+            message: str,
+    ) -> None:
+        """
+        Reaction association command. Creates an association between a
+        pattern and message such that any messages which contain the
+        specified pattern will be responded to with the specified
+        message, permission permitting.
+        :param ctx: Command context
+        :param pattern: Pattern string to match with the message
+        :param message: Message to respond with
+        """
+        await self.madd(ctx, pattern, message)
+
+    @commands.command(
+        aliases=[
+            'messagedelete', 'mdel', 'msgdel', 'msgremove', 'messageremove',
+            'rsgrem', 'mrem',
+        ],
+    )
+    async def message_delete(
+            self,
+            ctx: Context[Bot],
+            pattern: str,
+            message: str | None = None,
+    ) -> None:
+        """
+        Message dissociation command. Removes an association between a
+        pattern and message. If no message is specified, the bot will
+        remove all associations with the specified pattern.
+
+        See the documentation for the associate command for what an
+        association represents.
+        :param ctx: Command context
+        :param pattern: Pattern string to remove associations from
+        :param message: Message to (no longer) respond with
+        """
+        await self.mdel(ctx, pattern, message)
 
     @commands.Cog.listener('on_message')
     async def on_message(
@@ -92,10 +132,58 @@ class Message(commands.Cog):
                         (await self._bot.get_context(message)).send(response),
                     )
 
+    async def madd(
+            self,
+            ctx: Context[Bot],
+            pattern: str,
+            message: str,
+    ) -> None:
+        if ctx.guild is None:
+            return
+        self._message_table.add_message(
+            str(ctx.guild.id),
+            pattern,
+            message,
+        )
+        await ctx.send(
+            f'Successfully associated the keyword '
+            f'\"{pattern}\" with the message '
+            f'\"{message}\"!',
+        )
+
+    async def mdel(
+            self,
+            ctx: Context[Bot],
+            pattern: str,
+            message: str | None = None,
+    ) -> None:
+        if ctx.guild is None:
+            return
+        if message is None:
+            self._message_table.remove_all_messages(
+                str(ctx.guild.id),
+                pattern,
+            )
+            await ctx.send(
+                f'Successfully dissociated the keyword '
+                f'\"{pattern}\" from all messages!',
+            )
+        else:
+            self._message_table.remove_message(
+                str(ctx.guild.id),
+                pattern,
+                message,
+            )
+            await ctx.send(
+                f'Successfully dissociated the keyword '
+                f'\"{pattern}\" with the message '
+                f'\"{message}\"!',
+            )
+
 
 async def setup(
         bot: HeckBot,
-):
+) -> None:
     """
     Setup function for registering the message cog
     :param bot: Instance of the running Bot
