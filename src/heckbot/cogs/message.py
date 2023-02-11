@@ -64,7 +64,7 @@ class Message(commands.Cog):
             message: str,
     ) -> None:
         """
-        Reaction association command. Creates an association between a
+        Message association command. Creates an association between a
         pattern and message such that any messages which contain the
         specified pattern will be responded to with the specified
         message, permission permitting.
@@ -107,9 +107,9 @@ class Message(commands.Cog):
         """
         Event listener triggered whenever the bot detects a message.
         This listener will attempt to match the text contents of the
-        given message with all registered reaction associations to
-        respond with all appropriate messages based on the contents of
-        the message.
+        given message with all registered message response associations
+        to respond with all appropriate messages based on the contents
+        of the message.
         :param message: The Discord message to be analyzed
         """
         if message.author.bot or (

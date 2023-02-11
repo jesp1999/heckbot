@@ -92,7 +92,7 @@ class MessageTableAdapter:
     ) -> None:
         """
         Removes all message responses to a given pattern in a given
-         guild in the ReactionTableAdapter
+         guild in the MessageTableAdapter
         :param guild_id: Guild ID to match (PK)
         :param pattern: pattern to match (SK)
         """
