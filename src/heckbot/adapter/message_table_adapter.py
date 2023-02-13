@@ -88,13 +88,16 @@ class MessageTableAdapter:
     def remove_all_messages(
             cls,
             guild_id: str,
+            pattern: str,
     ) -> None:
         """
-        Removes all associations for the specified guild
+        Removes all message responses to a given pattern in a given
+         guild in the MessageTableAdapter
         :param guild_id: Guild ID to match (PK)
+        :param pattern: pattern to match (SK)
         """
         try:
-            association = MessageAssociation.get(guild_id)
+            association = MessageAssociation.get(guild_id, pattern)
             association.delete()
         except GetError:
             return  # TODO more
