@@ -66,7 +66,7 @@ class Poll(commands.Cog):
     @staticmethod
     def roll_many(
             roll_requests: Sequence[RollRequest],
-    ) -> Sequence[RollResult]:
+    ) -> Sequence[RollResult]:  # nosec B311
         """
         Simulates the rolling of a set of dice according to an input
         list of RollRequests.
