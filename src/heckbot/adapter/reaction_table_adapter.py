@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from typing import Mapping
 from typing import Sequence
 
 from pynamodb.attributes import ListAttribute
@@ -32,11 +33,11 @@ class ReactionTableAdapter:
     def get_all_reactions(
             cls,
             guild_id: str,
-    ) -> dict[str, Sequence[str]]:
+    ) -> Mapping[str, Sequence[str]]:
         """
         Finds all reactions for a given guild
         :param guild_id: Guild ID to match (PK)
-        :return: a list of reactions
+        :return: a mapping of patterns to sequences of reactions
         """
         return {q.pattern: q.reactions for q in ReactionAssociation.query(guild_id)}
 
@@ -48,10 +49,10 @@ class ReactionTableAdapter:
     ) -> Sequence[str]:
         """
         Finds the desired reactions for a given guild and (optionally)
-         pattern in the ReactionTableAdapter
+        pattern in the ReactionTableAdapter
         :param guild_id: Guild ID to match (PK)
         :param pattern: pattern to match (SK)
-        :return: a list of reactions
+        :return: a sequence of reactions
         """
         reactions: list[str] = ReactionAssociation.get(guild_id, pattern).reactions
         return reactions
@@ -65,7 +66,7 @@ class ReactionTableAdapter:
     ) -> None:
         """
         Adds the given reaction to the given guild id and pattern in the
-         ReactionTableAdapter
+        ReactionTableAdapter.
         :param guild_id: Guild ID to match (PK)
         :param pattern: pattern to match (SK)
         :param reaction: Reaction to add
@@ -90,8 +91,8 @@ class ReactionTableAdapter:
             pattern: str,
     ) -> None:
         """
-        Adds the given reaction to the given guild id and pattern in the
-         ReactionTableAdapter
+        Removes all reactions to a given pattern in a given guild in the
+        ReactionTableAdapter.
         :param guild_id: Guild ID to match (PK)
         :param pattern: pattern to match (SK)
         """
@@ -113,12 +114,11 @@ class ReactionTableAdapter:
             reaction: str,
     ) -> None:
         """
-        Adds the given reaction to the given guild id and pattern in the
-         ReactionTableAdapter
+        Removes the given reaction from the given guild id and pattern
+        in the ReactionTableAdapter.
         :param guild_id: Guild ID to match (PK)
         :param pattern: pattern to match (SK)
-        :param reaction: Reaction to remove (if unspecified, will remove
-        all)
+        :param reaction: Reaction to remove
         """
         try:
             association = ReactionAssociation.get(guild_id, pattern)
