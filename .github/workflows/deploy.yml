@@ -6,6 +6,7 @@ on:
 jobs:
   build:
     name: Deploy
+    if: github.repository == 'jesp1999/heckbot'
     runs-on: ubuntu-latest
     steps:
     - name: executing remote ssh commands using password
