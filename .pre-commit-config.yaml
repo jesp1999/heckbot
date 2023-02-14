@@ -57,7 +57,7 @@ repos:
     -   id: rst-backticks
     -   id: rst-directive-colons
     -   id: rst-inline-touching-normal
-  - repo: https://github.com/PyCQA/bandit
+-   repo: https://github.com/PyCQA/bandit
     rev: 1.7.4
     hooks:
     -   id: bandit
