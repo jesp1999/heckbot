@@ -9,6 +9,6 @@ pytest~=7.2.1
 pytest-asyncio~=0.20.3
 python-dotenv~=0.21.1
 PyYAML~=6.0
-setuptools==67.2.0
+setuptools==67.3.2
 table2ascii~=1.1.0
-types-PyYAML==6.0.12.6
+types-PyYAML==6.0.12.7
