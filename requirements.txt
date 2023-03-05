@@ -7,7 +7,7 @@ pynacl~=1.5.0
 pynamodb~=5.4.1
 pytest~=7.2.1
 pytest-asyncio~=0.20.3
-python-dotenv~=0.21.1
+python-dotenv~=1.0.0
 PyYAML~=6.0
 setuptools==67.4.0
 table2ascii~=1.1.0
