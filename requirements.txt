@@ -11,4 +11,4 @@ python-dotenv~=1.0.0
 PyYAML~=6.0
 setuptools==67.6.0
 table2ascii~=1.1.1
-types-PyYAML==6.0.12.8
+types-PyYAML==6.0.12.9
