@@ -203,7 +203,7 @@ class Poll(commands.Cog):
             ctx: Context[Bot],
             timeout_mins: int,
             question: str,
-            *choices: str
+            *choices: str,
     ) -> None:
         """
         Polling command. The commander specifies the poll duration, poll
@@ -223,7 +223,7 @@ class Poll(commands.Cog):
             self,
             ctx: Context[Bot],
             question: str,
-            *choices: str
+            *choices: str,
     ) -> None:
         """
         Polling command. The commander specifies the poll question and
@@ -513,7 +513,7 @@ class Poll(commands.Cog):
     async def roll(
             self,
             ctx: Context[Bot],
-            *args: str
+            *args: str,
     ) -> None:
         """
         Dice rolling command. The commander specifies a series of

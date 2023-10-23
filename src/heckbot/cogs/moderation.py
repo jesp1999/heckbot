@@ -81,7 +81,7 @@ class Moderation(commands.Cog):
             ctx: Context[Bot],
             member: Member,
             *,
-            reason='No reason provided!'
+            reason='No reason provided!',
     ) -> None:
         if ctx.guild is None or not isinstance(ctx.author, Member):
             return
@@ -136,7 +136,7 @@ class Moderation(commands.Cog):
             self,
             ctx: Context[Bot],
             *,
-            member_id: int
+            member_id: int,
     ) -> None:
         if ctx.guild is None:
             return
@@ -160,7 +160,7 @@ class Moderation(commands.Cog):
             ctx: Context[Bot],
             member: Member,
             *,
-            reason='No reason provided!'
+            reason='No reason provided!',
     ) -> None:
         if ctx.guild is None or not isinstance(ctx.author, Member):
             return
@@ -213,7 +213,7 @@ class Moderation(commands.Cog):
             ctx: Context[Bot],
             member: Member,
             *,
-            nickname: str
+            nickname: str,
     ) -> None:
         if ctx.guild is None or not isinstance(ctx.author, Member):
             return
@@ -345,7 +345,7 @@ class Moderation(commands.Cog):
             self,
             ctx: Context[Bot],
             *,
-            member_id: int
+            member_id: int,
     ) -> None:
         if ctx.guild is None:
             return
@@ -368,7 +368,7 @@ class Moderation(commands.Cog):
             ctx: Context[Bot],
             member: Member,
             *,
-            reason: str = 'No reason provided!'
+            reason: str = 'No reason provided!',
     ) -> None:
         if ctx.guild is None:
             return
