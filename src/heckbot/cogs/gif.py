@@ -31,7 +31,7 @@ class Gif(commands.Cog):
     async def gif(
             self,
             ctx: Context[Bot],
-            *search_term_parts
+            *search_term_parts,
     ) -> None:
         """
         Gif lookup command. Takes in a set of search parameters and
