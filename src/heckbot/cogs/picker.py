@@ -3,7 +3,8 @@ from __future__ import annotations
 import csv
 import os
 import random
-from datetime import datetime, timedelta
+from datetime import datetime
+from datetime import timedelta
 from pathlib import Path
 from urllib.parse import quote
 
@@ -11,11 +12,12 @@ from discord.ext import commands
 from discord.ext.commands import Bot
 from discord.ext.commands import Context
 from dotenv import load_dotenv
+from heckbot.utils.auth import encrypt
+from heckbot.utils.auth import generate_mac
 
-from bot import HeckBot
 from bot import cursor
 from bot import db_conn
-from heckbot.utils.auth import generate_mac, encrypt
+from bot import HeckBot
 
 load_dotenv(Path(__file__).parent.parent.parent.parent / '.env')
 
@@ -90,7 +92,7 @@ def random_game(players: list[str]):
 def get_pick_link(user_name: str) -> str:
     TTL = 60 * 5  # 5 minutes
     expiry = (
-            datetime.utcnow() + timedelta(seconds=TTL)
+        datetime.utcnow() + timedelta(seconds=TTL)
     ).isoformat()
     token, iv = encrypt(user_name, expiry)
     return PICK_SERVER_URL + f'?token={quote(token)}&iv={quote(iv)}'
@@ -143,7 +145,7 @@ class Picker(commands.Cog):
         await ctx.author.send(
             "Here's your custom link to edit your picks.\n"
             "Don't share this with anyone!\n" +
-            get_pick_link(self._bot.get_user(ctx.author.id).name)
+            get_pick_link(self._bot.get_user(ctx.author.id).name),
         )
 
 
