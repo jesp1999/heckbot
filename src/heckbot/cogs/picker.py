@@ -65,11 +65,11 @@ class Picker(commands.Cog):
                         self._game_constraints[line[0]] = (PLAYERS_MIN, PLAYERS_MAX)
                     elif len(line) == 2:
                         self._game_constraints[line[0]] = (
-                            int(line[1]), PLAYERS_MAX
+                            int(line[1]), PLAYERS_MAX,
                         )
                     else:
                         self._game_constraints[line[0]] = (
-                            int(line[1]), int(line[2])
+                            int(line[1]), int(line[2]),
                         )
 
             for player_file in os.listdir(f'{RESOURCE_DIR}/players'):
