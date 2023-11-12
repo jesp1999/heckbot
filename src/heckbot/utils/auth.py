@@ -1,35 +1,40 @@
+from __future__ import annotations
+
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
+from datetime import timedelta
 from typing import Optional
 
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.primitives.ciphers import algorithms
+from cryptography.hazmat.primitives.ciphers import Cipher
+from cryptography.hazmat.primitives.ciphers import modes
 
 SECRET_KEY = os.getenv('HECKBOT_SECRET_KEY')
 
 
 def encrypt(username: str, expiry: str) -> tuple[bytes, bytes]:
-    message = f"{username}:{expiry}".encode()
+    message = f'{username}:{expiry}'.encode()
     iv = os.urandom(16)
     cipher = Cipher(
         algorithms.AES(
-            SECRET_KEY.encode()
-        ), modes.CFB(iv), backend=default_backend()
+            SECRET_KEY.encode(),
+        ), modes.CFB(iv), backend=default_backend(),
     )
     encryptor = cipher.encryptor()
     ciphertext = encryptor.update(message) + encryptor.finalize()
     return ciphertext, iv
 
 
-def decrypt(ciphertext: str, iv: str) -> Optional[str]:
+def decrypt(ciphertext: str, iv: str) -> str | None:
     cipher = Cipher(
         algorithms.AES(
-            SECRET_KEY.encode()
-        ), modes.CFB(iv.encode()), backend=default_backend()
+            SECRET_KEY.encode(),
+        ), modes.CFB(iv.encode()), backend=default_backend(),
     )
     decryptor = cipher.decryptor()
     decrypted_data = decryptor.update(
-        ciphertext.encode()
+        ciphertext.encode(),
     ) + decryptor.finalize()
     decoded_data = decrypted_data.decode()
     username, timestamp = decoded_data.split(':')

@@ -3,7 +3,8 @@ from __future__ import annotations
 import csv
 import os
 import random
-from datetime import datetime, timedelta
+from datetime import datetime
+from datetime import timedelta
 from pathlib import Path
 from urllib.parse import quote
 
@@ -143,7 +144,7 @@ class Picker(commands.Cog):
         await ctx.author.send(
             "Here's your custom link to edit your picks.\n"
             "Don't share this with anyone!\n" +
-            get_pick_link(self._bot.get_user(ctx.author.id).name)
+            get_pick_link(self._bot.get_user(ctx.author.id).name),
         )
 
 
