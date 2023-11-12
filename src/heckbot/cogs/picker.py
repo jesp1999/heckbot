@@ -7,7 +7,8 @@ from base64 import b64encode
 from datetime import datetime
 from datetime import timedelta
 from pathlib import Path
-from urllib.parse import quote, quote_from_bytes
+from urllib.parse import quote
+from urllib.parse import quote_from_bytes
 
 from discord.ext import commands
 from discord.ext.commands import Bot
@@ -95,9 +96,11 @@ def get_pick_link(user_name: str) -> str:
         datetime.utcnow() + timedelta(seconds=TTL)
     ).isoformat()
     token, iv = encrypt(user_name, expiry)
-    return (PICK_SERVER_URL +
-            f'/form?token={quote(b64encode(token))}'
-            f'&iv={quote(b64encode(iv))}')
+    return (
+        PICK_SERVER_URL +
+        f'/form?token={quote(b64encode(token))}'
+        f'&iv={quote(b64encode(iv))}'
+    )
 
 
 class Picker(commands.Cog):

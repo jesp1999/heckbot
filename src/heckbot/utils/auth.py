@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 from datetime import datetime
 from datetime import timedelta
@@ -24,15 +26,15 @@ def encrypt(username: str, expiry: str) -> tuple[bytes, bytes]:
     return ciphertext, iv
 
 
-def decrypt(ciphertext: bytes, iv: bytes) -> Optional[str]:
+def decrypt(ciphertext: bytes, iv: bytes) -> str | None:
     cipher = Cipher(
         algorithms.AES(
-            SECRET_KEY
-        ), modes.CFB(iv), backend=default_backend()
+            SECRET_KEY,
+        ), modes.CFB(iv), backend=default_backend(),
     )
     decryptor = cipher.decryptor()
     decrypted_data = decryptor.update(
-        ciphertext
+        ciphertext,
     ) + decryptor.finalize()
     decoded_data = decrypted_data.decode()
     username, timestamp = decoded_data.split(':')
