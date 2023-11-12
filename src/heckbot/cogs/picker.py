@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 import os
 import random
+from base64 import b64encode
 from datetime import datetime
 from datetime import timedelta
 from pathlib import Path
@@ -95,8 +96,8 @@ def get_pick_link(user_name: str) -> str:
     ).isoformat()
     token, iv = encrypt(user_name, expiry)
     return (PICK_SERVER_URL +
-            f'/form?token={quote_from_bytes(token)}'
-            f'&iv={quote_from_bytes(iv)}')
+            f'/form?token={quote(b64encode(token))}'
+            f'&iv={quote(b64encode(iv))}')
 
 
 class Picker(commands.Cog):
