@@ -100,7 +100,7 @@ class Picker(commands.Cog):
         else:
             game_choice = random.choice(list(options))
             picky_person = min(players, key=lambda p: len(self._owned_games[p]))
-            r = f'You can play {game_choice}.'
+            r = f'You can play {game_choice.title()}.'
             if players != self._last_players:
                 r += f'\nBtw, the pickiest person here is: {picky_person}'
             self._last_players = players
