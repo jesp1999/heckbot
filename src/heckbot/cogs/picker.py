@@ -8,9 +8,9 @@ from discord.ext import commands
 from discord.ext.commands import Bot
 from discord.ext.commands import Context
 
-from bot import HeckBot
 from bot import cursor
 from bot import db_conn
+from bot import HeckBot
 
 RESOURCE_DIR = 'resources/'
 
@@ -39,7 +39,7 @@ class Picker(commands.Cog):
     @commands.command()
     async def pick(
             self,
-            ctx: Context[Bot]
+            ctx: Context[Bot],
     ) -> None:
         """
         Polling command. The commander specifies the poll duration, poll
@@ -58,7 +58,7 @@ class Picker(commands.Cog):
 
     def load_games(self):
         try:
-            with open(f'{RESOURCE_DIR}/games.csv', 'r') as f:
+            with open(f'{RESOURCE_DIR}/games.csv') as f:
                 csv_reader = csv.reader(f)
                 for line in csv_reader:
                     self._game_constraints[line[0]] = int(line[1])
@@ -66,7 +66,7 @@ class Picker(commands.Cog):
             for player_file in os.listdir(f'{RESOURCE_DIR}/players'):
                 player = player_file.rpartition('.')[0]
                 self._owned_games[player] = set()
-                with open(f'{RESOURCE_DIR}/players/' + player_file, 'r') as f:
+                with open(f'{RESOURCE_DIR}/players/' + player_file) as f:
                     self._owned_games[player] = {line.strip().lower() for line in f.readlines()}
             print('Loaded previous data from disk')
         except Exception as ex:
@@ -96,8 +96,10 @@ class Picker(commands.Cog):
                 r += f'\nBtw, the pickiest person here is: {picky_person}'
             self._last_players = players
         if len(need_info_players) > 0:
-            r += (f'\n(p.s. I don\'t know what games these people have: '
-                  f'{", ".join(need_info_players)})\n')
+            r += (
+                f'\n(p.s. I don\'t know what games these people have: '
+                f'{", ".join(need_info_players)})\n'
+            )
         return r
 
 
