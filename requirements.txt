@@ -1,5 +1,6 @@
 aiohttp~=3.8.4
 colorama~=0.4.6
+cryptography~=41.0.5
 discord~=2.3.2
 dpytest~=0.6.4
 heckbot
