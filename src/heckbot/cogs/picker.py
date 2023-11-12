@@ -44,11 +44,9 @@ class Picker(commands.Cog):
             ctx: Context[Bot],
     ) -> None:
         """
-        Polling command. The commander specifies the poll duration, poll
-        question, and answers as space-delimited strings which may
-        contain spaces as long as they are within quotes. If the
-        commander only specifies the poll question, the answers will be
-        assumed to be yes/no.
+        Picky Activity Picking command. The commander's voice call participants
+        are used to determine which games are available to play, and a random
+        game is chosen from the intersection of those games.
         :param ctx: Command context
         """
         if ctx.guild and ctx.author.voice:
