@@ -98,8 +98,8 @@ def get_pick_link(user_name: str) -> str:
     token, iv = encrypt(user_name, expiry)
     return (
         PICK_SERVER_URL +
-        f'/form?token={quote(b64encode(token))}'
-        f'&iv={quote(b64encode(iv))}'
+        f'/form?token={quote(token.hex())}'
+        f'&iv={quote(iv.hex())}'
     )
 
 

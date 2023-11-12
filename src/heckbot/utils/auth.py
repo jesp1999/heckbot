@@ -15,6 +15,10 @@ SECRET_KEY = os.getenv('HECKBOT_SECRET_KEY', '').encode()
 
 def encrypt(username: str, expiry: str) -> tuple[bytes, bytes]:
     message = f'{username}:{expiry}'.encode()
+
+    # Ensure the message length is a multiple of the block size (16 bytes for AES)
+    while len(message) % 16 != 0:
+        message += b'\x00'
     iv = os.urandom(16)
     cipher = Cipher(
         algorithms.AES(
