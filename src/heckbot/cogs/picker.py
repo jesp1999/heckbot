@@ -12,6 +12,8 @@ from bot import cursor
 from bot import db_conn
 from bot import HeckBot
 
+PLAYERS_MAX = 100
+PLAYERS_MIN = 1
 RESOURCE_DIR = 'resources/'
 
 
@@ -61,7 +63,16 @@ class Picker(commands.Cog):
             with open(f'{RESOURCE_DIR}/games.csv') as f:
                 csv_reader = csv.reader(f)
                 for line in csv_reader:
-                    self._game_constraints[line[0]] = int(line[1])
+                    if len(line) == 1:
+                        self._game_constraints[line[0]] = (PLAYERS_MIN, PLAYERS_MAX)
+                    elif len(line) == 2:
+                        self._game_constraints[line[0]] = (
+                            int(line[1]), PLAYERS_MAX
+                        )
+                    else:
+                        self._game_constraints[line[0]] = (
+                            int(line[1]), int(line[2])
+                        )
 
             for player_file in os.listdir(f'{RESOURCE_DIR}/players'):
                 player = player_file.rpartition('.')[0]
@@ -84,7 +95,7 @@ class Picker(commands.Cog):
             options = options.intersection(self._owned_games[player])
         options = {
             item for item in options
-            if self._game_constraints[item] <= len(players)
+            if self._game_constraints[item][0] <= len(players) <= self._game_constraints[item][1]
         }
         if len(options) == 0:
             r += "No games available. Y'all are too picky."
