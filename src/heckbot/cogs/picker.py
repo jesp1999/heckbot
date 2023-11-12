@@ -94,7 +94,7 @@ def get_pick_link(user_name: str) -> str:
             datetime.utcnow() + timedelta(seconds=TTL)
     ).isoformat()
     token, iv = encrypt(user_name, expiry)
-    return PICK_SERVER_URL + f'?token={quote(token)}&iv={quote(iv)}'
+    return PICK_SERVER_URL + f'?token={quote(token.decode())}&iv={quote(iv.decode())}'
 
 
 class Picker(commands.Cog):
