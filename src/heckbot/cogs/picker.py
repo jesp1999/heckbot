@@ -15,7 +15,7 @@ from dotenv import load_dotenv
 from bot import HeckBot
 from bot import cursor
 from bot import db_conn
-from heckbot.utils.auth import generate_mac, encrypt
+from heckbot.utils.auth import encrypt
 
 load_dotenv(Path(__file__).parent.parent.parent.parent / '.env')
 
