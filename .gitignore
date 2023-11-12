@@ -1,4 +1,7 @@
 message_bruh.py
+resources/games.csv
+resources/players/
+
 # PyCharm
 .idea
 .run
