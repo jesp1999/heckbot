@@ -41,7 +41,7 @@ class Config(commands.Cog):
             self,
             ctx: Context[Bot],
             command: ConfigCommand,
-            *config_options
+            *config_options,
     ) -> None:
         raise NotImplementedError
 
