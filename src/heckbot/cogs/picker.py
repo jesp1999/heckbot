@@ -66,11 +66,8 @@ def random_game(players: list[str]):
     players = [player for player in players if player in owned_games]
     r = ''
     options = owned_games[players[0]]
-    print(f'{owned_games=}')
-    print(f'{players=}')
     for player in players[1:]:
         options = options.intersection(owned_games[player])
-    print(f'{options=}')
     options = {
         item for item in options
         if game_constraints[item][0] <= len(players) <= game_constraints[item][1]
