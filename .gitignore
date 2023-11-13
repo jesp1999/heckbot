@@ -4,7 +4,9 @@ message_bruh.py
 .run
 *.run.xml
 *.db
+run_heckbot.bat
 run_heckbot.sh
+*.csv
 
 # Created by https://www.toptal.com/developers/gitignore/api/python,jupyternotebooks
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,jupyternotebooks

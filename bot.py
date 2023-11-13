@@ -57,6 +57,7 @@ class HeckBot(commands.Bot):
         'moderation',
         'poll',
         'react',
+        'roles',
     ]
 
     def __init__(self):
