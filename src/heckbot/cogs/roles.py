@@ -5,7 +5,8 @@ import sqlite3
 from sqlite3 import Row
 
 import discord
-from discord import client, PartialEmoji
+from discord import client
+from discord import PartialEmoji
 from discord.ext import commands
 from discord.ext.commands import Bot
 from discord.ext.commands import Context
@@ -32,7 +33,7 @@ class Roles(commands.Cog):
         db_conn = sqlite3.connect('roles.db')
         db_conn.row_factory = Row
         self._cursor = db_conn.cursor()
-        self._cursor.execute("PRAGMA foreign_keys = 1")
+        self._cursor.execute('PRAGMA foreign_keys = 1')
         self._cursor.execute(
             'CREATE TABLE IF NOT EXISTS role_categories'
             '(role_category TEXT UNIQUE NOT NULL);',
@@ -66,11 +67,11 @@ class Roles(commands.Cog):
             react_map[item[1]] = emoji
         role_msg = '\n\n'.join([
             (
-                    f'**{category}**\n'
-                    '--------------------------\n' +
-                    '\n'.join([
-                        f'{react_map[role]} for {role}' for role in role_map[category]
-                    ])
+                f'**{category}**\n'
+                '--------------------------\n' +
+                '\n'.join([
+                    f'{react_map[role]} for {role}' for role in role_map[category]
+                ])
             ) for category in role_map
         ])
         message = await ctx.author.send(role_msg)
