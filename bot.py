@@ -62,11 +62,15 @@ class HeckBot(commands.Bot):
 
     def __init__(self):
         intents = Intents(
+            auto_moderation=True,
+            guilds=True,
+            members=True,
             messages=True,
             message_content=True,
-            typing=True,
+            moderation=True,
             presences=True,
-            members=True,
+            typing=True,
+            voice_states=True,
         )
         super().__init__(
             command_prefix=BOT_COMMAND_PREFIX,
