@@ -152,6 +152,7 @@ class Picker(commands.Cog):
             "Don't share this with anyone!\n" +
             get_pick_link(self._bot.get_user(ctx.author.id).name),
         )
+        await ctx.message.add_reaction('📨')
 
 
 async def setup(
