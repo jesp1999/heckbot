@@ -5,8 +5,14 @@ import sqlite3
 from sqlite3 import Row
 
 import discord
-from discord import client, Emoji, Message, Reaction, User, RawReactionActionEvent, Member
+from discord import client
+from discord import Emoji
+from discord import Member
+from discord import Message
 from discord import PartialEmoji
+from discord import RawReactionActionEvent
+from discord import Reaction
+from discord import User
 from discord.abc import Snowflake
 from discord.ext import commands
 from discord.ext.commands import Bot
@@ -33,27 +39,27 @@ class Roles(commands.Cog):
         self._connection = None
         self.cursor.execute('''PRAGMA foreign_keys = 1''')
         self.cursor.execute('''\
-            CREATE TABLE IF NOT EXISTS role_categories 
-            (guild_id TEXT NOT NULL, 
-            role_category TEXT NOT NULL, 
+            CREATE TABLE IF NOT EXISTS role_categories
+            (guild_id TEXT NOT NULL,
+            role_category TEXT NOT NULL,
             PRIMARY KEY (guild_id, role_category));
         ''')
         self.cursor.execute('''\
             CREATE TABLE IF NOT EXISTS roles
-            (guild_id TEXT NOT NULL, 
-            role_name TEXT NOT NULL, 
-            role_description TEXT NOT NULL, 
-            role_category TEXT NOT NULL DEFAULT 'Miscellaneous', 
-            role_react TEXT NOT NULL, 
+            (guild_id TEXT NOT NULL,
+            role_name TEXT NOT NULL,
+            role_description TEXT NOT NULL,
+            role_category TEXT NOT NULL DEFAULT 'Miscellaneous',
+            role_react TEXT NOT NULL,
             role_opt_in BOOLEAN NOT NULL DEFAULT TRUE,
-            PRIMARY KEY (guild_id, role_name), 
+            PRIMARY KEY (guild_id, role_name),
             FOREIGN KEY (role_category) REFERENCES role_categories (role_category));
         ''')
         self.cursor.execute('''\
-            CREATE TABLE IF NOT EXISTS role_messages 
-            (guild_id TEXT NOT NULL, 
-            channel_id INT NOT NULL, 
-            message_id INT NOT NULL, 
+            CREATE TABLE IF NOT EXISTS role_messages
+            (guild_id TEXT NOT NULL,
+            channel_id INT NOT NULL,
+            message_id INT NOT NULL,
             PRIMARY KEY (guild_id, channel_id, message_id));
         ''')
         self.commit_and_close()
@@ -79,8 +85,9 @@ class Roles(commands.Cog):
         Sends a role-reaction-enabled message in the current chat.
         :param ctx: Context of the command
         """
-        result = self.cursor.execute('''\
-            SELECT role_name, role_description, role_category, role_react 
+        result = self.cursor.execute(
+            '''\
+            SELECT role_name, role_description, role_category, role_react
             FROM roles WHERE guild_id=:guild_id
             AND role_opt_in=TRUE;''',
             {'guild_id': str(ctx.guild.id)},
@@ -104,50 +111,55 @@ class Roles(commands.Cog):
                 '\n'.join([
                     f'{react_map[role]} for {role}'
                     for role in role_map[category]
-                ])
+                ]),
             )
             for role in role_map[category]:
                 await message.add_reaction(react_map[role])
 
-            self.cursor.execute('''
-                INSERT INTO role_messages (guild_id, channel_id, message_id) 
+            self.cursor.execute(
+                '''
+                INSERT INTO role_messages (guild_id, channel_id, message_id)
                 VALUES (:guild_id, :channel_id, :message_id);''',
                 {
                     'guild_id': str(ctx.guild.id),
                     'channel_id': str(ctx.channel.id),
-                    'message_id': str(message.id)
-                }
+                    'message_id': str(message.id),
+                },
             )
             self.commit_and_close()
 
     async def _fetch_roles_for_reaction_change(
-            self, payload: RawReactionActionEvent
+            self, payload: RawReactionActionEvent,
     ) -> list[int]:
         message_id = str(payload.message_id)
         channel_id = str(payload.channel_id)
         guild_id = str(payload.guild_id)
         guild = await self._bot.fetch_guild(payload.guild_id)
-        role_react_message = self.cursor.execute('''\
+        role_react_message = self.cursor.execute(
+            '''\
             SELECT COUNT(*) AS num_messages FROM role_messages
-            WHERE guild_id=:guild_id 
-            AND channel_id=:channel_id 
+            WHERE guild_id=:guild_id
+            AND channel_id=:channel_id
             AND message_id=:message_id;''',
             {
                 'guild_id': guild_id,
                 'channel_id': channel_id,
-                'message_id': message_id
-            }
+                'message_id': message_id,
+            },
         ).fetchone()['num_messages'] > 0
         if role_react_message:
-            role_names = [r['role_name'] for r in self.cursor.execute('''\
-                SELECT role_name FROM roles 
-                WHERE guild_id=:guild_id 
+            role_names = [
+                r['role_name'] for r in self.cursor.execute(
+                    '''\
+                SELECT role_name FROM roles
+                WHERE guild_id=:guild_id
                 AND role_react=:role_react;''',
-                {
-                    'guild_id': guild_id,
-                    'role_react': str(payload.emoji)
-                }
-            ).fetchall()]
+                    {
+                        'guild_id': guild_id,
+                        'role_react': str(payload.emoji),
+                    },
+                ).fetchall()
+            ]
             roles = [
                 discord.utils.get(guild.roles, name=role_name)
                 for role_name in role_names
