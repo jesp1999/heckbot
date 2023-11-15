@@ -69,6 +69,7 @@ class HeckBot(commands.Bot):
             message_content=True,
             moderation=True,
             presences=True,
+            reactions=True,
             typing=True,
             voice_states=True,
         )
