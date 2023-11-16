@@ -70,7 +70,10 @@ def random_game(players: list[str]):
         options = options.intersection(owned_games[player])
     options = {
         item for item in options
-        if game_constraints[item][0] <= len(players) <= game_constraints[item][1]
+        if (
+            item in game_constraints and
+            game_constraints[item][0] <= len(players) <= game_constraints[item][1]
+        )
     }
     if len(options) == 0:
         r += "No games available. Y'all are too picky."
@@ -135,9 +138,12 @@ class Picker(commands.Cog):
         if ctx.guild and ctx.author.voice:
             voice_states = ctx.author.voice.channel.voice_states
             users_in_channel = [
-                self._bot.get_user(int(uid)).name for uid in voice_states
+                self._bot.get_user(int(uid)) for uid in voice_states
             ]
-            await ctx.send(random_game(users_in_channel))
+            user_names_in_channel = [
+                user.name for user in users_in_channel if not user.bot
+            ]
+            await ctx.send(random_game(user_names_in_channel))
 
     @commands.command(aliases=['pickadmin'])
     @commands.has_permissions(administrator=True)
