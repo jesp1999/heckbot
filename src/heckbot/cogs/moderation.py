@@ -32,46 +32,46 @@ class Moderation(commands.Cog):
             description=message,
         )
 
-    @commands.command(aliases=['addrole'])
-    @commands.has_permissions(manage_roles=True)
-    @commands.bot_has_permissions(manage_roles=True)
-    async def add_role(
-            self,
-            ctx: Context[Bot],
-            role: Role,
-            member: Member,
-    ) -> None:
-        if ctx.guild is None or not isinstance(ctx.author, Member):
-            return
-        if ctx.guild.me.top_role < member.top_role:
-            await ctx.send(
-                embed=self.embed_for_message(
-                    ctx.guild.id,
-                    'higherPermissionErrorMessage',
-                ),
-            )
-        elif ctx.author.top_role == member.top_role:
-            await ctx.send(
-                embed=self.embed_for_message(
-                    ctx.guild.id,
-                    'equalPermissionErrorMessage',
-                ),
-            )
-        elif ctx.guild.me.top_role > member.top_role:
-            await member.add_roles(role)
-            await ctx.send(
-                embed=discord.Embed(
-                    color=self._bot.config.get_color(
-                        ctx.guild.id,
-                        'embedColor',
-                    ),
-                    title='Success',
-                    description=f'{member.mention} has been granted the role '
-                                f'`{role}`',
-                ),
-            )
-        else:
-            traceback.print_exc()
+    # @commands.command(aliases=['addrole'])
+    # @commands.has_permissions(manage_roles=True)
+    # @commands.bot_has_permissions(manage_roles=True)
+    # async def add_role(
+    #         self,
+    #         ctx: Context[Bot],
+    #         role: Role,
+    #         member: Member,
+    # ) -> None:
+    #     if ctx.guild is None or not isinstance(ctx.author, Member):
+    #         return
+    #     if ctx.guild.me.top_role < member.top_role:
+    #         await ctx.send(
+    #             embed=self.embed_for_message(
+    #                 ctx.guild.id,
+    #                 'higherPermissionErrorMessage',
+    #             ),
+    #         )
+    #     elif ctx.author.top_role == member.top_role:
+    #         await ctx.send(
+    #             embed=self.embed_for_message(
+    #                 ctx.guild.id,
+    #                 'equalPermissionErrorMessage',
+    #             ),
+    #         )
+    #     elif ctx.guild.me.top_role > member.top_role:
+    #         await member.add_roles(role)
+    #         await ctx.send(
+    #             embed=discord.Embed(
+    #                 color=self._bot.config.get_color(
+    #                     ctx.guild.id,
+    #                     'embedColor',
+    #                 ),
+    #                 title='Success',
+    #                 description=f'{member.mention} has been granted the role '
+    #                             f'`{role}`',
+    #             ),
+    #         )
+    #     else:
+    #         traceback.print_exc()
 
     @commands.command()
     @commands.has_permissions(ban_members=True)
@@ -81,7 +81,7 @@ class Moderation(commands.Cog):
             ctx: Context[Bot],
             member: Member,
             *,
-            reason='No reason provided!'
+            reason='No reason provided!',
     ) -> None:
         if ctx.guild is None or not isinstance(ctx.author, Member):
             return
@@ -136,7 +136,7 @@ class Moderation(commands.Cog):
             self,
             ctx: Context[Bot],
             *,
-            member_id: int
+            member_id: int,
     ) -> None:
         if ctx.guild is None:
             return
@@ -160,7 +160,7 @@ class Moderation(commands.Cog):
             ctx: Context[Bot],
             member: Member,
             *,
-            reason='No reason provided!'
+            reason='No reason provided!',
     ) -> None:
         if ctx.guild is None or not isinstance(ctx.author, Member):
             return
@@ -213,7 +213,7 @@ class Moderation(commands.Cog):
             ctx: Context[Bot],
             member: Member,
             *,
-            nickname: str
+            nickname: str,
     ) -> None:
         if ctx.guild is None or not isinstance(ctx.author, Member):
             return
@@ -257,45 +257,45 @@ class Moderation(commands.Cog):
             return
         await ctx.channel.purge(limit=amount)
 
-    @commands.command(aliases=['removerole', 'delrole'])
-    @commands.has_permissions(manage_roles=True)
-    @commands.bot_has_permissions(manage_roles=True)
-    async def remove_role(
-            self,
-            ctx: Context[Bot],
-            role: Role,
-            member: Member,
-    ) -> None:
-        if ctx.guild is None or not isinstance(ctx.author, Member):
-            return
-        if ctx.guild.me.top_role < member.top_role:
-            await ctx.send(
-                embed=self.embed_for_message(
-                    ctx.guild.id,
-                    'higherPermissionErrorMessage',
-                ),
-            )
-        elif ctx.author.top_role <= member.top_role:
-            await ctx.send(
-                embed=self.embed_for_message(
-                    ctx.guild.id,
-                    'equalPermissionErrorMessage',
-                ),
-            )
-        elif ctx.guild.me.top_role > member.top_role:
-            await member.remove_roles(role)
-            await ctx.send(
-                embed=discord.Embed(
-                    color=self._bot.config.get_color(
-                        ctx.guild.id,
-                        'embedColor',
-                    ),
-                    title='Success',
-                    description=f'{member.mention} lost the role `{role}`.',
-                ),
-            )
-        else:
-            traceback.print_exc()
+    # @commands.command(aliases=['removerole', 'delrole'])
+    # @commands.has_permissions(manage_roles=True)
+    # @commands.bot_has_permissions(manage_roles=True)
+    # async def remove_role(
+    #         self,
+    #         ctx: Context[Bot],
+    #         role: Role,
+    #         member: Member,
+    # ) -> None:
+    #     if ctx.guild is None or not isinstance(ctx.author, Member):
+    #         return
+    #     if ctx.guild.me.top_role < member.top_role:
+    #         await ctx.send(
+    #             embed=self.embed_for_message(
+    #                 ctx.guild.id,
+    #                 'higherPermissionErrorMessage',
+    #             ),
+    #         )
+    #     elif ctx.author.top_role <= member.top_role:
+    #         await ctx.send(
+    #             embed=self.embed_for_message(
+    #                 ctx.guild.id,
+    #                 'equalPermissionErrorMessage',
+    #             ),
+    #         )
+    #     elif ctx.guild.me.top_role > member.top_role:
+    #         await member.remove_roles(role)
+    #         await ctx.send(
+    #             embed=discord.Embed(
+    #                 color=self._bot.config.get_color(
+    #                     ctx.guild.id,
+    #                     'embedColor',
+    #                 ),
+    #                 title='Success',
+    #                 description=f'{member.mention} lost the role `{role}`.',
+    #             ),
+    #         )
+    #     else:
+    #         traceback.print_exc()
 
     @commands.command(aliases=['resetnick', 'resetnickname', 'reset_nickname'])
     @commands.has_permissions(manage_nicknames=True)
@@ -345,7 +345,7 @@ class Moderation(commands.Cog):
             self,
             ctx: Context[Bot],
             *,
-            member_id: int
+            member_id: int,
     ) -> None:
         if ctx.guild is None:
             return
@@ -368,7 +368,7 @@ class Moderation(commands.Cog):
             ctx: Context[Bot],
             member: Member,
             *,
-            reason: str = 'No reason provided!'
+            reason: str = 'No reason provided!',
     ) -> None:
         if ctx.guild is None:
             return
