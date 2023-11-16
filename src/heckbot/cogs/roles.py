@@ -27,27 +27,27 @@ class Roles(commands.Cog):
         self._db = SqliteAdaptor()
         self._db.run_query('''PRAGMA foreign_keys = 1''')
         self._db.run_query('''\
-            CREATE TABLE IF NOT EXISTS role_categories 
-            (guild_id TEXT NOT NULL, 
-            role_category TEXT NOT NULL, 
+            CREATE TABLE IF NOT EXISTS role_categories
+            (guild_id TEXT NOT NULL,
+            role_category TEXT NOT NULL,
             PRIMARY KEY (guild_id, role_category));
         ''')
         self._db.run_query('''\
             CREATE TABLE IF NOT EXISTS roles
-            (guild_id TEXT NOT NULL, 
-            role_name TEXT NOT NULL, 
-            role_description TEXT NOT NULL, 
-            role_category TEXT NOT NULL DEFAULT 'Miscellaneous', 
-            role_react TEXT NOT NULL, 
+            (guild_id TEXT NOT NULL,
+            role_name TEXT NOT NULL,
+            role_description TEXT NOT NULL,
+            role_category TEXT NOT NULL DEFAULT 'Miscellaneous',
+            role_react TEXT NOT NULL,
             role_opt_in BOOLEAN NOT NULL DEFAULT TRUE,
-            PRIMARY KEY (guild_id, role_name), 
+            PRIMARY KEY (guild_id, role_name),
             FOREIGN KEY (role_category) REFERENCES role_categories (role_category));
         ''')
         self._db.run_query('''\
-            CREATE TABLE IF NOT EXISTS role_messages 
-            (guild_id TEXT NOT NULL, 
-            channel_id INT NOT NULL, 
-            message_id INT NOT NULL, 
+            CREATE TABLE IF NOT EXISTS role_messages
+            (guild_id TEXT NOT NULL,
+            channel_id INT NOT NULL,
+            message_id INT NOT NULL,
             PRIMARY KEY (guild_id, channel_id, message_id));
         ''')
         self._db.commit_and_close()
@@ -161,7 +161,7 @@ class Roles(commands.Cog):
                 '\n'.join([
                     f'{react_map[role]} for {role}'
                     for role in role_map[category]
-                ])
+                ]),
             )
             for role in role_map[category]:
                 await message.add_reaction(react_map[role])
@@ -179,7 +179,7 @@ class Roles(commands.Cog):
         await ctx.message.delete()
 
     async def _fetch_roles_for_reaction_change(
-            self, payload: RawReactionActionEvent
+            self, payload: RawReactionActionEvent,
     ) -> list[Role]:
         message_id = str(payload.message_id)
         channel_id = str(payload.channel_id)
