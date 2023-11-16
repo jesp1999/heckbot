@@ -1,19 +1,12 @@
 from __future__ import annotations
 
-import asyncio
-import sqlite3
-from sqlite3 import Row
-
 import discord
-from discord import client, Emoji, Message, Reaction, User, RawReactionActionEvent, Member
-from discord import PartialEmoji
-from discord.abc import Snowflake
+from discord import RawReactionActionEvent, Role
 from discord.ext import commands
-from discord.ext.commands import Bot
 from discord.ext.commands import Context
-from heckbot.adapter.reaction_table_adapter import ReactionTableAdapter
 
 from bot import HeckBot
+from heckbot.adapter.sqlite_adaptor import SqliteAdaptor
 
 
 class Roles(commands.Cog):
@@ -31,14 +24,15 @@ class Roles(commands.Cog):
         """
         self._bot = bot
         self._connection = None
-        self.cursor.execute('''PRAGMA foreign_keys = 1''')
-        self.cursor.execute('''\
+        self._db = SqliteAdaptor()
+        self._db.run_query('''PRAGMA foreign_keys = 1''')
+        self._db.run_query('''\
             CREATE TABLE IF NOT EXISTS role_categories 
             (guild_id TEXT NOT NULL, 
             role_category TEXT NOT NULL, 
             PRIMARY KEY (guild_id, role_category));
         ''')
-        self.cursor.execute('''\
+        self._db.run_query('''\
             CREATE TABLE IF NOT EXISTS roles
             (guild_id TEXT NOT NULL, 
             role_name TEXT NOT NULL, 
@@ -49,27 +43,88 @@ class Roles(commands.Cog):
             PRIMARY KEY (guild_id, role_name), 
             FOREIGN KEY (role_category) REFERENCES role_categories (role_category));
         ''')
-        self.cursor.execute('''\
+        self._db.run_query('''\
             CREATE TABLE IF NOT EXISTS role_messages 
             (guild_id TEXT NOT NULL, 
             channel_id INT NOT NULL, 
             message_id INT NOT NULL, 
             PRIMARY KEY (guild_id, channel_id, message_id));
         ''')
-        self.commit_and_close()
+        self._db.commit_and_close()
 
-    @property
-    def cursor(self):
-        if self._connection is None:
-            self._connection = sqlite3.connect('roles.db')
-            self._connection.row_factory = sqlite3.Row
-        return self._connection.cursor()
+    @commands.command(aliases=['createrole', 'addrole', 'rolerequest'])
+    @commands.has_permissions(manage_roles=True)
+    @commands.bot_has_permissions(manage_roles=True)
+    async def create_role(
+            self, ctx: Context, name: str, description: str,
+            category: str, emoji: str
+    ):
+        guild_id = str(ctx.guild.id)
+        result = self._db.run_query(
+            '''SELECT channel_id, message_id FROM role_messages 
+            WHERE guild_id=? AND role_category=?;''', (guild_id, category)
+        )
+        if not any(r.name == name for r in ctx.guild.roles):
+            await ctx.guild.create_role(name=name)
+        params_list = []
+        for row in result:
+            channel_id = row['channel_id']
+            message_id = row['message_id']
+            channel = await ctx.guild.fetch_channel(channel_id)
+            message = await channel.fetch_message(
+                message_id
+            )
+            content = message.content + f'\n{emoji} for {description}'
+            await message.edit(content=content)
+            await message.add_reaction(emoji)
+            params_list.append((guild_id, name, description, category, emoji))
+        self._db.run_query_many(
+            '''INSERT INTO roles 
+                (guild_id, role_name, role_description, 
+                role_category, role_react)
+                VALUES (?, ?, ?, ?, ?);''', params_list
+        )
+        self._db.commit_and_close()
 
-    def commit_and_close(self):
-        if self._connection:
-            self._connection.commit()
-            self._connection.close()
-            self._connection = None
+    @commands.command(aliases=['deleterole', 'delrole', 'removerole', 'rmrole'])
+    @commands.has_permissions(manage_roles=True)
+    @commands.bot_has_permissions(manage_roles=True)
+    async def delete_role(
+            self, ctx: Context, name: str
+    ):
+        guild_id = str(ctx.guild.id)
+        role_rows = self._db.run_query(
+            '''SELECT role_react, role_description, role_category, role_react FROM roles
+            WHERE guild_id=? AND role_name=?;''', (guild_id, name)
+        )
+        if len(role_rows) < 1:
+            return
+        role_row = role_rows[0]
+        react = role_row['role_react']
+        desc = role_row['role_description']
+        category = role_row['role_category']
+        message_rows = self._db.run_query(
+            '''SELECT channel_id, message_id FROM role_messages 
+            WHERE guild_id=? AND role_category=?;''', (guild_id, category)
+        )
+        role_string = f'{react} for {desc}'
+        # Doesn't delete the role from the guild, just removes it from role
+        # request messages
+        for row in message_rows:
+            channel_id = row['channel_id']
+            message_id = row['message_id']
+            channel = await ctx.guild.fetch_channel(channel_id)
+            message = await channel.fetch_message(message_id)
+            content = message.content.replace(
+                role_string, ''
+            ).replace('\n\n', '\n')
+            await message.edit(content=content)
+            await message.clear_reaction(react)
+        self._db.run_query(
+            '''DELETE FROM roles WHERE guild_id=? AND role_name=?;''',
+            (guild_id, name)
+        )
+        self._db.commit_and_close()
 
     @commands.command(aliases=['createrolesmessage', 'createrolesmsg'])
     @commands.has_permissions(manage_roles=True)
@@ -79,12 +134,13 @@ class Roles(commands.Cog):
         Sends a role-reaction-enabled message in the current chat.
         :param ctx: Context of the command
         """
-        result = self.cursor.execute('''\
-            SELECT role_name, role_description, role_category, role_react 
-            FROM roles WHERE guild_id=:guild_id
-            AND role_opt_in=TRUE;''',
-            {'guild_id': str(ctx.guild.id)},
-        ).fetchall()
+        result = self._db.run_query(
+            '''SELECT role_name, role_description, role_category, role_react 
+            FROM roles WHERE guild_id=?
+            AND role_opt_in=TRUE;
+            ''',
+            (ctx.guild.id,),
+        )
         role_map = {}
         react_map = {}
         for item in result:
@@ -97,6 +153,7 @@ class Roles(commands.Cog):
             role_map[category][name] = desc
             react_map[name] = react
 
+        params = []
         for category in role_map:
             message = await ctx.channel.send(
                 f'**{category}**\n'
@@ -108,51 +165,45 @@ class Roles(commands.Cog):
             )
             for role in role_map[category]:
                 await message.add_reaction(react_map[role])
-
-            self.cursor.execute('''
-                INSERT INTO role_messages (guild_id, channel_id, message_id) 
-                VALUES (:guild_id, :channel_id, :message_id);''',
-                {
-                    'guild_id': str(ctx.guild.id),
-                    'channel_id': str(ctx.channel.id),
-                    'message_id': str(message.id)
-                }
-            )
-            self.commit_and_close()
+            params.append((
+                str(ctx.guild.id),
+                str(ctx.channel.id),
+                str(message.id)
+            ))
+        self._db.run_query_many(
+            '''INSERT INTO role_messages (guild_id, channel_id, message_id) 
+            VALUES (?, ?, ?);''',
+            params
+        )
+        self._db.commit_and_close()
+        await ctx.message.delete()
 
     async def _fetch_roles_for_reaction_change(
             self, payload: RawReactionActionEvent
-    ) -> list[int]:
+    ) -> list[Role]:
         message_id = str(payload.message_id)
         channel_id = str(payload.channel_id)
         guild_id = str(payload.guild_id)
         guild = await self._bot.fetch_guild(payload.guild_id)
-        role_react_message = self.cursor.execute('''\
-            SELECT COUNT(*) AS num_messages FROM role_messages
-            WHERE guild_id=:guild_id 
-            AND channel_id=:channel_id 
-            AND message_id=:message_id;''',
-            {
-                'guild_id': guild_id,
-                'channel_id': channel_id,
-                'message_id': message_id
-            }
-        ).fetchone()['num_messages'] > 0
+        role_react_message = self._db.run_query(
+            '''SELECT COUNT(*) AS num_messages FROM role_messages
+            WHERE guild_id=? 
+            AND channel_id=? 
+            AND message_id=?;''',
+            (guild_id, channel_id, message_id)
+        )[0]['num_messages'] > 0
         if role_react_message:
-            role_names = [r['role_name'] for r in self.cursor.execute('''\
-                SELECT role_name FROM roles 
-                WHERE guild_id=:guild_id 
-                AND role_react=:role_react;''',
-                {
-                    'guild_id': guild_id,
-                    'role_react': str(payload.emoji)
-                }
-            ).fetchall()]
+            role_names = [r['role_name'] for r in self._db.run_query(
+                '''SELECT role_name FROM roles 
+                WHERE guild_id=? 
+                AND role_react=?;''',
+                (guild_id, str(payload.emoji))
+            )]
             roles = [
                 discord.utils.get(guild.roles, name=role_name)
                 for role_name in role_names
             ]
-            self.commit_and_close()
+            self._db.commit_and_close()
             return roles
         return []
 
