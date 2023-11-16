@@ -59,30 +59,49 @@ class Roles(commands.Cog):
             self, ctx: Context, name: str, description: str,
             category: str, emoji: str
     ):
-        guild_id = str(ctx.guild.id)
-        result = self._db.run_query(
-            '''SELECT channel_id, message_id FROM role_messages 
-            WHERE guild_id=? AND role_category=?;''', (guild_id, category)
-        )
         if not any(r.name == name for r in ctx.guild.roles):
             await ctx.guild.create_role(name=name)
-        params_list = []
-        for row in result:
+        guild_id = str(ctx.guild.id)
+        results = self._db.run_query(
+            '''SELECT channel_id, message_id, role_category FROM role_messages 
+            WHERE guild_id=?;''', (guild_id,)
+        )
+        if len(results) < 1:
+            return
+        category_exists = any(r['role_category'] == category for r in results)
+        roles_params_list = []
+        for row in results:
+            if row['role_category'] != category:
+                continue
             channel_id = row['channel_id']
             message_id = row['message_id']
             channel = await ctx.guild.fetch_channel(channel_id)
-            message = await channel.fetch_message(
-                message_id
-            )
+            message = await channel.fetch_message(message_id)
             content = message.content + f'\n{emoji} for {description}'
             await message.edit(content=content)
             await message.add_reaction(emoji)
-            params_list.append((guild_id, name, description, category, emoji))
+            roles_params_list.append((guild_id, name, description, category, emoji))
+        if not category_exists:
+            channels = {r['channel_id'] for r in results}
+            message_params_list = []
+            for channel in channels:
+                channel = await ctx.guild.fetch_channel(channel)
+                message = await channel.send(
+                    f'**{category}**\n'
+                    '--------------------------\n'
+                    f'{emoji} for {description}'
+                )
+                await message.add_reaction(emoji)
+                message_params_list.append((guild_id, str(channel.id), str(message.id)))
+            self._db.run_query_many(
+                '''INSERT INTO role_messages (guild_id, channel_id, message_id) 
+                VALUES (?, ?, ?);''', message_params_list
+            )
         self._db.run_query_many(
             '''INSERT INTO roles 
                 (guild_id, role_name, role_description, 
                 role_category, role_react)
-                VALUES (?, ?, ?, ?, ?);''', params_list
+                VALUES (?, ?, ?, ?, ?);''', roles_params_list
         )
         self._db.commit_and_close()
 
@@ -159,7 +178,7 @@ class Roles(commands.Cog):
                 f'**{category}**\n'
                 '--------------------------\n' +
                 '\n'.join([
-                    f'{react_map[role]} for {role}'
+                    f'{react_map[role]} for {role_map[category][role]}'
                     for role in role_map[category]
                 ]),
             )
