@@ -57,16 +57,20 @@ class HeckBot(commands.Bot):
         'moderation',
         'poll',
         'react',
+        'roles',
         'picker',
     ]
 
     def __init__(self):
         intents = Intents(
+            auto_moderation=True,
             guilds=True,
             members=True,
             messages=True,
             message_content=True,
+            moderation=True,
             presences=True,
+            reactions=True,
             typing=True,
             voice_states=True,
         )
