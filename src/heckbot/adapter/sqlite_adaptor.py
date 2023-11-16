@@ -1,11 +1,14 @@
+from __future__ import annotations
+
 import sqlite3
 import threading
-from typing import Any, Optional
+from typing import Any
+from typing import Optional
 
 
 class SqliteAdaptor:
     def __init__(
-            self
+            self,
     ) -> None:
         """
         Constructor method
@@ -29,7 +32,7 @@ class SqliteAdaptor:
 
     def run_query(
             self, query: str,
-            params: Optional[tuple] = None
+            params: tuple | None = None,
     ) -> list[dict[str, Any]]:
         try:
             if params is None:
@@ -39,12 +42,12 @@ class SqliteAdaptor:
         except sqlite3.Error as ex:
             print(
                 f'Got exception {ex} when running query '
-                f'{query} with params {params}'
+                f'{query} with params {params}',
             )
 
     def run_query_many(
             self, query: str,
-            params_list: Optional[list[tuple]] = None
+            params_list: list[tuple] | None = None,
     ) -> list[dict[str, Any]]:
         try:
             if params_list is None:
@@ -54,5 +57,5 @@ class SqliteAdaptor:
         except sqlite3.Error as ex:
             print(
                 f'Got exception {ex} when running query many '
-                f'{query} with params list {params_list}'
+                f'{query} with params list {params_list}',
             )
