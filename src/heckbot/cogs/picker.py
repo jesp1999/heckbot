@@ -12,11 +12,11 @@ from discord.ext import commands
 from discord.ext.commands import Bot
 from discord.ext.commands import Context
 from dotenv import load_dotenv
+from heckbot.utils.auth import encrypt
 
-from bot import HeckBot
 from bot import cursor
 from bot import db_conn
-from heckbot.utils.auth import encrypt
+from bot import HeckBot
 
 load_dotenv(Path(__file__).parent.parent.parent.parent / '.env')
 
