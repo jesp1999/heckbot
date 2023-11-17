@@ -3,22 +3,20 @@ from __future__ import annotations
 import csv
 import os
 import random
-from base64 import b64encode
 from datetime import datetime
 from datetime import timedelta
 from pathlib import Path
 from urllib.parse import quote
-from urllib.parse import quote_from_bytes
 
 from discord.ext import commands
 from discord.ext.commands import Bot
 from discord.ext.commands import Context
 from dotenv import load_dotenv
-from heckbot.utils.auth import encrypt
 
+from bot import HeckBot
 from bot import cursor
 from bot import db_conn
-from bot import HeckBot
+from heckbot.utils.auth import encrypt
 
 load_dotenv(Path(__file__).parent.parent.parent.parent / '.env')
 
@@ -40,21 +38,19 @@ def load_games():
                 if len(line) == 1:
                     game_constraints[line[0]] = (PLAYERS_MIN, PLAYERS_MAX)
                 elif len(line) == 2:
-                    game_constraints[line[0]] = (
-                        int(line[1]), PLAYERS_MAX,
-                    )
+                    game_constraints[line[0]] = (int(line[1]), PLAYERS_MAX)
                 else:
-                    game_constraints[line[0]] = (
-                        int(line[1]), int(line[2]),
-                    )
+                    game_constraints[line[0]] = (int(line[1]), int(line[2]))
 
         for player_file in os.listdir(f'{RESOURCE_DIR}/players'):
             player = player_file.rpartition('.')[0]
             owned_games[player] = set()
             with open(f'{RESOURCE_DIR}/players/' + player_file) as f:
-                owned_games[player] = {line.strip().lower() for line in f.readlines()}
+                owned_games[player] = {
+                    line.strip().lower() for line in f.readlines()
+                }
         print('Loaded previous data from disk')
-    except Exception as ex:
+    except Exception:
         print('Nothing to load from disk')
         ...
 
@@ -135,6 +131,7 @@ class Picker(commands.Cog):
         game is chosen from the intersection of those games.
         :param ctx: Command context
         """
+        load_games()
         if ctx.guild and ctx.author.voice:
             voice_states = ctx.author.voice.channel.voice_states
             users_in_channel = [
