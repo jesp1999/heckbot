@@ -31,6 +31,12 @@ last_players = []
 
 
 def load_games():
+    global owned_games
+    owned_games = {}
+    global game_constraints
+    game_constraints = {}
+    global last_players
+    last_players = []
     try:
         with open(f'{RESOURCE_DIR}/games.csv') as f:
             csv_reader = csv.reader(f)
@@ -56,6 +62,7 @@ def load_games():
 
 
 def random_game(players: list[str]):
+    load_games()
     need_info_players = [
         player for player in players if player not in owned_games
     ]
@@ -131,7 +138,6 @@ class Picker(commands.Cog):
         game is chosen from the intersection of those games.
         :param ctx: Command context
         """
-        load_games()
         if ctx.guild and ctx.author.voice:
             voice_states = ctx.author.voice.channel.voice_states
             users_in_channel = [
