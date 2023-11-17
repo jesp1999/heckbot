@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 import os
 import random
+import threading
 from datetime import datetime
 from datetime import timedelta
 from pathlib import Path
@@ -28,37 +29,38 @@ PICK_SERVER_URL = os.getenv('PICK_SERVER_URL')
 owned_games = {}
 game_constraints = {}
 last_players = []
+load_game_lock = threading.Lock()
 
 
 def load_games():
-    global owned_games
-    owned_games = {}
-    global game_constraints
-    game_constraints = {}
-    global last_players
-    last_players = []
-    try:
-        with open(f'{RESOURCE_DIR}/games.csv') as f:
-            csv_reader = csv.reader(f)
-            for line in csv_reader:
-                if len(line) == 1:
-                    game_constraints[line[0]] = (PLAYERS_MIN, PLAYERS_MAX)
-                elif len(line) == 2:
-                    game_constraints[line[0]] = (int(line[1]), PLAYERS_MAX)
-                else:
-                    game_constraints[line[0]] = (int(line[1]), int(line[2]))
+    with load_game_lock:
+        global owned_games
+        owned_games = {}
+        global game_constraints
+        game_constraints = {}
+        global last_players
+        last_players = []
+        try:
+            with open(f'{RESOURCE_DIR}/games.csv') as f:
+                csv_reader = csv.reader(f)
+                for line in csv_reader:
+                    if len(line) == 1:
+                        game_constraints[line[0]] = (PLAYERS_MIN, PLAYERS_MAX)
+                    elif len(line) == 2:
+                        game_constraints[line[0]] = (int(line[1]), PLAYERS_MAX)
+                    else:
+                        game_constraints[line[0]] = (int(line[1]), int(line[2]))
 
-        for player_file in os.listdir(f'{RESOURCE_DIR}/players'):
-            player = player_file.rpartition('.')[0]
-            owned_games[player] = set()
-            with open(f'{RESOURCE_DIR}/players/' + player_file) as f:
-                owned_games[player] = {
-                    line.strip().lower() for line in f.readlines()
-                }
-        print('Loaded previous data from disk')
-    except Exception:
-        print('Nothing to load from disk')
-        ...
+            for player_file in os.listdir(f'{RESOURCE_DIR}/players/'):
+                player = player_file.rpartition('.')[0]
+                owned_games[player] = set()
+                with open(f'{RESOURCE_DIR}/players/' + player_file) as f:
+                    owned_games[player] = {
+                        line.strip().lower() for line in f.readlines()
+                    }
+            print('Loaded previous data from disk')
+        except Exception:
+            print('Nothing to load from disk')
 
 
 def random_game(players: list[str]):
