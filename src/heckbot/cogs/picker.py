@@ -161,11 +161,10 @@ class Picker(commands.Cog):
         else:
             constraints = (int(args[0]), int(args[1]))
         game_constraints[activity_name.lower()] = constraints
-        with open(f'{RESOURCE_DIR}/games.csv', 'w+', newline='') as f:
-            csv_writer = csv.writer(f)
-            csv_writer.writerows([
+        with open(f'{RESOURCE_DIR}/games.csv', 'w+') as f:
+            f.writelines([
                 f'{game},{constraints[0]},{constraints[1]}\n'
-                for game, constraints in game_constraints.items()
+                for game, constraints in sorted(game_constraints.items())
             ])
         await ctx.message.add_reaction('✅')
 
