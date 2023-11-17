@@ -163,7 +163,10 @@ class Picker(commands.Cog):
         game_constraints[activity_name.lower()] = constraints
         with open(f'{RESOURCE_DIR}/games.csv', 'w+', newline='') as f:
             csv_writer = csv.writer(f)
-            csv_writer.writerows(list(game_constraints.items()))
+            csv_writer.writerows([
+                f'{game},{constraints[0]},{constraints[1]}\n'
+                for game, constraints in game_constraints.items()
+            ])
         await ctx.message.add_reaction('✅')
 
     @commands.command(aliases=['setpicks'])
