@@ -145,11 +145,20 @@ class Picker(commands.Cog):
             ]
             await ctx.send(random_game(user_names_in_channel))
 
-    @commands.command(aliases=['pickadmin'])
+    @commands.command(aliases=['editpicks'])
     @commands.has_permissions(administrator=True)
     @commands.bot_has_permissions(administrator=True)
-    async def edit_activities(self, ctx: Context):
-        ...
+    async def edit_activity(self, ctx: Context, activity_name: str, *args):
+        if len(args) == 0:
+            constraints = (PLAYERS_MIN, PLAYERS_MAX)
+        elif len(args) == 1:
+            constraints = (int(args[0]), PLAYERS_MAX)
+        else:
+            constraints = (int(args[0]), int(args[1]))
+        game_constraints[activity_name.lower()] = constraints
+        with open(f'{RESOURCE_DIR}/games.csv', 'w+', newline='') as f:
+            csv_writer = csv.writer(f)
+            csv_writer.writerows(list(game_constraints.items()))
 
     @commands.command(aliases=['setpicks'])
     async def set_picks(self, ctx: Context):
