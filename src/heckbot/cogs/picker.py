@@ -59,8 +59,8 @@ def load_games():
                         line.strip().lower() for line in f.readlines()
                     }
             print('Loaded previous data from disk')
-        except Exception:
-            print('Nothing to load from disk')
+        except Exception as ex:
+            print(f'Error: {ex}')
 
 
 def random_game(players: list[str]):
@@ -99,9 +99,9 @@ def random_game(players: list[str]):
 
 
 def get_pick_link(user_name: str) -> str:
-    TTL = 60 * 5  # 5 minutes
+    ttl = 60 * 5  # 5 minutes
     expiry = (
-        datetime.utcnow() + timedelta(seconds=TTL)
+        datetime.utcnow() + timedelta(seconds=ttl)
     ).isoformat()
     token, iv = encrypt(user_name, expiry)
     return (
@@ -164,6 +164,7 @@ class Picker(commands.Cog):
         with open(f'{RESOURCE_DIR}/games.csv', 'w+', newline='') as f:
             csv_writer = csv.writer(f)
             csv_writer.writerows(list(game_constraints.items()))
+        await ctx.message.add_reaction('✅')
 
     @commands.command(aliases=['setpicks'])
     async def set_picks(self, ctx: Context):
