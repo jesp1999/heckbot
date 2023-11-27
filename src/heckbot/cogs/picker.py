@@ -7,11 +7,14 @@ import threading
 from datetime import datetime
 from datetime import timedelta
 from pathlib import Path
+from typing import Collection
 from urllib.parse import quote
 
+from discord import ButtonStyle, Interaction, ui
 from discord.ext import commands
 from discord.ext.commands import Bot
 from discord.ext.commands import Context
+from discord.ui import Button, View
 from dotenv import load_dotenv
 from heckbot.utils.auth import encrypt
 
@@ -63,7 +66,7 @@ def load_games():
             print(f'Error: {ex}')
 
 
-def random_game(players: list[str]):
+def random_game(players: list[str]) -> tuple[str, set]:
     load_games()
     need_info_players = [
         player for player in players if player not in owned_games
@@ -76,8 +79,9 @@ def random_game(players: list[str]):
     options = {
         item for item in options
         if (
-            item in game_constraints and
-            game_constraints[item][0] <= len(players) <= game_constraints[item][1]
+                item in game_constraints and
+                game_constraints[item][0] <= len(players) <=
+                game_constraints[item][1]
         )
     }
     if len(options) == 0:
@@ -95,20 +99,39 @@ def random_game(players: list[str]):
             f'\n(p.s. I don\'t know what games these people have: '
             f'{", ".join(need_info_players)})\n'
         )
-    return r
+    return r, options
 
 
 def get_pick_link(user_name: str) -> str:
     ttl = 60 * 5  # 5 minutes
     expiry = (
-        datetime.utcnow() + timedelta(seconds=ttl)
+            datetime.utcnow() + timedelta(seconds=ttl)
     ).isoformat()
     token, iv = encrypt(user_name, expiry)
     return (
-        PICK_SERVER_URL +
-        f'form?token={quote(token.hex())}'
-        f'&iv={quote(iv.hex())}'
+            PICK_SERVER_URL +
+            f'form?token={quote(token.hex())}'
+            f'&iv={quote(iv.hex())}'
     )
+
+
+class PickView(View):
+    def __init__(self, options):
+        super().__init__()
+        self.options = options
+
+    @ui.button(label='Confirm', style=ButtonStyle.green)
+    async def repick(self, interaction: Interaction,
+                     button: Button):
+        if len(self.options) == 0:
+            await interaction.message.edit(
+                content="No options left. Y'all are too picky!",
+                view=self
+            )
+            self.stop()
+        choice = random.choice(self.options)
+        await interaction.message.edit(content=choice, view=self)
+        self.options.remove(choice)
 
 
 class Picker(commands.Cog):
@@ -148,7 +171,12 @@ class Picker(commands.Cog):
             user_names_in_channel = [
                 user.name for user in users_in_channel if not user.bot
             ]
-            await ctx.send(random_game(user_names_in_channel))
+            message_content, options = random_game(user_names_in_channel)
+            options.remove(message_content)
+            view = PickView(options)
+            await ctx.send(
+                message_content, view=view
+            )
 
     @commands.command(aliases=['editpicks'])
     @commands.has_permissions(administrator=True)
