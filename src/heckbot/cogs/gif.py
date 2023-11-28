@@ -3,11 +3,14 @@ from __future__ import annotations
 import os
 
 import aiohttp
+import logging
 from discord.ext import commands
 from discord.ext.commands import Bot
 from discord.ext.commands import Context
 
 from bot import HeckBot
+
+logger = logging.getLogger(__name__)
 
 
 class Gif(commands.Cog):

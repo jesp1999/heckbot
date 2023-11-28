@@ -2,12 +2,15 @@ from __future__ import annotations
 
 from typing import Literal
 
+import logging
 from discord.ext import commands
 from discord.ext.commands import Bot
 from discord.ext.commands import Context
 from heckbot.adapter.config_adapter import ConfigAdapter
 
 from bot import HeckBot
+
+logger = logging.getLogger(__name__)
 
 ConfigCommand = Literal[
     'add', 'create', 'update', 'set', 'remove', 'unset',

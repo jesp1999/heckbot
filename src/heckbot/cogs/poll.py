@@ -6,6 +6,7 @@ from datetime import datetime
 from datetime import timedelta
 from typing import Sequence
 
+import logging
 from discord import Forbidden
 from discord import Message
 from discord import TextChannel
@@ -21,6 +22,8 @@ from table2ascii import TableStyle
 from bot import cursor
 from bot import db_conn
 from bot import HeckBot
+
+logger = logging.getLogger(__name__)
 
 Bounds: namedtuple = namedtuple(
     'Bounds',
@@ -166,17 +169,17 @@ class Poll(commands.Cog):
         # TODO input validation on roll requests which don't fit on
         #  mobile, maybe this could be a config option?
         if max_dice_strlen > RESULT_DICE_LENGTH_BOUNDS.max:
-            print(
+            logger.warning(
                 'Warning: dice string exceeds the set '
                 'limit for optimal mobile display',
             )
         if max_rolls_strlen > RESULT_ROLLS_LENGTH_BOUNDS.max:
-            print(
+            logger.warning(
                 'Warning: rolls string exceeds the set '
                 'limit for optimal mobile display',
             )
         if max_sum_strlen > RESULT_SUM_LENGTH_BOUNDS.max:
-            print(
+            logger.warning(
                 'Warning: sum string exceeds the set '
                 'limit for optimal mobile display',
             )
