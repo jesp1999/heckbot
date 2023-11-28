@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 
 import discord
 from discord.ext import commands
@@ -9,6 +10,8 @@ from discord.ext.commands import Context
 from heckbot.adapter.message_table_adapter import MessageTableAdapter
 
 from bot import HeckBot
+
+logger = logging.getLogger(__name__)
 
 
 class Message(commands.Cog):

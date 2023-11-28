@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import traceback
 
 import discord
@@ -12,6 +13,8 @@ from discord.ext.commands import Bot
 from discord.ext.commands import Context
 
 from bot import HeckBot
+
+logger = logging.getLogger(__name__)
 
 
 class Moderation(commands.Cog):

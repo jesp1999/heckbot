@@ -19,6 +19,7 @@ from typing import Literal
 from typing import cast
 
 import discord
+import logging
 from discord import Intents
 from discord import TextChannel
 from discord.ext import commands
@@ -29,6 +30,10 @@ from heckbot.types.constants import ADMIN_CONSOLE_CHANNEL_ID
 from heckbot.types.constants import BOT_COMMAND_PREFIX
 from heckbot.types.constants import BOT_CUSTOM_STATUS
 from heckbot.types.constants import PRIMARY_GUILD_ID
+from discord.ext.commands import Bot
+from discord.ext.commands import Context
+
+logger = logging.getLogger(__name__)
 
 TASK_LOOP_PERIOD = 5  # seconds
 
@@ -136,7 +141,7 @@ class HeckBot(commands.Bot):
             try:
                 await self.load_extension(f'src.heckbot.cogs.{cog}')
             except Exception as ex:
-                print(f'Could not load extension {cog}: {ex}')
+                logger.error(f'Could not load extension {cog}: {ex}')
                 raise ex
 
     async def after_ready(
@@ -158,7 +163,7 @@ class HeckBot(commands.Bot):
 
         # alert channels of bot online status
         for guild in self.guilds:
-            print(
+            logger.info(
                 f'{self.user} has connected to the following guild: '
                 f'{guild.name}(id: {guild.id})',
             )
@@ -169,7 +174,7 @@ class HeckBot(commands.Bot):
                         self.config.get_message(guild.id, 'welcomeMessage'),
                     )
 
-        print(
+        logger.debug(
             f'----------------HeckBot---------------------'
             f'\nBot is online as user {self.user}'
             f'\nConnected to {(len(self.guilds))} guilds.'
@@ -180,4 +185,14 @@ class HeckBot(commands.Bot):
 
 if __name__ == '__main__':
     random.seed(0)
-    HeckBot().run()
+    bot = HeckBot()
+
+    @bot.command()
+    async def sync(ctx: Context[Bot]):
+        if ctx.author.id == 277859399903608834:
+            await bot.tree.sync()
+            logger.info('Command tree synced.')
+        else:
+            await ctx.send('You must be the owner to use this command!')
+
+    bot.run()

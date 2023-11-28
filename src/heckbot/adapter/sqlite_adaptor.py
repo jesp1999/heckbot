@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import logging
 import sqlite3
 import threading
 from typing import Any
 from typing import Optional
+
+logger = logging.getLogger(__name__)
 
 
 class SqliteAdaptor:
@@ -40,7 +43,7 @@ class SqliteAdaptor:
             with self._lock:
                 return self.cursor.execute(query, params).fetchall()
         except sqlite3.Error as ex:
-            print(
+            logger.warning(
                 f'Got exception {ex} when running query '
                 f'{query} with params {params}',
             )
@@ -55,7 +58,7 @@ class SqliteAdaptor:
             with self._lock:
                 return self.cursor.executemany(query, params_list).fetchall()
         except sqlite3.Error as ex:
-            print(
+            logger.error(
                 f'Got exception {ex} when running query many '
                 f'{query} with params list {params_list}',
             )

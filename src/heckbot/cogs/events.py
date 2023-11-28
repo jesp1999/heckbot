@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import logging
+
 import discord
 from discord import TextChannel
 from discord.ext import commands
@@ -7,6 +9,8 @@ from heckbot.types.constants import PRIMARY_GUILD_ID
 from heckbot.types.constants import WELCOME_CHANNEL_ID
 
 from bot import HeckBot
+
+logger = logging.getLogger(__name__)
 
 
 class Events(commands.Cog):
