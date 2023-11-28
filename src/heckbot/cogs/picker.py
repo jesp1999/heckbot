@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Collection
 from urllib.parse import quote
 
-from discord import ButtonStyle, Interaction, ui
+from discord import ButtonStyle, Interaction, ui, InteractionResponse
 from discord.ext import commands
 from discord.ext.commands import Bot
 from discord.ext.commands import Context
@@ -24,41 +24,46 @@ from bot import HeckBot
 
 load_dotenv(Path(__file__).parent.parent.parent.parent / '.env')
 
-PLAYERS_MAX = 100
-PLAYERS_MIN = 1
+PARTICIPANTS_MAX = 100
+PARTICIPANTS_MIN = 1
 RESOURCE_DIR = 'resources/'
 PICK_SERVER_URL = os.getenv('PICK_SERVER_URL')
 
-owned_games = {}
-game_constraints = {}
-last_players = []
-load_game_lock = threading.Lock()
+interested_activities = {}
+activity_constraints = {}
+last_users = []
+picky_person = None
+load_activities_lock = threading.Lock()
 
 
-def load_games():
-    with load_game_lock:
-        global owned_games
-        owned_games = {}
-        global game_constraints
-        game_constraints = {}
-        global last_players
-        last_players = []
+def load_activities():
+    with load_activities_lock:
+        global interested_activities
+        interested_activities = {}
+        global activity_constraints
+        activity_constraints = {}
         try:
             with open(f'{RESOURCE_DIR}/games.csv') as f:
                 csv_reader = csv.reader(f)
                 for line in csv_reader:
                     if len(line) == 1:
-                        game_constraints[line[0]] = (PLAYERS_MIN, PLAYERS_MAX)
+                        activity_constraints[line[0]] = (
+                            PARTICIPANTS_MIN, PARTICIPANTS_MAX
+                        )
                     elif len(line) == 2:
-                        game_constraints[line[0]] = (int(line[1]), PLAYERS_MAX)
+                        activity_constraints[line[0]] = (
+                            int(line[1]), PARTICIPANTS_MAX
+                        )
                     else:
-                        game_constraints[line[0]] = (int(line[1]), int(line[2]))
+                        activity_constraints[line[0]] = (
+                            int(line[1]), int(line[2])
+                        )
 
             for player_file in os.listdir(f'{RESOURCE_DIR}/players/'):
                 player = player_file.rpartition('.')[0]
-                owned_games[player] = set()
+                interested_activities[player] = set()
                 with open(f'{RESOURCE_DIR}/players/' + player_file) as f:
-                    owned_games[player] = {
+                    interested_activities[player] = {
                         line.strip().lower() for line in f.readlines()
                     }
             print('Loaded previous data from disk')
@@ -66,40 +71,22 @@ def load_games():
             print(f'Error: {ex}')
 
 
-def random_game(players: list[str]) -> tuple[str, set]:
-    load_games()
-    need_info_players = [
-        player for player in players if player not in owned_games
-    ]
-    players = [player for player in players if player in owned_games]
+def activities_for_users(users: list[str]) -> set[str]:
+    load_activities()
+    users = [user for user in users if user in interested_activities]
     r = ''
-    options = owned_games[players[0]]
-    for player in players[1:]:
-        options = options.intersection(owned_games[player])
+    options = interested_activities[users[0]]
+    for player in users[1:]:
+        options = options.intersection(interested_activities[player])
     options = {
         item for item in options
         if (
-                item in game_constraints and
-                game_constraints[item][0] <= len(players) <=
-                game_constraints[item][1]
+                item in activity_constraints and
+                activity_constraints[item][0] <= len(users) <=
+                activity_constraints[item][1]
         )
     }
-    if len(options) == 0:
-        r += "No games available. Y'all are too picky."
-    else:
-        game_choice = random.choice(list(options))
-        picky_person = min(players, key=lambda p: len(owned_games[p]))
-        r = f'You can play {game_choice.title()}.'
-        global last_players
-        if players != last_players:
-            r += f'\nBtw, the pickiest person here is: {picky_person}'
-        last_players = players
-    if len(need_info_players) > 0:
-        r += (
-            f'\n(p.s. I don\'t know what games these people have: '
-            f'{", ".join(need_info_players)})\n'
-        )
-    return r, options
+    return options
 
 
 def get_pick_link(user_name: str) -> str:
@@ -117,21 +104,26 @@ def get_pick_link(user_name: str) -> str:
 
 class PickView(View):
     def __init__(self, options):
-        super().__init__()
-        self.options = options
+        super().__init__(timeout=None)
+        self.options: set[str] = options
 
-    @ui.button(label='Confirm', style=ButtonStyle.green)
-    async def repick(self, interaction: Interaction,
-                     button: Button):
+    @ui.button(label='Re-pick', style=ButtonStyle.green)
+    async def repick(self, interaction: Interaction, button: Button):
+        button.disabled = True
         if len(self.options) == 0:
             await interaction.message.edit(
                 content="No options left. Y'all are too picky!",
                 view=self
             )
             self.stop()
-        choice = random.choice(self.options)
-        await interaction.message.edit(content=choice, view=self)
+            return
+        choice = random.choice(list(self.options))
+        content_lines = interaction.message.content.split('\n')
+        content_lines[0] = f'You can play {choice.title()}'
+        content = '\n'.join(content_lines)
         self.options.remove(choice)
+        button.disabled = False
+        await interaction.response.edit_message(content=content, view=self)
 
 
 class Picker(commands.Cog):
@@ -150,7 +142,7 @@ class Picker(commands.Cog):
         self._bot = bot
         self._db_conn = db_conn
         self._cursor = cursor
-        load_games()
+        load_activities()
 
     @commands.command()
     async def pick(
@@ -171,9 +163,30 @@ class Picker(commands.Cog):
             user_names_in_channel = [
                 user.name for user in users_in_channel if not user.bot
             ]
-            message_content, options = random_game(user_names_in_channel)
-            options.remove(message_content)
+            options = activities_for_users(user_names_in_channel)
+            global picky_person
+            picky_person = min(
+                user_names_in_channel,
+                key=lambda p: len(interested_activities.get(p, set()))
+            )
+            need_info_players = [
+                player for player in user_names_in_channel
+                if player not in interested_activities
+            ]
+            game = random.choice(list(options))
+            options.remove(game)
             view = PickView(options)
+
+            message_content = f'You can play {game.title()}'
+            global last_users
+            last_users = user_names_in_channel
+            message_content += (f'\nBtw, the pickiest person here is: '
+                                f'{picky_person}')
+            if len(need_info_players) > 0:
+                message_content += (
+                    f"\n(p.s. I don't know what games these people have: "
+                    f'{", ".join(need_info_players)})\n'
+                )
             await ctx.send(
                 message_content, view=view
             )
@@ -183,16 +196,16 @@ class Picker(commands.Cog):
     @commands.bot_has_permissions(administrator=True)
     async def edit_activity(self, ctx: Context, activity_name: str, *args):
         if len(args) == 0:
-            constraints = (PLAYERS_MIN, PLAYERS_MAX)
+            constraints = (PARTICIPANTS_MIN, PARTICIPANTS_MAX)
         elif len(args) == 1:
-            constraints = (int(args[0]), PLAYERS_MAX)
+            constraints = (int(args[0]), PARTICIPANTS_MAX)
         else:
             constraints = (int(args[0]), int(args[1]))
-        game_constraints[activity_name.lower()] = constraints
+        activity_constraints[activity_name.lower()] = constraints
         with open(f'{RESOURCE_DIR}/games.csv', 'w+') as f:
             f.writelines([
                 f'{game},{constraints[0]},{constraints[1]}\n'
-                for game, constraints in sorted(game_constraints.items())
+                for game, constraints in sorted(activity_constraints.items())
             ])
         await ctx.message.add_reaction('✅')
 
