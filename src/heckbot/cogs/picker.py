@@ -18,11 +18,11 @@ from discord.ext.commands import Context
 from discord.ui import Button
 from discord.ui import View
 from dotenv import load_dotenv
+from heckbot.utils.auth import encrypt
 
-from bot import HeckBot
 from bot import cursor
 from bot import db_conn
-from heckbot.utils.auth import encrypt
+from bot import HeckBot
 
 load_dotenv(Path(__file__).parent.parent.parent.parent / '.env')
 
@@ -50,15 +50,15 @@ def load_activities():
                 for line in csv_reader:
                     if len(line) == 1:
                         activity_constraints[line[0]] = (
-                            PARTICIPANTS_MIN, PARTICIPANTS_MAX
+                            PARTICIPANTS_MIN, PARTICIPANTS_MAX,
                         )
                     elif len(line) == 2:
                         activity_constraints[line[0]] = (
-                            int(line[1]), PARTICIPANTS_MAX
+                            int(line[1]), PARTICIPANTS_MAX,
                         )
                     else:
                         activity_constraints[line[0]] = (
-                            int(line[1]), int(line[2])
+                            int(line[1]), int(line[2]),
                         )
 
             for player_file in os.listdir(f'{RESOURCE_DIR}/players/'):
@@ -169,7 +169,7 @@ class Picker(commands.Cog):
             global picky_person
             picky_person = min(
                 user_names_in_channel,
-                key=lambda p: len(interested_activities.get(p, set()))
+                key=lambda p: len(interested_activities.get(p, set())),
             )
             need_info_players = [
                 player for player in user_names_in_channel
@@ -182,8 +182,10 @@ class Picker(commands.Cog):
             message_content = f'You can play {game.title()}'
             global last_users
             last_users = user_names_in_channel
-            message_content += (f'\nBtw, the pickiest person here is: '
-                                f'{picky_person}')
+            message_content += (
+                f'\nBtw, the pickiest person here is: '
+                f'{picky_person}'
+            )
             if len(need_info_players) > 0:
                 message_content += (
                     f"\n(p.s. I don't know what games these people have: "
