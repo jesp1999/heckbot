@@ -52,7 +52,6 @@ class HeckBot(commands.Bot):
     _cogs: Final = [
         'config',
         'events',
-        'gif',
         'message',
         'moderation',
         'poll',
