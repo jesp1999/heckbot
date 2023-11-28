@@ -50,7 +50,7 @@ async def setup(
         bot: HeckBot,
 ) -> None:
     """
-    Setup function for registering the gif cog.
+    Setup function for registering the config cog.
     :param bot: Instance of the running Bot
     """
     await bot.add_cog(Config(bot))
