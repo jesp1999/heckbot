@@ -1,14 +1,15 @@
 from __future__ import annotations
 
-import discord
 import logging
+
+import discord
 from discord import RawReactionActionEvent
 from discord import Role
 from discord.ext import commands
 from discord.ext.commands import Context
+from heckbot.adapter.sqlite_adaptor import SqliteAdaptor
 
 from bot import HeckBot
-from heckbot.adapter.sqlite_adaptor import SqliteAdaptor
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +46,7 @@ class Roles(commands.Cog):
             role_react TEXT NOT NULL,
             role_opt_in BOOLEAN NOT NULL DEFAULT TRUE,
             PRIMARY KEY (guild_id, role_name),
-            FOREIGN KEY (role_category) 
+            FOREIGN KEY (role_category)
             REFERENCES role_categories (role_category));
         ''')
         self._db.run_query('''\
@@ -86,7 +87,8 @@ class Roles(commands.Cog):
             await message.edit(content=content)
             await message.add_reaction(emoji)
             roles_params_list.append(
-                (guild_id, name, description, category, emoji))
+                (guild_id, name, description, category, emoji),
+            )
         if not category_exists:
             channels = {r['channel_id'] for r in results}
             message_params_list = []
@@ -99,7 +101,8 @@ class Roles(commands.Cog):
                 )
                 await message.add_reaction(emoji)
                 message_params_list.append(
-                    (guild_id, str(channel.id), str(message.id)))
+                    (guild_id, str(channel.id), str(message.id)),
+                )
             self._db.run_query_many(
                 '''INSERT INTO role_messages (guild_id, channel_id, message_id)
                 VALUES (?, ?, ?);''', message_params_list,
@@ -120,7 +123,7 @@ class Roles(commands.Cog):
     ):
         guild_id = str(ctx.guild.id)
         role_rows = self._db.run_query(
-            '''SELECT role_react, role_description, role_category, role_react 
+            '''SELECT role_react, role_description, role_category, role_react
             FROM roles
             WHERE guild_id=? AND role_name=?;''', (guild_id, name),
         )

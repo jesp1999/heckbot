@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-import discord
 import logging
+
+import discord
 from discord import TextChannel
 from discord.ext import commands
 from heckbot.types.constants import PRIMARY_GUILD_ID

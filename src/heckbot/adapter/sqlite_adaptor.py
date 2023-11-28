@@ -1,11 +1,10 @@
 from __future__ import annotations
 
+import logging
 import sqlite3
 import threading
 from typing import Any
 from typing import Optional
-
-import logging
 
 logger = logging.getLogger(__name__)
 

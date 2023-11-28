@@ -1,9 +1,9 @@
 from __future__ import annotations
 
+import logging
 import traceback
 
 import discord
-import logging
 from discord import Embed
 from discord import Member
 from discord import Role

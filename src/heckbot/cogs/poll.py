@@ -1,12 +1,12 @@
 from __future__ import annotations
 
+import logging
 import random
 from collections import namedtuple
 from datetime import datetime
 from datetime import timedelta
 from typing import Sequence
 
-import logging
 from discord import Forbidden
 from discord import Message
 from discord import TextChannel

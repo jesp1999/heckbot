@@ -187,7 +187,6 @@ if __name__ == '__main__':
     random.seed(0)
     bot = HeckBot()
 
-
     @bot.command()
     async def sync(ctx: Context[Bot]):
         if ctx.author.id == 277859399903608834:
@@ -195,6 +194,5 @@ if __name__ == '__main__':
             logger.info('Command tree synced.')
         else:
             await ctx.send('You must be the owner to use this command!')
-
 
     bot.run()
