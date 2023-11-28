@@ -7,20 +7,22 @@ import threading
 from datetime import datetime
 from datetime import timedelta
 from pathlib import Path
-from typing import Collection
 from urllib.parse import quote
 
-from discord import ButtonStyle, Interaction, ui, InteractionResponse
+from discord import ButtonStyle
+from discord import Interaction
+from discord import ui
 from discord.ext import commands
 from discord.ext.commands import Bot
 from discord.ext.commands import Context
-from discord.ui import Button, View
+from discord.ui import Button
+from discord.ui import View
 from dotenv import load_dotenv
-from heckbot.utils.auth import encrypt
 
+from bot import HeckBot
 from bot import cursor
 from bot import db_conn
-from bot import HeckBot
+from heckbot.utils.auth import encrypt
 
 load_dotenv(Path(__file__).parent.parent.parent.parent / '.env')
 
@@ -81,9 +83,9 @@ def activities_for_users(users: list[str]) -> set[str]:
     options = {
         item for item in options
         if (
-                item in activity_constraints and
-                activity_constraints[item][0] <= len(users) <=
-                activity_constraints[item][1]
+            item in activity_constraints and
+            activity_constraints[item][0] <= len(users) <=
+            activity_constraints[item][1]
         )
     }
     return options
@@ -92,13 +94,13 @@ def activities_for_users(users: list[str]) -> set[str]:
 def get_pick_link(user_name: str) -> str:
     ttl = 60 * 5  # 5 minutes
     expiry = (
-            datetime.utcnow() + timedelta(seconds=ttl)
+        datetime.utcnow() + timedelta(seconds=ttl)
     ).isoformat()
     token, iv = encrypt(user_name, expiry)
     return (
-            PICK_SERVER_URL +
-            f'form?token={quote(token.hex())}'
-            f'&iv={quote(iv.hex())}'
+        PICK_SERVER_URL +
+        f'form?token={quote(token.hex())}'
+        f'&iv={quote(iv.hex())}'
     )
 
 
@@ -113,7 +115,7 @@ class PickView(View):
         if len(self.options) == 0:
             await interaction.message.edit(
                 content="No options left. Y'all are too picky!",
-                view=self
+                view=self,
             )
             self.stop()
             return
@@ -188,7 +190,7 @@ class Picker(commands.Cog):
                     f'{", ".join(need_info_players)})\n'
                 )
             await ctx.send(
-                message_content, view=view
+                message_content, view=view,
             )
 
     @commands.command(aliases=['editpicks'])
