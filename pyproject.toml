@@ -1,13 +1,30 @@
 [project]
 name = "heckbot"
 description = "For-fun Discord bot"
-dynamic = ["version", "dependencies"]
+dynamic = ["version", "dependencies", "optional-dependencies"]
+license = {file = "LICENSE.md"}
+requires-python = ">=3.7"
+readme = "README.md"
+keywords = ["discord", "bot"]
 authors = [
-    { name = "Julian Espada", email = "jesp1999@gmail.com" }
+  {name = "Julian Espada"}
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Discord Users",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3 :: Only",
 ]
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
+optional-dependencies = {testing = {file = ["requirements_dev.txt"]}}
 
 [build-system]
 requires = ["setuptools>=42.0", "wheel"]
