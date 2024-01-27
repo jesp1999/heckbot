@@ -95,7 +95,8 @@ class Roles(commands.Cog):
                 )
                 await message.add_reaction(emoji)
                 message_params_list.append(
-                    (guild_id, str(channel.id), str(message.id), row['message_index'] + 1))
+                    (guild_id, str(channel.id), str(message.id), row['message_index'] + 1),
+                )
             else:
                 content = message.content + f'\n{emoji} for {description}'
                 await message.edit(content=content)
@@ -211,7 +212,7 @@ class Roles(commands.Cog):
                 str(ctx.channel.id),
                 str(message.id),
                 category,
-                message_index
+                message_index,
             ))
         self._db.run_query_many(
             '''INSERT INTO role_messages (guild_id, channel_id, message_id, role_category, message_index)
