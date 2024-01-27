@@ -194,6 +194,7 @@ class Roles(commands.Cog):
 
         params = []
         for category in role_map:
+            message_index = 1
             message = await ctx.channel.send(
                 f'**{category}**\n'
                 '--------------------------\n' +
@@ -208,9 +209,11 @@ class Roles(commands.Cog):
                 str(ctx.guild.id),
                 str(ctx.channel.id),
                 str(message.id),
+                category,
+                message_index
             ))
         self._db.run_query_many(
-            '''INSERT INTO role_messages (guild_id, channel_id, message_id)
+            '''INSERT INTO role_messages (guild_id, channel_id, message_id, role_category, message_index)
             VALUES (?, ?, ?);''',
             params,
         )
@@ -250,13 +253,13 @@ class Roles(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: RawReactionActionEvent):
-        channel = await self._bot.fetch_channel(payload.channel_id)
-        message = await channel.fetch_message(payload.message_id)
-        reactions = message.reactions
-        if not any(r.emoji == payload.emoji for r in reactions):
-            member = await self._bot.get_guild(payload.guild_id).fetch_member(payload.user_id)
-            await message.remove_reaction(payload.emoji, member)
-            return
+        # channel = await self._bot.fetch_channel(payload.channel_id)
+        # message = await channel.fetch_message(payload.message_id)
+        # reactions = message.reactions
+        # if not any(r.emoji == payload.emoji for r in reactions):
+        #     member = await self._bot.get_guild(payload.guild_id).fetch_member(payload.user_id)
+        #     await message.remove_reaction(payload.emoji, member)
+        #     return
         roles = await self._fetch_roles_for_reaction_change(payload)
         await payload.member.add_roles(*roles)
 
