@@ -55,7 +55,7 @@ class Roles(commands.Cog):
             message_id INT NOT NULL,
             role_category TEXT NOT NULL DEFAULT 'Miscellaneous',
             message_index INT NOT NULL DEFAULT 1,
-            
+
             PRIMARY KEY (guild_id, channel_id, message_id, message_index),
             FOREIGN KEY (role_category) REFERENCES role_categories (role_category));
         ''')
@@ -94,7 +94,8 @@ class Roles(commands.Cog):
                     f'{emoji} for {description}',
                 )
                 await message.add_reaction(emoji)
-                message_params_list.append((guild_id, str(channel.id), str(message.id), row['message_index'] + 1))
+                message_params_list.append(
+                    (guild_id, str(channel.id), str(message.id), row['message_index'] + 1))
             else:
                 content = message.content + f'\n{emoji} for {description}'
                 await message.edit(content=content)
