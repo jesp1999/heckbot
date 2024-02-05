@@ -1,4 +1,4 @@
-aiohttp~=3.9.1
+aiohttp~=3.9.3
 colorama~=0.4.6
 discord~=2.3.2
 dpytest~=0.7.0
