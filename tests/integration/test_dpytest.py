@@ -5,7 +5,7 @@ from unittest import mock
 import discord.ext.test as dpytest
 import pytest
 import pytest_asyncio
-from heckbot.cogs.poll import Poll
+from heckbot.extensions.poll import Poll
 
 from bot import HeckBot
 
