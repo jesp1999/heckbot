@@ -46,7 +46,8 @@ class ConfigAdapter:
     ) -> None:
         # guild_id -> group_name -> option -> value OR nested option
         self.configs: dict[str, GuildConfig] = {}
-        self.config_file = os.getcwd() + '/../../../resources/config/config.yaml'
+        self.config_folder = os.getcwd() + '/resources/config/'
+        self.config_file = f'{self.config_folder}config.yaml'
 
     @classmethod
     def get_default_guild_config(cls) -> GuildConfig:
@@ -66,6 +67,8 @@ class ConfigAdapter:
     ) -> None:
         # Load the config from the file
         data: dict[str, GuildConfig] = {}
+        if not os.path.exists(self.config_folder):
+            os.makedirs(self.config_folder)
         if os.path.exists(self.config_file):
             with open(self.config_file) as f:
                 data = yaml.safe_load(f)
