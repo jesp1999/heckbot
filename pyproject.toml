@@ -1,7 +1,7 @@
 [project]
 name = "heckbot"
 description = "For-fun Discord bot"
-dynamic = ["version", "dependencies"]
+dynamic = ["version", "dependencies", "readme", "requires-python", "license", "classifiers", "optional-dependencies"]
 authors = [
     { name = "Julian Espada", email = "jesp1999@gmail.com" }
 ]
