@@ -4,10 +4,7 @@ import csv
 import os
 import random
 import threading
-from datetime import datetime
-from datetime import timedelta
 from pathlib import Path
-from urllib.parse import quote
 
 from discord import ButtonStyle
 from discord import Interaction
@@ -18,7 +15,6 @@ from discord.ext.commands import Context
 from discord.ui import Button
 from discord.ui import View
 from dotenv import load_dotenv
-from heckbot.utils.auth import encrypt
 
 from bot import cursor
 from bot import db_conn
@@ -89,19 +85,6 @@ def activities_for_users(users: list[str]) -> set[str]:
         )
     }
     return options
-
-
-def get_pick_link(user_name: str) -> str:
-    ttl = 60 * 5  # 5 minutes
-    expiry = (
-        datetime.utcnow() + timedelta(seconds=ttl)
-    ).isoformat()
-    token, iv = encrypt(user_name, expiry)
-    return (
-        PICK_SERVER_URL +
-        f'form?token={quote(token.hex())}'
-        f'&iv={quote(iv.hex())}'
-    )
 
 
 class PickView(View):
@@ -218,7 +201,7 @@ class Picker(commands.Cog):
         await ctx.author.send(
             "Here's your custom link to edit your picks.\n"
             "Don't share this with anyone!\n" +
-            get_pick_link(self._bot.get_user(ctx.author.id).name),
+            PICK_SERVER_URL + 'form/',
         )
         await ctx.message.add_reaction('📨')
 
