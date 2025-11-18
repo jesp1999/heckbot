@@ -25,14 +25,6 @@ issues = "https://github.com/jesp1999/heckbot/issues"
 [project.authors]
 name = "Julian Espada"
 
-[tool.setuptools.dynamic]
-dependencies = {file = ["requirements.txt"]}
-optional-dependencies = {testing = {file = ["requirements_dev.txt"]}}
-
-[build-system]
-requires = ["setuptools>=80.9.0", "wheel"]
-build-backend = "setuptools.build_meta"
-
 [tool.pytest.ini_options]
 addopts = "--cov=heckbot"
 testpaths = [
