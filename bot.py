@@ -80,7 +80,7 @@ class HeckBot(commands.Bot):
             reconnect=True,
             case_insensitive=False,
         )
-        self.uptime = datetime.utcnow()
+        self.uptime = datetime.now(UTC)
         self.config = ConfigAdapter()
 
     @tasks.loop(seconds=TASK_LOOP_PERIOD)
