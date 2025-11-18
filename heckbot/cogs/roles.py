@@ -1,13 +1,17 @@
 from __future__ import annotations
 
+from typing import Final
+
 import discord
 from discord import RawReactionActionEvent
 from discord import Role
 from discord.ext import commands
 from discord.ext.commands import Context
-from heckbot.adapter.sqlite_adaptor import SqliteAdaptor
 
 from bot import HeckBot
+from heckbot.adapter.sqlite_adaptor import SqliteAdaptor
+
+MAX_REACTIONS_PER_MESSAGE: Final[int] = 20
 
 
 class Roles(commands.Cog):
@@ -49,7 +53,11 @@ class Roles(commands.Cog):
             (guild_id TEXT NOT NULL,
             channel_id INT NOT NULL,
             message_id INT NOT NULL,
-            PRIMARY KEY (guild_id, channel_id, message_id));
+            role_category TEXT NOT NULL DEFAULT 'Miscellaneous',
+            message_index INT NOT NULL DEFAULT 1,
+
+            PRIMARY KEY (guild_id, channel_id, message_id, message_index),
+            FOREIGN KEY (role_category) REFERENCES role_categories (role_category));
         ''')
         self._db.commit_and_close()
 
@@ -71,6 +79,7 @@ class Roles(commands.Cog):
             return
         category_exists = any(r['role_category'] == category for r in results)
         roles_params_list = []
+        message_params_list = []
         for row in results:
             if row['role_category'] != category:
                 continue
@@ -78,13 +87,23 @@ class Roles(commands.Cog):
             message_id = row['message_id']
             channel = await ctx.guild.fetch_channel(channel_id)
             message = await channel.fetch_message(message_id)
-            content = message.content + f'\n{emoji} for {description}'
-            await message.edit(content=content)
-            await message.add_reaction(emoji)
+            if message.content.count('\n') >= MAX_REACTIONS_PER_MESSAGE:
+                message = await channel.send(
+                    f'**{category}**\n'
+                    '--------------------------\n'
+                    f'{emoji} for {description}',
+                )
+                await message.add_reaction(emoji)
+                message_params_list.append(
+                    (guild_id, str(channel.id), str(message.id), row['message_index'] + 1),
+                )
+            else:
+                content = message.content + f'\n{emoji} for {description}'
+                await message.edit(content=content)
+                await message.add_reaction(emoji)
             roles_params_list.append((guild_id, name, description, category, emoji))
         if not category_exists:
             channels = {r['channel_id'] for r in results}
-            message_params_list = []
             for channel in channels:
                 channel = await ctx.guild.fetch_channel(channel)
                 message = await channel.send(
@@ -93,17 +112,19 @@ class Roles(commands.Cog):
                     f'{emoji} for {description}',
                 )
                 await message.add_reaction(emoji)
-                message_params_list.append((guild_id, str(channel.id), str(message.id)))
+                message_params_list.append((guild_id, str(channel.id), str(message.id), 1))
+        if message_params_list:
             self._db.run_query_many(
-                '''INSERT INTO role_messages (guild_id, channel_id, message_id)
-                VALUES (?, ?, ?);''', message_params_list,
+                '''INSERT INTO role_messages (guild_id, channel_id, message_id, message_index)
+                VALUES (?, ?, ?, ?);''', message_params_list,
             )
-        self._db.run_query_many(
-            '''INSERT INTO roles
-                (guild_id, role_name, role_description,
-                role_category, role_react)
-                VALUES (?, ?, ?, ?, ?);''', roles_params_list,
-        )
+        if roles_params_list:
+            self._db.run_query_many(
+                '''INSERT INTO roles
+                    (guild_id, role_name, role_description,
+                    role_category, role_react)
+                    VALUES (?, ?, ?, ?, ?);''', roles_params_list,
+            )
         self._db.commit_and_close()
 
     @commands.command(aliases=['deleterole', 'delrole', 'removerole', 'rmrole'])
@@ -175,6 +196,7 @@ class Roles(commands.Cog):
 
         params = []
         for category in role_map:
+            message_index = 1
             message = await ctx.channel.send(
                 f'**{category}**\n'
                 '--------------------------\n' +
@@ -189,9 +211,11 @@ class Roles(commands.Cog):
                 str(ctx.guild.id),
                 str(ctx.channel.id),
                 str(message.id),
+                category,
+                message_index,
             ))
         self._db.run_query_many(
-            '''INSERT INTO role_messages (guild_id, channel_id, message_id)
+            '''INSERT INTO role_messages (guild_id, channel_id, message_id, role_category, message_index)
             VALUES (?, ?, ?);''',
             params,
         )
@@ -231,6 +255,13 @@ class Roles(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: RawReactionActionEvent):
+        # channel = await self._bot.fetch_channel(payload.channel_id)
+        # message = await channel.fetch_message(payload.message_id)
+        # reactions = message.reactions
+        # if not any(r.emoji == payload.emoji for r in reactions):
+        #     member = await self._bot.get_guild(payload.guild_id).fetch_member(payload.user_id)
+        #     await message.remove_reaction(payload.emoji, member)
+        #     return
         roles = await self._fetch_roles_for_reaction_change(payload)
         await payload.member.add_roles(*roles)
 

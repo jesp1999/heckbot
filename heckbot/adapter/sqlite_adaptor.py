@@ -3,7 +3,6 @@ from __future__ import annotations
 import sqlite3
 import threading
 from typing import Any
-from typing import Optional
 
 
 class SqliteAdaptor:

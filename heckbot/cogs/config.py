@@ -5,9 +5,9 @@ from typing import Literal
 from discord.ext import commands
 from discord.ext.commands import Bot
 from discord.ext.commands import Context
-from heckbot.adapter.config_adapter import ConfigAdapter
 
 from bot import HeckBot
+from heckbot.adapter.config_adapter import ConfigAdapter
 
 ConfigCommand = Literal[
     'add', 'create', 'update', 'set', 'remove', 'unset',

@@ -12,8 +12,6 @@ from discord import TextChannel
 from discord.ext import commands
 from discord.ext.commands import Bot
 from discord.ext.commands import Context
-from heckbot.utils.chatutils import bold
-from heckbot.utils.chatutils import codeblock
 from table2ascii import PresetStyle
 from table2ascii import table2ascii
 from table2ascii import TableStyle
@@ -21,6 +19,8 @@ from table2ascii import TableStyle
 from bot import cursor
 from bot import db_conn
 from bot import HeckBot
+from heckbot.utils.chatutils import bold
+from heckbot.utils.chatutils import codeblock
 
 Bounds: namedtuple = namedtuple(
     'Bounds',

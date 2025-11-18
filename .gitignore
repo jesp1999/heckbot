@@ -1,4 +1,7 @@
 message_bruh.py
+resources/games.csv
+resources/players/
+
 # PyCharm
 .idea
 .run
@@ -6,6 +9,8 @@ message_bruh.py
 *.db
 run_heckbot.*
 *.csv
+
+node_modules/
 
 # Created by https://www.toptal.com/developers/gitignore/api/python,jupyternotebooks
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,jupyternotebooks

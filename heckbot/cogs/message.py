@@ -6,9 +6,9 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import Bot
 from discord.ext.commands import Context
-from heckbot.adapter.message_table_adapter import MessageTableAdapter
 
 from bot import HeckBot
+from heckbot.adapter.message_table_adapter import MessageTableAdapter
 
 
 class Message(commands.Cog):
