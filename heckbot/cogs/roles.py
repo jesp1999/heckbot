@@ -7,9 +7,9 @@ from discord import RawReactionActionEvent
 from discord import Role
 from discord.ext import commands
 from discord.ext.commands import Context
-from heckbot.adapter.sqlite_adaptor import SqliteAdaptor
 
 from bot import HeckBot
+from heckbot.adapter.sqlite_adaptor import SqliteAdaptor
 
 MAX_REACTIONS_PER_MESSAGE: Final[int] = 20
 

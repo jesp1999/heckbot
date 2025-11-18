@@ -6,9 +6,9 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import Bot
 from discord.ext.commands import Context
-from heckbot.adapter.reaction_table_adapter import ReactionTableAdapter
 
 from bot import HeckBot
+from heckbot.adapter.reaction_table_adapter import ReactionTableAdapter
 
 
 class React(commands.Cog):
