@@ -1,33 +1,36 @@
 [project]
 name = "heckbot"
-description = "For-fun Discord bot"
-dynamic = ["version", "dependencies", "optional-dependencies"]
-license = {file = "LICENSE.md"}
-requires-python = ">=3.7"
+version = "0.1.0"
+description = "A silly Discord bot for my personal server with my friends"
 readme = "README.md"
+requires-python = ">=3.12"
+license-files = ["LICENSE.md"]
 keywords = ["discord", "bot"]
-authors = [
-  {name = "Julian Espada"}
-]
+dynamic = ["dependencies", "optional-dependencies"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Discord Users",
-  "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.7",
-  "Programming Language :: Python :: 3.8",
-  "Programming Language :: Python :: 3.9",
-  "Programming Language :: Python :: 3.10",
-  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Programming Language :: Python :: 3 :: Only",
 ]
+
+[project.urls]
+homepage = "https://github.com/jesp1999/heckbot"
+source = "https://github.com/jesp1999/heckbot"
+issues = "https://github.com/jesp1999/heckbot/issues"
+
+[project.authors]
+name = "Julian Espada"
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
 optional-dependencies = {testing = {file = ["requirements_dev.txt"]}}
 
 [build-system]
-requires = ["setuptools>=42.0", "wheel"]
+requires = ["setuptools>=80.9.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.pytest.ini_options]

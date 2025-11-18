@@ -13,7 +13,7 @@ import os
 import random
 import sqlite3
 import sys
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Final
 from typing import Literal
 from typing import cast
@@ -134,7 +134,7 @@ class HeckBot(commands.Bot):
         # load cogs
         for cog in self._cogs:
             try:
-                await self.load_extension(f'src.heckbot.cogs.{cog}')
+                await self.load_extension(f'heckbot.cogs.{cog}')
             except Exception as ex:
                 print(f'Could not load extension {cog}: {ex}')
                 raise ex
@@ -148,7 +148,7 @@ class HeckBot(commands.Bot):
         """
         await self.wait_until_ready()
 
-        self.uptime = datetime.utcnow()
+        self.uptime = datetime.now(UTC)
 
         await self.change_presence(
             status=discord.Status.online,
