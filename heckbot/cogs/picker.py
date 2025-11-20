@@ -24,7 +24,7 @@ load_dotenv(Path(__file__).parent.parent.parent.parent / '.env')
 
 PARTICIPANTS_MAX = 100
 PARTICIPANTS_MIN = 1
-RESOURCE_DIR = 'resources/'
+RESOURCE_DIR = os.getenv('RESOURCE_DIR', 'resources/')
 PICK_SERVER_URL = os.getenv('PICK_SERVER_URL')
 
 interested_activities = {}
