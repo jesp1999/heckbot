@@ -54,7 +54,8 @@ class MessageTableAdapter:
         :param pattern: pattern to match (SK)
         :return: a list of messages
         """
-        messages: list[str] = MessageAssociation.get(guild_id, pattern).messages
+        messages: list[str] = MessageAssociation.get(
+            guild_id, pattern).messages
         return messages
 
     @classmethod
