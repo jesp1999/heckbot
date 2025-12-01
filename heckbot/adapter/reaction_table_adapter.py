@@ -54,7 +54,8 @@ class ReactionTableAdapter:
         :param pattern: pattern to match (SK)
         :return: a sequence of reactions
         """
-        reactions: list[str] = ReactionAssociation.get(guild_id, pattern).reactions
+        reactions: list[str] = ReactionAssociation.get(
+            guild_id, pattern).reactions
         return reactions
 
     @classmethod
