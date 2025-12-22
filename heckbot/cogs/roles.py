@@ -95,13 +95,15 @@ class Roles(commands.Cog):
                 )
                 await message.add_reaction(emoji)
                 message_params_list.append(
-                    (guild_id, str(channel.id), str(message.id), row['message_index'] + 1),
+                    (guild_id, str(channel.id), str(
+                        message.id), row['message_index'] + 1),
                 )
             else:
                 content = message.content + f'\n{emoji} for {description}'
                 await message.edit(content=content)
                 await message.add_reaction(emoji)
-            roles_params_list.append((guild_id, name, description, category, emoji))
+            roles_params_list.append(
+                (guild_id, name, description, category, emoji))
         if not category_exists:
             channels = {r['channel_id'] for r in results}
             for channel in channels:
@@ -112,7 +114,8 @@ class Roles(commands.Cog):
                     f'{emoji} for {description}',
                 )
                 await message.add_reaction(emoji)
-                message_params_list.append((guild_id, str(channel.id), str(message.id), 1))
+                message_params_list.append(
+                    (guild_id, str(channel.id), str(message.id), 1))
         if message_params_list:
             self._db.run_query_many(
                 '''INSERT INTO role_messages (guild_id, channel_id, message_id, message_index)
