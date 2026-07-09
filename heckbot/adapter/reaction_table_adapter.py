@@ -1,37 +1,27 @@
 from __future__ import annotations
 
-import os
+from collections import defaultdict
 from typing import Mapping
 from typing import Sequence
 
-from pynamodb.attributes import ListAttribute
-from pynamodb.attributes import UnicodeAttribute
-from pynamodb.exceptions import DeleteError
-from pynamodb.exceptions import DoesNotExist
-from pynamodb.exceptions import GetError
-from pynamodb.models import Model
-
-
-class ReactionAssociation(Model):
-    class Meta:
-        read_capacity_units = 1
-        write_capacity_units = 1
-        table_name = 'HeckBotReactions'
-        host = os.environ['AWS_HOST']
-    guild_id: UnicodeAttribute = UnicodeAttribute(hash_key=True)
-    pattern: UnicodeAttribute = UnicodeAttribute(range_key=True)
-    reactions: ListAttribute[str] = ListAttribute(default=list)
+from heckbot.adapter.sqlite_adaptor import SqliteAdaptor
 
 
 class ReactionTableAdapter:
 
-    def __init__(self):
-        if not ReactionAssociation.exists():
-            ReactionAssociation.create_table()
+    def __init__(self) -> None:
+        self._db = SqliteAdaptor()
+        self._db.run_query('''\
+            CREATE TABLE IF NOT EXISTS reaction_associations
+            (guild_id TEXT NOT NULL,
+            pattern TEXT NOT NULL,
+            reaction TEXT NOT NULL,
+            PRIMARY KEY (guild_id, pattern, reaction));
+        ''')
+        self._db.commit_and_close()
 
-    @classmethod
     def get_all_reactions(
-            cls,
+            self,
             guild_id: str,
     ) -> Mapping[str, Sequence[str]]:
         """
@@ -39,11 +29,19 @@ class ReactionTableAdapter:
         :param guild_id: Guild ID to match (PK)
         :return: a mapping of patterns to sequences of reactions
         """
-        return {q.pattern: q.reactions for q in ReactionAssociation.query(guild_id)}
+        rows = self._db.run_query(
+            '''SELECT pattern, reaction FROM reaction_associations
+            WHERE guild_id=?;''',
+            (guild_id,),
+        )
+        associations: dict[str, list[str]] = defaultdict(list)
+        for row in rows:
+            associations[row['pattern']].append(row['reaction'])
+        self._db.commit_and_close()
+        return dict(associations)
 
-    @classmethod
     def get_reactions(
-            cls,
+            self,
             guild_id: str,
             pattern: str | None = None,
     ) -> Sequence[str]:
@@ -54,12 +52,16 @@ class ReactionTableAdapter:
         :param pattern: pattern to match (SK)
         :return: a sequence of reactions
         """
-        reactions: list[str] = ReactionAssociation.get(guild_id, pattern).reactions
-        return reactions
+        rows = self._db.run_query(
+            '''SELECT reaction FROM reaction_associations
+            WHERE guild_id=? AND pattern=?;''',
+            (guild_id, pattern),
+        )
+        self._db.commit_and_close()
+        return [row['reaction'] for row in rows]
 
-    @classmethod
     def add_reaction(
-            cls,
+            self,
             guild_id: str,
             pattern: str,
             reaction: str,
@@ -71,22 +73,15 @@ class ReactionTableAdapter:
         :param pattern: pattern to match (SK)
         :param reaction: Reaction to add
         """
-        try:
-            association = ReactionAssociation.get(guild_id, pattern)
-            association.reactions.append(reaction)
-        except GetError:
-            association = ReactionAssociation(
-                guild_id, pattern, reactions=[reaction],
-            )
-        except DoesNotExist:
-            association = ReactionAssociation(
-                guild_id, pattern, reactions=[reaction],
-            )
-        association.save()
+        self._db.run_query(
+            '''INSERT OR IGNORE INTO reaction_associations
+            (guild_id, pattern, reaction) VALUES (?, ?, ?);''',
+            (guild_id, pattern, reaction),
+        )
+        self._db.commit_and_close()
 
-    @classmethod
     def remove_all_reactions(
-            cls,
+            self,
             guild_id: str,
             pattern: str,
     ) -> None:
@@ -96,19 +91,15 @@ class ReactionTableAdapter:
         :param guild_id: Guild ID to match (PK)
         :param pattern: pattern to match (SK)
         """
-        try:
-            association = ReactionAssociation.get(guild_id, pattern)
-            association.delete()
-        except GetError:
-            return  # TODO more
-        except DoesNotExist:
-            return  # TODO more
-        except DeleteError:
-            return  # TODO more
+        self._db.run_query(
+            '''DELETE FROM reaction_associations
+            WHERE guild_id=? AND pattern=?;''',
+            (guild_id, pattern),
+        )
+        self._db.commit_and_close()
 
-    @classmethod
     def remove_reaction(
-            cls,
+            self,
             guild_id: str,
             pattern: str,
             reaction: str,
@@ -120,13 +111,9 @@ class ReactionTableAdapter:
         :param pattern: pattern to match (SK)
         :param reaction: Reaction to remove
         """
-        try:
-            association = ReactionAssociation.get(guild_id, pattern)
-            association.reactions.remove(reaction)
-            association.save()
-        except GetError:
-            return  # TODO more
-        except DoesNotExist:
-            return  # TODO more
-        except DeleteError:
-            return  # TODO more
+        self._db.run_query(
+            '''DELETE FROM reaction_associations
+            WHERE guild_id=? AND pattern=? AND reaction=?;''',
+            (guild_id, pattern, reaction),
+        )
+        self._db.commit_and_close()
