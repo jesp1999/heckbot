@@ -1,0 +1,47 @@
+name: heckbot
+networks:
+  egress-net:
+    name: egress-net
+    external: true
+services:
+  heckbot:
+    image: heckbot:local
+    container_name: heckbot
+    hostname: heckbot
+    # Dockerfile has no USER; uid 1000 matches picky-picker, which reads the same data dir.
+    user: "1000:1000"
+    security_opt:
+      - "no-new-privileges:true"
+    # All writes go to /opt/data (DBs + sqlite journals) and /tmp.
+    read_only: true
+    # §2.4 deviation: full-project repo layout, so the build context is the repo
+    # root rather than a dedicated build/ dir. .dockerignore excludes data/,
+    # *.db, resources/ and *.env so runtime state never enters the context.
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # Non-root with no root-time setup -> drop-all is safe (§8.2.1).
+    cap_drop:
+      - ALL
+    env_file:
+      - heckbot.env
+    environment:
+      TASKS_DB_PATH: /opt/data/tasks.db
+      ROLES_DB_PATH: /opt/data/roles.db
+      RESOURCE_DIR: /opt/data/resources/
+    volumes:
+      - type: bind
+        source: /opt/appdata/heckbot/data
+        target: /opt/data
+    tmpfs:
+      - /tmp
+    networks:
+      egress-net:
+        ipv4_address: 10.10.8.10
+    # No healthcheck: a PID-1 liveness check can't see a hung Discord gateway
+    # connection (§6.5 — a green-but-meaningless check is worse than none).
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: "268435456" # 256MiB
