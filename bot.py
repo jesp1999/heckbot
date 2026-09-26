@@ -34,7 +34,7 @@ TASK_LOOP_PERIOD = 5  # seconds
 
 load_dotenv(Path(__file__).parent / '.env')
 
-db_conn = sqlite3.connect('tasks.db')
+db_conn = sqlite3.connect(os.getenv('TASKS_DB_PATH', 'tasks.db'))
 db_conn.row_factory = Row
 cursor = db_conn.cursor()
 cursor.execute('DROP TABLE IF EXISTS tasks;')
