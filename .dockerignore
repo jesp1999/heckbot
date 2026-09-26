@@ -1,0 +1,7 @@
+*.db
+*.egg-info/
+.env
+resources/
+rolesbck
+src/
+venv/
