@@ -12,4 +12,5 @@ RUN python3 -m venv $VIRTUAL_ENV
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . ./
+RUN chmod -R a+rX /usr/src/app
 CMD ["python", "bot.py"]
