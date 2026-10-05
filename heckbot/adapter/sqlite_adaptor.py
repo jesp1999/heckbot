@@ -19,7 +19,8 @@ class SqliteAdaptor:
     @property
     def cursor(self):
         if self._connection is None:
-            self._connection = sqlite3.connect(os.getenv('ROLES_DB_PATH', 'roles.db'))
+            self._connection = sqlite3.connect(
+                os.getenv('ROLES_DB_PATH', 'roles.db'))
             self._connection.row_factory = sqlite3.Row
         return self._connection.cursor()
 
