@@ -46,7 +46,8 @@ class ConfigAdapter:
     ) -> None:
         # guild_id -> group_name -> option -> value OR nested option
         self.configs: dict[str, GuildConfig] = {}
-        self.config_folder = os.path.join(os.getenv('RESOURCE_DIR', os.getcwd() + '/resources/'), 'config/')
+        self.config_folder = os.path.join(
+            os.getenv('RESOURCE_DIR', os.getcwd() + '/resources/'), 'config/')
         self.config_file = f'{self.config_folder}config.yaml'
 
     @classmethod
