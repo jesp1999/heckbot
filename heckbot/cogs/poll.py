@@ -78,7 +78,8 @@ class Poll(commands.Cog):
         for roll_request in roll_requests:
             rolls = []
             for roll in range(roll_request.num):
-                rolls.append(random.randint(1, roll_request.sides))  # nosec B311
+                rolls.append(random.randint(
+                    1, roll_request.sides))  # nosec B311
             roll_results.append(
                 RollResult(
                     dice=f'{roll_request.num}D{roll_request.sides}',
